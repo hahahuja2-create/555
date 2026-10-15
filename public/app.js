@@ -607,7 +607,8 @@ Object.assign(en, { membershipTerm: 'Membership term', days: 'days', expiresOn: 
 Object.assign(en, {
   navAdmin: 'Admin', adminSubtitle: 'Withdrawal requests and every account. Send the payout yourself, then confirm it here.',
   adminWithdrawals: 'Withdrawals', adminUsers: 'Users', adminPending: 'Under review', adminPendingNet: 'To send (net)',
-  adminUserCount: 'Users', adminPaidTotal: 'Paid out (net)', adminShowPending: 'Under review', adminShowAll: 'All',
+  adminUserCount: 'Users', adminPaidTotal: 'Paid out (net)', adminTotalVip: 'Total VIP balance', adminTotalWithdraw: 'Total withdrawal balance',
+  adminReservedNote: (amount) => `+ ${amount} reserved`, adminShowPending: 'Under review', adminShowAll: 'All',
   adminDate: 'Date', adminUser: 'User', adminAddress: 'TRC20 address', adminRequested: 'Requested', adminFee: 'Fee', adminToSend: 'To send',
   adminStatus: 'Status', adminConfirm: 'Confirm', adminConfirmAgain: 'Paid? Click again', adminReject: 'Reject', adminRejectAgain: 'Reject? Click again',
   adminNoWithdrawals: 'No withdrawal requests here.', adminSearch: 'Search by email or name', adminNoUsers: 'No users found.',
@@ -620,7 +621,8 @@ Object.assign(en, {
 Object.assign(copy.ka, {
   navAdmin: 'Admin', adminSubtitle: 'გატანის მოთხოვნები და ყველა მომხმარებელი. თანხას შენ გადარიცხავ და მერე აქ დაადასტურებ.',
   adminWithdrawals: 'გატანის მოთხოვნები', adminUsers: 'მომხმარებლები', adminPending: 'განხილვაში', adminPendingNet: 'გადასარიცხი (net)',
-  adminUserCount: 'მომხმარებლები', adminPaidTotal: 'სულ გადარიცხული (net)', adminShowPending: 'განხილვაში', adminShowAll: 'ყველა',
+  adminUserCount: 'მომხმარებლები', adminPaidTotal: 'სულ გადარიცხული (net)', adminTotalVip: 'სულ VIP ბალანსი', adminTotalWithdraw: 'სულ გასატანი ბალანსი',
+  adminReservedNote: (amount) => `+ ${amount} დაჯავშნილი`, adminShowPending: 'განხილვაში', adminShowAll: 'ყველა',
   adminDate: 'თარიღი', adminUser: 'მომხმარებელი', adminAddress: 'TRC20 მისამართი', adminRequested: 'მოთხოვნა', adminFee: 'საკომისიო', adminToSend: 'გადასარიცხი',
   adminStatus: 'სტატუსი', adminConfirm: 'დადასტურება', adminConfirmAgain: 'გადარიცხე? დააჭირე ისევ', adminReject: 'უარყოფა', adminRejectAgain: 'უარყოფა? დააჭირე ისევ',
   adminNoWithdrawals: 'მოთხოვნები არ არის.', adminSearch: 'ძებნა ელფოსტით ან სახელით', adminNoUsers: 'მომხმარებელი ვერ მოიძებნა.',
@@ -1226,19 +1228,21 @@ function renderAdminPage() {
   if (!state.admin) return `<div class="page admin-page">${heading}<div class="empty-state">${icon('retry')}<strong>${escapeHtml(t('adminLoading'))}</strong></div></div>`;
   const { users, withdrawals } = state.admin;
   const open = withdrawals.filter(row => adminOpen.includes(row.status));
-  const total = rows => Math.round(rows.reduce((sum, row) => sum + Number(row.netAmount), 0) * 1e6) / 1e6;
+  const total = (rows, field) => Math.round(rows.reduce((sum, row) => sum + Number(row[field] || 0), 0) * 1e6) / 1e6;
   const metrics = [
-    ['clock', 'amber', t('adminPending'), String(open.length)],
-    ['withdraw', 'blue', t('adminPendingNet'), formatUsdt(total(open))],
-    ['users', 'neutral', t('adminUserCount'), String(users.length)],
-    ['check', 'primary', t('adminPaidTotal'), formatUsdt(total(withdrawals.filter(row => row.status === 'confirmed')))]
+    ['pending', 'clock', 'amber', t('adminPending'), String(open.length)],
+    ['to-send', 'withdraw', 'blue', t('adminPendingNet'), formatUsdt(total(open, 'netAmount'))],
+    ['vip-balance', 'crown', 'neutral', t('adminTotalVip'), formatUsdt(total(users, 'lockedBalance'))],
+    ['withdraw-balance', 'wallet', 'neutral', t('adminTotalWithdraw'), formatUsdt(total(users, 'withdrawBalance')), t('adminReservedNote', formatUsdt(total(users, 'reservedBalance')))],
+    ['users', 'users', 'neutral', t('adminUserCount'), String(users.length)],
+    ['paid', 'check', 'primary', t('adminPaidTotal'), formatUsdt(total(withdrawals.filter(row => row.status === 'confirmed'), 'netAmount'))]
   ];
   const tabs = [['withdrawals', t('adminWithdrawals'), open.length], ['users', t('adminUsers'), users.length]]
     .map(([tab, label, count]) => `<button type="button" data-action="admin-tab" data-tab="${tab}" aria-pressed="${state.adminTab === tab}">${escapeHtml(label)}<span class="nav-count">${count}</span></button>`).join('');
   const body = state.adminTab === 'users'
     ? `<section class="admin-panel"><div class="admin-toolbar"><div class="field-control admin-search">${icon('search')}<input id="admin-search" type="search" value="${escapeHtml(state.adminSearch)}" placeholder="${escapeHtml(t('adminSearch'))}" aria-label="${escapeHtml(t('adminSearch'))}" autocomplete="off" /></div></div><div id="admin-user-results">${renderAdminUserRows()}</div></section>`
     : renderAdminWithdrawals();
-  return `<div class="page admin-page">${heading}<section class="metrics-grid">${metrics.map(([symbol, tone, label, value]) => `<article class="metric-card ${tone}"><div class="metric-top"><span>${escapeHtml(label)}</span>${icon(symbol)}</div><strong>${escapeHtml(value)}</strong></article>`).join('')}</section><nav class="admin-tabs" aria-label="${escapeHtml(t('navAdmin'))}">${tabs}</nav>${body}</div>`;
+  return `<div class="page admin-page">${heading}<section class="metrics-grid">${metrics.map(([key, symbol, tone, label, value, note]) => `<article class="metric-card ${tone}" data-metric="${key}"><div class="metric-top"><span>${escapeHtml(label)}</span>${icon(symbol)}</div><strong>${escapeHtml(value)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ''}</article>`).join('')}</section><nav class="admin-tabs" aria-label="${escapeHtml(t('navAdmin'))}">${tabs}</nav>${body}</div>`;
 }
 
 let adminRequest = 0;

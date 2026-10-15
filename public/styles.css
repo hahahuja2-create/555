@@ -765,6 +765,8 @@ input:disabled { color: #8a9690; }
 
 /* Admin */
 .admin-page .metric-card > strong { white-space: normal; overflow-wrap: anywhere; }
+.admin-page .metric-card > small { display: block; }
+@media (min-width: 761px) { .admin-page .metrics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .admin-tabs button { display: inline-flex; align-items: center; gap: 9px; min-height: 38px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #5f6d66; font-size: 12px; font-weight: 600; }
 .admin-tabs button[aria-pressed="true"] { color: var(--green); border-color: var(--green); background: var(--green-soft); }
@@ -799,7 +801,6 @@ input:disabled { color: #8a9690; }
 .admin-actions .danger-button.armed { color: #fff; background: var(--red); border-color: var(--red); }
 .admin-vip { font-weight: 600; }
 .admin-vip.expired { color: var(--muted); }
-.admin-address code { white-space: nowrap; }
 @media (max-width: 760px) {
   .admin-panel { padding: 12px; }
   .admin-search { width: 100%; }

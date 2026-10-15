@@ -170,6 +170,9 @@ test('admin sees every account and marks manual payouts paid; customers see unde
     const { page, pageErrors } = await open(admin.cookie, viewport);
     await page.goto(url + '/#admin');
     await page.locator(`tr[data-withdrawal="${third}"]`).waitFor();
+    assert.equal(await page.locator('[data-metric="vip-balance"] strong').textContent(), '30.00 USDT', 'total VIP balance of all accounts');
+    assert.equal(await page.locator('[data-metric="withdraw-balance"] strong').textContent(), '70.00 USDT', 'total withdrawal balance of all accounts');
+    assert.match(await page.locator('[data-metric="withdraw-balance"] small').textContent(), /20\.00 USDT/);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, name + ' page has no horizontal scrolling');
     await page.screenshot({ path: path.join(output, `withdrawals-${name}.png`), fullPage: true });
     await page.locator('[data-action="admin-tab"][data-tab="users"]').click();
