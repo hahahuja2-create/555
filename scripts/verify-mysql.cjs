@@ -149,7 +149,7 @@ test('MySQL migrations, atomic accounting, uniqueness, writer lease, sessions an
     assert.deepEqual(await store.sql.prepare('SELECT vip_balance,withdrawal_balance FROM users WHERE id=?').get(account.id), backfilled);
     await store.catalog(vipPlans, tasks);
     console.log('MySQL fixture: schema and catalog verified.');
-    await assert.rejects(() => MysqlPaymentStore.open(env), /one database writer/);
+    await assert.rejects(() => MysqlPaymentStore.open({ ...env, TASKMALL_WRITER_LOCK_WAIT_SECONDS: '1' }), /one database writer/);
     const state = { users: [account], tasks };
     await store.save(state, 'isolated-test-opening');
     assert.equal((await store.sql.prepare('SELECT duration_days FROM vip_plans WHERE id=?').get('vip11')).duration_days, 365);

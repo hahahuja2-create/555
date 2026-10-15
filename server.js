@@ -1008,7 +1008,9 @@ loadDatabase().then(() => {
     console.log(`TaskMall is running at http://${HOST}:${server.address().port}`);
   });
 }).catch(async error => {
-  console.error('Startup failed; stored data was preserved:', USE_MYSQL ? `MySQL configuration or storage validation failed (${error.code || 'VALIDATION'}).` : error.message);
+  // Driver errors are reported by code only; the application's own validation messages are shown with long tokens masked.
+  const reason = error.code || String(error.message || 'VALIDATION').replace(/[A-Za-z0-9_+/=-]{32,}/g, '[redacted]').slice(0, 200);
+  console.error('Startup failed; stored data was preserved:', USE_MYSQL ? `MySQL configuration or storage validation failed (${reason}).` : error.message);
   await paymentStore?.close();
   process.exitCode = 1;
 });

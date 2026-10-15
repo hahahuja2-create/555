@@ -29,8 +29,13 @@ class MysqlPaymentStore {
     const connection = await connect(env);
     const store = new MysqlPaymentStore(connection);
     try {
+      // A writer that dies without closing its socket would otherwise hold the lock for MySQL's default 8 hours.
+      // The live server queries at least every minute, so a 5-minute idle limit only ever drops dead writers.
+      await connection.query('SET SESSION wait_timeout = 300');
       await migrate(connection);
-      const [[{ acquired }]] = await connection.query("SELECT GET_LOCK(CONCAT(DATABASE(), ':taskmall:writer'), 0) AS acquired");
+      // During a deployment the previous instance can still be shutting down; wait for it instead of failing at once.
+      const wait = Math.min(300, Math.max(0, Number(env.TASKMALL_WRITER_LOCK_WAIT_SECONDS ?? 90) || 0));
+      const [[{ acquired }]] = await connection.query("SELECT GET_LOCK(CONCAT(DATABASE(), ':taskmall:writer'), ?) AS acquired", [wait]);
       if (Number(acquired) !== 1) throw new Error('TaskMall requires one database writer. Another instance is running.');
       store.acquired = true;
       return store;
