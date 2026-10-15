@@ -37,7 +37,7 @@ function hiddenPassword(prompt) {
 async function maskedBackupPassword(context = 'original') {
   if (!process.stdin.isTTY || !process.stdout.isTTY) throw new Error('PRIVATE_TERMINAL_REQUIRED');
   if (process.platform !== 'win32') throw new Error('WINDOWS_BACKUP_HELPER_REQUIRED');
-  if (!['original', 'returned', 'retry', 'new'].includes(context)) throw new Error('BACKUP_PASSWORD_DIALOG_FAILED');
+  if (!['original', 'returned', 'retry', 'new', 'collection'].includes(context)) throw new Error('BACKUP_PASSWORD_DIALOG_FAILED');
   const environment = Object.fromEntries(['SystemRoot', 'WINDIR', 'PATH', 'TEMP', 'TMP', 'SystemDrive', 'LOCALAPPDATA', 'USERPROFILE', 'APPDATA']
     .filter(name => process.env[name] !== undefined).map(name => [name, process.env[name]]));
   let result;
@@ -55,7 +55,7 @@ async function maskedBackupPassword(context = 'original') {
   if (result?.status === 'cancelled') throw new Error('BACKUP_PASSWORD_ENTRY_CANCELLED');
   if (result?.status !== 'entered' || typeof result.password !== 'string' || !result.password.length
     || result.password.length > 128) throw new Error('BACKUP_PASSWORD_DIALOG_FAILED');
-  if (context === 'new' && (result.password.length < 20 || !/\p{L}/u.test(result.password))) throw new Error('BACKUP_PASSWORD_TOO_WEAK');
+  if (['new', 'collection'].includes(context) && (result.password.length < 20 || !/\p{L}/u.test(result.password))) throw new Error('BACKUP_PASSWORD_TOO_WEAK');
   return result.password;
 }
 

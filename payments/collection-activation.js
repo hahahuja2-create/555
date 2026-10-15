@@ -107,10 +107,12 @@ async function writeWorkerStatus(file, status) {
 async function readWorkerStatus(file, now = Date.now()) {
   try {
     const status = JSON.parse(await fs.readFile(file, 'utf8'));
-    if (!Number.isInteger(status.pid) || status.pid < 1 || status.state !== 'running'
+    if (!Number.isInteger(status.pid) || status.pid < 1 || !['running', 'waiting-for-fuel', 'paused'].includes(status.state)
       || !Number.isSafeInteger(status.lastHeartbeat) || status.lastHeartbeat > now + 5000 || status.lastHeartbeat < now - 120_000) return { running: false };
     process.kill(status.pid, 0);
-    return { running: true, recoveryVerified: status.recoveryVerified === true, lastHeartbeat: status.lastHeartbeat };
+    return { running: true, state: status.state, sendingEnabled: status.state === 'running',
+      recoveryVerified: status.recoveryVerified === true, lastHeartbeat: status.lastHeartbeat,
+      ...(status.reason ? { reason: status.reason } : {}), ...(status.fuelBalanceSun ? { fuelBalanceSun: status.fuelBalanceSun } : {}) };
   } catch { return { running: false }; }
 }
 

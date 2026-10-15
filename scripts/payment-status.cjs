@@ -14,8 +14,11 @@ async function main() {
     recoveryRehearsalAcknowledged: process.env.TRON_RECOVERY_VERIFIED === '1' };
   const worker = await readWorkerStatus(workerStatusFile(process.env.TASKMALL_DATA_DIR || path.join(__dirname, '..', 'data')));
   result.collectionWorkerRunning = worker.running;
+  result.collectionSendingConfigured ||= worker.running;
+  result.recoveryRehearsalAcknowledged ||= worker.recoveryVerified === true;
   result.portableRecoveryVerifiedThisRun = worker.running && worker.recoveryVerified;
-  result.collectionSendingEnabled = worker.running;
+  result.collectionSendingEnabled = worker.sendingEnabled === true;
+  result.collectionWorkerState = worker.state || 'stopped';
   try {
     const treasury = process.env.TRON_TREASURY_ADDRESS || require('../config/tron-payment-setup.json').treasuryAddress;
     const file = process.env.TRON_WALLET_PUBLIC_FILE || path.join(__dirname, '..', 'config', 'tron-wallet-public.json');

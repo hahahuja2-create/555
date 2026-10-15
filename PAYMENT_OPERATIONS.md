@@ -91,6 +91,20 @@ A USB flash drive is a backup option, not a protocol requirement. A separate tru
 
 Double-click the local **TaskMall iPhone Backup** shortcut or `scripts/payments-backup-iphone.cmd`:
 
+### Persistent Railway Collector
+
+The Windows collection service connects to the Railway ledger through the authenticated, service-scoped SSH transport. It uses the existing local deposit vault and a separate, Windows-protected authorization receipt. The receipt binds the deposit wallet, treasury, TRX fuel address, Railway project/service/environment, exact recovery-file digest and spending limits. It contains no mnemonic, private key or password. Changing the backup, returned copy, wallet or Railway identity invalidates authorization.
+
+`npm run collections:authorize` verifies the encrypted copy already returned from the operator's iPhone using the local masked password dialog. Actual phone custody must have been confirmed by the operator. If a single pending replacement already has its independently verified returned copy, the command completes that existing backup rotation while retaining the previous encrypted file for rollback. The backup password must contain at least 20 characters including letters. No transfer is performed by authorization.
+
+`npm run collections:install` installs a disabled, current-user Windows sign-in task. After private recovery verification, `npm run collections:start` checks the authorization and enables/starts that task. `npm run collections:stop` disables the task and writes a stop marker checked before broadcasts. The active journal and signed intents are preserved so a subsequent authorized start can resume the existing transactions.
+
+Replacing the authorization receipt while the service is running pauses new cycles until the service is restarted; an old process cannot continue using superseded limits. The collection recovery dialog rejects short and digits-only passwords before submission, without displaying or recording password contents.
+
+The service rechecks its authorization before each cycle and stays observable as `waiting-for-fuel` when the dedicated TRX wallet cannot fund a new collection. With a 20 TRX Energy cap, the conservative startup reserve is 23 TRX; this is a working reserve, not a fixed network fee. Existing funded or signed jobs may finish even when the fuel wallet is low. Spending caps persist across restarts in the protected local signer journal, and status distinguishes an active process from enabled sending. Logs are stored privately under `%LOCALAPPDATA%\TaskMall\collection-service`.
+
+The Windows computer must remain powered on, signed in and connected to the internet. A Railway deployment does not itself run the local signer. `npm run payments:automation-check` reports the actual local service state and confirmed Mainnet reserves without decrypting the wallet or sending a transaction. Test fixtures cover authorization failures, changed backups, restart recovery, fuel gates, identical transaction retries and spending limits. A real USDT collection still requires an operator-owned Mainnet deposit and adequate TRX; fixture success is not a live settlement rehearsal.
+
 ```powershell
 npm run wallet:iphone
 ```

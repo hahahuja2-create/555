@@ -3,8 +3,9 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'private-dialog.ps1')
 Initialize-TaskMallPrivateDialog
 function New-BackupPasswordForm([string] $Context) {
-    if ($Context -notin @('original', 'returned', 'retry', 'new')) { throw 'Invalid password dialog context.' }
+    if ($Context -notin @('original', 'returned', 'retry', 'new', 'collection')) { throw 'Invalid password dialog context.' }
     $newPassword = $Context -eq 'new'
+    $collectionPassword = $Context -eq 'collection'
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     [System.Windows.Forms.Application]::EnableVisualStyles()
@@ -16,6 +17,10 @@ function New-BackupPasswordForm([string] $Context) {
     if ($newPassword) {
         $form.Text = 'TaskMall - Secure Backup'
         $form.ClientSize = New-Object System.Drawing.Size -ArgumentList 520, 414
+    }
+    if ($collectionPassword) {
+        $form.Text = 'TaskMall - Collection Recovery Check'
+        $form.ClientSize = New-Object System.Drawing.Size -ArgumentList 520, 326
     }
     $form.FormBorderStyle = 'FixedDialog'
     $form.MaximizeBox = $false
@@ -36,6 +41,9 @@ function New-BackupPasswordForm([string] $Context) {
     }
     if ($newPassword) {
         $label.Text = "Choose a NEW password that has never been shared in chat.`r`nUse at least 20 characters including letters (several words).`r`nEnter it twice below. Your wallet addresses will not change."
+    }
+    if ($collectionPassword) {
+        $label.Text = "Enter the EXISTING password of your NEW encrypted backup.`r`nUse the password chosen when creating the iPhone copy.`r`nAt least 20 characters including letters. Do not create a new one."
     }
     $form.Controls.Add($label)
 
@@ -70,9 +78,10 @@ function New-BackupPasswordForm([string] $Context) {
     }
 
     $validationLabel = $null
-    if ($newPassword) {
+    if ($newPassword -or $collectionPassword) {
         $validationLabel = New-Object System.Windows.Forms.Label
         $validationLabel.Location = New-Object System.Drawing.Point -ArgumentList 20, 232
+        if ($collectionPassword) { $validationLabel.Location = New-Object System.Drawing.Point -ArgumentList 20, 181 }
         $validationLabel.Size = New-Object System.Drawing.Size -ArgumentList 480, 42
         $validationLabel.Text = 'Enter a new password here, not in the black terminal.'
         $validationLabel.ForeColor = [System.Drawing.Color]::DarkRed
@@ -94,6 +103,7 @@ function New-BackupPasswordForm([string] $Context) {
     $note = New-Object System.Windows.Forms.Label
     $note.Location = New-Object System.Drawing.Point -ArgumentList 20, 181
     if ($newPassword) { $note.Location = New-Object System.Drawing.Point -ArgumentList 20, 317 }
+    if ($collectionPassword) { $note.Location = New-Object System.Drawing.Point -ArgumentList 20, 225 }
     $note.Size = New-Object System.Drawing.Size -ArgumentList 480, 24
     $note.Text = 'Keep this private. No funds are sent by this check.'
     $form.Controls.Add($note)
@@ -101,6 +111,7 @@ function New-BackupPasswordForm([string] $Context) {
     $cancel = New-Object System.Windows.Forms.Button
     $cancel.Location = New-Object System.Drawing.Point -ArgumentList 280, 225
     if ($newPassword) { $cancel.Location = New-Object System.Drawing.Point -ArgumentList 280, 361 }
+    if ($collectionPassword) { $cancel.Location = New-Object System.Drawing.Point -ArgumentList 280, 277 }
     $cancel.Size = New-Object System.Drawing.Size -ArgumentList 104, 34
     $cancel.Text = 'Cancel'
     $cancel.DialogResult = 'Cancel'
@@ -110,6 +121,7 @@ function New-BackupPasswordForm([string] $Context) {
     $confirm = New-Object System.Windows.Forms.Button
     $confirm.Location = New-Object System.Drawing.Point -ArgumentList 396, 225
     if ($newPassword) { $confirm.Location = New-Object System.Drawing.Point -ArgumentList 396, 361 }
+    if ($collectionPassword) { $confirm.Location = New-Object System.Drawing.Point -ArgumentList 396, 277 }
     $confirm.Size = New-Object System.Drawing.Size -ArgumentList 104, 34
     $confirm.Text = 'Continue'
     $confirm.Enabled = $false
@@ -126,6 +138,17 @@ function New-BackupPasswordForm([string] $Context) {
             elseif ($passwordBox.Text -cne $confirmationBox.Text) { $validationLabel.Text = 'The two passwords do not match. Check letter case too.' }
             else {
                 $validationLabel.Text = 'Ready. Click Continue to verify your backup.'
+                $validationLabel.ForeColor = [System.Drawing.Color]::DarkGreen
+            }
+        }
+        if ($collectionPassword) {
+            $valid = $passwordBox.Text.Length -ge 20 -and $passwordBox.Text -match '\p{L}'
+            $validationLabel.ForeColor = [System.Drawing.Color]::DarkRed
+            if ($passwordBox.Text.Length -eq 0) { $validationLabel.Text = 'Enter the existing backup password here, not in the terminal.' }
+            elseif ($passwordBox.Text.Length -lt 20) { $validationLabel.Text = 'The new backup password has at least 20 characters. Enter that existing password.' }
+            elseif ($passwordBox.Text -notmatch '\p{L}') { $validationLabel.Text = 'The new backup password includes letters, not only digits.' }
+            else {
+                $validationLabel.Text = 'Click Continue to check this password against your saved backup.'
                 $validationLabel.ForeColor = [System.Drawing.Color]::DarkGreen
             }
         }
