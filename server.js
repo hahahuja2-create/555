@@ -42,6 +42,8 @@ let settlementWatcher;
 let operatorToken;
 const OPERATOR_FILE = process.env.TASKMALL_OPERATOR_TOKEN_FILE || path.join(DATA_DIR, 'operator.token');
 const MANUAL_WITHDRAWALS = process.env.TRON_MANUAL_WITHDRAWALS_ENABLED === '1';
+// These accounts see the Admin page. Signup refuses a registered email, so the account must exist before deployment.
+const ADMIN_EMAILS = (process.env.TASKMALL_ADMIN_EMAILS ?? 'hahahuja2@gmail.com').split(',').map(email => email.trim().toLowerCase()).filter(Boolean);
 let operationQueue = Promise.resolve();
 function exclusive(operation) {
   const next = operationQueue.then(operation);
@@ -202,7 +204,58 @@ function cleanUser(user) {
     vipDaysRemaining: vipDaysRemaining(user),
     freeDaysRemaining,
     inviteCode: user.inviteCode,
+    isAdmin: isAdmin(user),
     createdAt: user.createdAt
+  };
+}
+
+function isAdmin(user) {
+  return ADMIN_EMAILS.includes(String(user?.email || '').toLowerCase());
+}
+
+// Customer withdrawals open only when someone can review them: the private operator desk or an admin account.
+function withdrawalReviewer() {
+  return Boolean(operatorToken) || ADMIN_EMAILS.length > 0;
+}
+
+function adminUserRow(user) {
+  ensureUserShape(user);
+  const vip = planById(user.vipId);
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    vipName: vip.name,
+    vipLevel: vip.level,
+    vipActive: vipActive(user),
+    vipExpiresAt: user.vipExpiresAt,
+    lockedBalance: money(user.lockedBalance),
+    withdrawBalance: money(user.withdrawBalance),
+    reservedBalance: money(user.reservedBalance),
+    earnedTotal: money(user.earnedTotal),
+    withdrawnTotal: money(user.withdrawnTotal),
+    lastCompletionDate: user.lastCompletionDate,
+    inviteCode: user.inviteCode,
+    referredBy: user.referredBy,
+    createdAt: user.createdAt
+  };
+}
+
+function adminWithdrawalRow(row, users) {
+  const user = users.get(row.user_id);
+  return {
+    id: row.id,
+    userId: row.user_id,
+    email: user?.email || null,
+    name: user?.name || null,
+    destination: row.destination,
+    amount: usdtAmount(row.gross_units),
+    fee: usdtAmount(row.fee_units),
+    netAmount: usdtAmount(row.net_units),
+    status: row.status,
+    txid: row.txid || null,
+    createdAt: new Date(Number(row.created_at)).toISOString(),
+    updatedAt: new Date(Number(row.updated_at)).toISOString()
   };
 }
 
@@ -582,7 +635,7 @@ async function handleApi(req, res, url) {
 
   if (req.method === 'GET' && url.pathname === '/api/payment-config') {
     if (TRON_DEPOSITS) return json(res, 200, { available: storageHealthy && Boolean(depositWatcher?.ready()), mode: 'tron-watch-only',
-      withdrawalsAvailable: storageHealthy && MANUAL_WITHDRAWALS && Boolean(operatorToken) && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
+      withdrawalsAvailable: storageHealthy && MANUAL_WITHDRAWALS && withdrawalReviewer() && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
       minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
       networks: storageHealthy && depositWatcher?.ready() ? [{ id: 'trc20', label: 'USDT TRC20' }] : [] });
     return json(res, 200, { available: TEST_WALLET, withdrawalsAvailable: TEST_WALLET, mode: TEST_WALLET ? 'test-wallet' : 'disabled', minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
@@ -612,6 +665,26 @@ async function handleApi(req, res, url) {
     return json(res, 200, { withdrawals: (await outgoingLedger?.withdrawals(user.id) || []).map(item => ({ id: item.id,
       destination: item.destination, amount: usdtAmount(item.gross_units), fee: usdtAmount(item.fee_units),
       netAmount: usdtAmount(item.net_units), status: item.status, txid: item.txid, createdAt: new Date(item.created_at).toISOString() })) });
+  }
+
+  if (url.pathname.startsWith('/api/admin/')) {
+    const user = await requireUser(req, res);
+    if (!user) return;
+    if (!isAdmin(user)) return json(res, 403, { error: 'ADMIN_REQUIRED' });
+    const users = new Map(db.users.map(item => [item.id, item]));
+    if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
+      const withdrawals = outgoingLedger ? await outgoingLedger.withdrawals() : [];
+      return json(res, 200, { users: db.users.map(adminUserRow), withdrawals: withdrawals.map(row => adminWithdrawalRow(row, users)) });
+    }
+    const decision = url.pathname.match(/^\/api\/admin\/withdrawals\/([a-f0-9-]{36})\/(confirm|reject)$/);
+    if (req.method === 'POST' && decision) {
+      if (!outgoingLedger) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
+      const next = structuredClone(db);
+      const result = decision[2] === 'confirm' ? await outgoingLedger.confirmManual(next, decision[1]) : await outgoingLedger.decide(next, decision[1], 'reject');
+      db = next;
+      return json(res, 200, { withdrawal: adminWithdrawalRow(result.record, new Map(db.users.map(item => [item.id, item]))) });
+    }
+    return json(res, 404, { error: 'NOT_FOUND' });
   }
 
   if (req.method === 'POST' && url.pathname === '/api/auth/signup') {
@@ -753,7 +826,7 @@ async function handleApi(req, res, url) {
     if (!user) return;
     const body = await readBody(req);
     if (!TEST_WALLET) {
-      if (!MANUAL_WITHDRAWALS || !operatorToken || !outgoingLedger || !depositWatcher?.ready()) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
+      if (!MANUAL_WITHDRAWALS || !withdrawalReviewer() || !outgoingLedger || !depositWatcher?.ready()) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
       if (body.network !== 'trc20') return json(res, 400, { error: 'INVALID_NETWORK' });
       if (!(await verifyPassword(body.password, user))) return json(res, 403, { error: 'PASSWORD_CONFIRMATION_REQUIRED' });
       const value = parseExactUsdt(body.amount, 0, 100_000);

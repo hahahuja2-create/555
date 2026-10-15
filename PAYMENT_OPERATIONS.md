@@ -39,6 +39,14 @@ npm run collections
 
 The last command is read-only: no vault decryption, signing, funding or broadcast.
 
+## Admin Page
+
+Signing in to TaskMall with an admin account (`TASKMALL_ADMIN_EMAILS`, default `hahahuja2@gmail.com`) adds an **Admin** page to the normal app. It has two tables: withdrawal requests, and every account with its email, VIP status and expiry, VIP balance, withdrawal balance, reserved amount, totals and registration date. Every other account gets 403 from `/api/admin/*`.
+
+Per request: send exactly the shown "to send" (net) amount in USDT TRC20 to the shown address from any wallet, then press **Confirm** twice. Until then the customer sees "Under review"; afterwards "Confirmed". The reservation is released and the totals updated; no TXID is recorded or checked, so confirm only after the money has actually gone out. **Reject** returns the full amount to the customer's withdrawal balance. Both decisions are final and written to `payment_audit`.
+
+Signup refuses an email that already exists but does not verify ownership. Make sure each admin email already has an account on the live site before deploying, and give that account a strong password.
+
 ## Manual Withdrawals
 
 Local request admission has been enabled at the operator's explicit request with `TRON_MANUAL_WITHDRAWALS_ENABLED=1`. This only opens the request and manually signed payout workflow; there is no automatic payout sender. Storage, operator authentication and deposit-monitor readiness still gate admission, and preparation checks the treasury's confirmed USDT and TRX reserve. Public hosting defaults to disabled in `.env.example`: reconcile existing balances and rehearse a small operator-owned withdrawal before opening public financial service. The collection worker and its recovery flags remain disabled and unchanged.

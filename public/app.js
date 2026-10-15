@@ -48,6 +48,11 @@ const state = {
   walletChecking: false,
   walletError: null,
   helpOpen: false,
+  admin: null,
+  adminTab: 'withdrawals',
+  adminFilter: 'pending',
+  adminSearch: '',
+  adminArmed: null,
   loading: true,
   busy: false
 };
@@ -490,11 +495,11 @@ Object.assign(en, {
 en.depositsReady = 'USDT TRC20 deposits are available. Withdrawals are not enabled yet.';
 Object.assign(en, { reservedFunds: 'Reserved for withdrawals', confirmWithdrawalPassword: 'Confirm your account password',
   minimumWithdrawal: (amount) => `Minimum withdrawal request: ${amount} USDT.`,
-  netToReceive: 'You receive after the 10% fee', requested: 'Awaiting review', approved: 'Approved', submitted: 'Awaiting blockchain confirmation',
+  netToReceive: 'You receive after the 10% fee', requested: 'Under review', approved: 'Approved', submitted: 'Awaiting blockchain confirmation',
   confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Pending', paymentsManual: 'USDT TRC20 deposits and manually reviewed withdrawals are available.' });
 Object.assign(copy.ka, { reservedFunds: 'გატანისთვის დაჯავშნილია', confirmWithdrawalPassword: 'დაადასტურე ანგარიშის პაროლი',
   minimumWithdrawal: (amount) => `გატანის მოთხოვნის მინიმუმი: ${amount} USDT.`,
-  netToReceive: 'მიიღებ 10%-იანი საკომისიოს შემდეგ', requested: 'განხილვის მოლოდინში', approved: 'დამტკიცებულია',
+  netToReceive: 'მიიღებ 10%-იანი საკომისიოს შემდეგ', requested: 'განხილვაში', approved: 'დამტკიცებულია',
   submitted: 'ბლოკჩეინზე დადასტურების მოლოდინში', confirmed: 'დადასტურებულია', rejected: 'უარყოფილია', pending: 'მოლოდინში',
   paymentsManual: 'USDT TRC20 შევსება და ხელით განხილული გატანები ხელმისაწვდომია.' });
 errors.en.PASSWORD_CONFIRMATION_REQUIRED = 'Confirm your current account password.';
@@ -598,6 +603,39 @@ Object.assign(copy.ka, {
 });
 
 Object.assign(en, { membershipTerm: 'Membership term', days: 'days', expiresOn: 'Expires on', renewVip: 'Renew membership', paymentsReady: 'Payment service available', dailyLimitReached: 'Daily limit reached', previous: 'Previous', next: 'Next', records: 'records', hidePassword: 'Hide password' });
+
+Object.assign(en, {
+  navAdmin: 'Admin', adminSubtitle: 'Withdrawal requests and every account. Send the payout yourself, then confirm it here.',
+  adminWithdrawals: 'Withdrawals', adminUsers: 'Users', adminPending: 'Under review', adminPendingNet: 'To send (net)',
+  adminUserCount: 'Users', adminPaidTotal: 'Paid out (net)', adminShowPending: 'Under review', adminShowAll: 'All',
+  adminDate: 'Date', adminUser: 'User', adminAddress: 'TRC20 address', adminRequested: 'Requested', adminFee: 'Fee', adminToSend: 'To send',
+  adminStatus: 'Status', adminConfirm: 'Confirm', adminConfirmAgain: 'Paid? Click again', adminReject: 'Reject', adminRejectAgain: 'Reject? Click again',
+  adminNoWithdrawals: 'No withdrawal requests here.', adminSearch: 'Search by email or name', adminNoUsers: 'No users found.',
+  adminVip: 'VIP status', adminVipBalance: 'VIP balance', adminWithdrawBalance: 'Withdrawal balance', adminReserved: 'Reserved',
+  adminEarned: 'Total earned', adminWithdrawn: 'Total withdrawn', adminJoined: 'Registered', adminExpired: 'Expired', adminUntil: (date) => `until ${date}`,
+  adminConfirmed: 'Confirmed. The user now sees the withdrawal as confirmed.', adminRejected: 'Rejected. The amount returned to the user balance.',
+  adminCopied: 'Copied', adminRefresh: 'Refresh', adminLoading: 'Loading...', adminDeleted: 'Deleted account',
+  adminHowTo: 'Send the exact "To send" amount in USDT TRC20 to the address, then press Confirm. Until then the user sees "Under review".'
+});
+Object.assign(copy.ka, {
+  navAdmin: 'Admin', adminSubtitle: 'გატანის მოთხოვნები და ყველა მომხმარებელი. თანხას შენ გადარიცხავ და მერე აქ დაადასტურებ.',
+  adminWithdrawals: 'გატანის მოთხოვნები', adminUsers: 'მომხმარებლები', adminPending: 'განხილვაში', adminPendingNet: 'გადასარიცხი (net)',
+  adminUserCount: 'მომხმარებლები', adminPaidTotal: 'სულ გადარიცხული (net)', adminShowPending: 'განხილვაში', adminShowAll: 'ყველა',
+  adminDate: 'თარიღი', adminUser: 'მომხმარებელი', adminAddress: 'TRC20 მისამართი', adminRequested: 'მოთხოვნა', adminFee: 'საკომისიო', adminToSend: 'გადასარიცხი',
+  adminStatus: 'სტატუსი', adminConfirm: 'დადასტურება', adminConfirmAgain: 'გადარიცხე? დააჭირე ისევ', adminReject: 'უარყოფა', adminRejectAgain: 'უარყოფა? დააჭირე ისევ',
+  adminNoWithdrawals: 'მოთხოვნები არ არის.', adminSearch: 'ძებნა ელფოსტით ან სახელით', adminNoUsers: 'მომხმარებელი ვერ მოიძებნა.',
+  adminVip: 'VIP სტატუსი', adminVipBalance: 'VIP ბალანსი', adminWithdrawBalance: 'გასატანი ბალანსი', adminReserved: 'დაჯავშნილი',
+  adminEarned: 'სულ გამომუშავებული', adminWithdrawn: 'სულ გატანილი', adminJoined: 'რეგისტრაცია', adminExpired: 'ვადაგასული', adminUntil: (date) => `${date}-მდე`,
+  adminConfirmed: 'დადასტურდა. მომხმარებელს უჩანს „დადასტურებულია“.', adminRejected: 'უარყოფილია. თანხა მომხმარებელს ბალანსზე დაუბრუნდა.',
+  adminCopied: 'დაკოპირდა', adminRefresh: 'განახლება', adminLoading: 'იტვირთება...', adminDeleted: 'წაშლილი ანგარიში',
+  adminHowTo: 'გადაურიცხე ზუსტად „გადასარიცხი“ თანხა USDT TRC20-ით მითითებულ მისამართზე და მერე დააჭირე „დადასტურებას“. მანამდე მომხმარებელს უჩანს „განხილვაში“.'
+});
+errors.en.ADMIN_REQUIRED = 'This page is available only to the administrator.';
+errors.ka.ADMIN_REQUIRED = 'ეს გვერდი მხოლოდ ადმინისტრატორისთვისაა.';
+errors.en.WITHDRAWAL_ALREADY_IN_PROGRESS = 'This request was already processed. Refresh the list.';
+errors.ka.WITHDRAWAL_ALREADY_IN_PROGRESS = 'ეს მოთხოვნა უკვე დამუშავებულია. განაახლე სია.';
+errors.en.WITHDRAWAL_NOT_FOUND = 'The request was not found.';
+errors.ka.WITHDRAWAL_NOT_FOUND = 'მოთხოვნა ვერ მოიძებნა.';
 
 function t(key, ...args) {
   const value = copy[state.lang]?.[key] ?? en[key] ?? key;
@@ -1127,8 +1165,134 @@ function renderSupportPage() {
   return `<div class="page support-page">${renderVisualHeader(t('helpTitle'), t('helpSubtitle'))}<div class="support-layout"><section class="faq-section">${[1, 2, 3, 4].map(number => `<details class="faq-item" ${number === 1 ? 'open' : ''}><summary>${escapeHtml(t(`faq${number}q`))}${icon('chevron')}</summary><p>${escapeHtml(t(`faq${number}a`))}</p></details>`).join('')}</section><aside class="support-aside"><span class="stat-icon">${icon('help')}</span><h2>${escapeHtml(t('supportAccount'))}</h2><p>${escapeHtml(t('supportAccountText'))}</p><button class="secondary-button" type="button" data-action="${state.user ? 'view' : 'auth-home'}" data-view="me" data-mode="login">${escapeHtml(t(state.user ? 'account' : 'signin'))}${icon('arrow')}</button>${!state.paymentsAvailable ? `<div class="payment-notice">${icon('info')}<span>${escapeHtml(t('paymentStatusDetail'))}</span></div>` : ''}</aside></div></div>`;
 }
 
+const adminOpen = ['requested', 'approved'];
+
+function adminNumber(value) {
+  return `<span class="admin-number">${escapeHtml(formatUsdt(value))}</span>`;
+}
+
+function adminCopyButton(value) {
+  return `<button class="icon-button" type="button" data-action="admin-copy" data-value="${escapeHtml(value)}" aria-label="${escapeHtml(t('adminCopied'))}" title="${escapeHtml(value)}">${icon('copy')}</button>`;
+}
+
+function adminActionButton(row, action) {
+  const armed = state.adminArmed?.id === row.id && state.adminArmed.action === action;
+  const confirm = action === 'confirm';
+  const label = confirm ? (armed ? 'adminConfirmAgain' : 'adminConfirm') : (armed ? 'adminRejectAgain' : 'adminReject');
+  return `<button class="${confirm ? 'primary-button' : 'secondary-button danger-button'}${armed ? ' armed' : ''}" type="button" data-action="admin-${action}" data-id="${escapeHtml(row.id)}" ${state.busy ? 'disabled' : ''}>${icon(confirm ? 'check' : 'close')}${escapeHtml(t(label))}</button>`;
+}
+
+// Each column is [label, cell renderer, class]; the label also heads the card field on phones.
+function adminTable(columns, rows, rowAttributes) {
+  return `<div class="table-wrap"><table class="admin-table"><thead><tr>${columns.map(([label]) => `<th>${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr ${rowAttributes(row)}>${columns.map(([label, cell, className = '']) => `<td class="${className}" data-label="${escapeHtml(label)}">${cell(row)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderAdminWithdrawals() {
+  const all = state.admin.withdrawals;
+  const rows = state.adminFilter === 'pending' ? all.filter(row => adminOpen.includes(row.status)) : all;
+  const filter = ['pending', 'all'].map(value => `<button type="button" data-action="admin-filter" data-filter="${value}" aria-pressed="${state.adminFilter === value}">${escapeHtml(t(value === 'pending' ? 'adminShowPending' : 'adminShowAll'))}</button>`).join('');
+  const table = rows.length ? adminTable([
+    [t('adminDate'), row => escapeHtml(formatDate(row.createdAt)), 'admin-number'],
+    [t('adminUser'), row => `<strong>${escapeHtml(row.email || t('adminDeleted'))}</strong><small>${escapeHtml(row.name || '')}</small>`],
+    [t('adminAddress'), row => `<span class="admin-copy"><code>${escapeHtml(row.destination)}</code>${adminCopyButton(row.destination)}</span>`, 'admin-address'],
+    [t('adminRequested'), row => adminNumber(row.amount)],
+    [t('adminFee'), row => adminNumber(row.fee)],
+    [t('adminToSend'), row => `<span class="admin-copy"><strong class="admin-number">${escapeHtml(formatUsdt(row.netAmount))}</strong>${adminCopyButton(String(row.netAmount))}</span>`, 'admin-send'],
+    [t('adminStatus'), row => `<span class="admin-status ${escapeHtml(row.status)}">${escapeHtml(t(row.status))}</span>${/^[a-f0-9]{64}$/.test(row.txid || '') ? `<a class="transaction-explorer" href="https://tronscan.org/#/transaction/${row.txid}" target="_blank" rel="noopener noreferrer">TXID${icon('arrow')}</a>` : ''}`],
+    ['', row => adminOpen.includes(row.status) ? adminActionButton(row, 'confirm') + (row.status === 'requested' ? adminActionButton(row, 'reject') : '') : '', 'admin-actions']
+  ], rows, row => `data-withdrawal="${escapeHtml(row.id)}"`) : `<div class="empty-state">${icon('list')}<strong>${escapeHtml(t('adminNoWithdrawals'))}</strong></div>`;
+  return `<section class="admin-panel"><div class="admin-toolbar"><div class="admin-filter">${filter}</div></div><p class="admin-howto">${icon('info')}<span>${escapeHtml(t('adminHowTo'))}</span></p>${table}</section>`;
+}
+
+function renderAdminUserRows() {
+  const query = state.adminSearch.trim().toLowerCase();
+  const rows = [...state.admin.users].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+    .filter(user => !query || `${user.email} ${user.name}`.toLowerCase().includes(query));
+  if (!rows.length) return `<div class="empty-state">${icon('users')}<strong>${escapeHtml(t('adminNoUsers'))}</strong></div>`;
+  return adminTable([
+    [t('adminUser'), user => `<strong>${escapeHtml(user.email)}</strong><small>${escapeHtml(user.name)}</small>`],
+    [t('adminVip'), user => `<span class="admin-vip${user.vipActive ? '' : ' expired'}">${escapeHtml(user.vipName)}</span><small>${escapeHtml(user.vipActive ? t('adminUntil', formatDate(user.vipExpiresAt, true)) : t('adminExpired'))}</small>`],
+    [t('adminVipBalance'), user => adminNumber(user.lockedBalance)],
+    [t('adminWithdrawBalance'), user => adminNumber(user.withdrawBalance)],
+    [t('adminReserved'), user => adminNumber(user.reservedBalance)],
+    [t('adminEarned'), user => adminNumber(user.earnedTotal)],
+    [t('adminWithdrawn'), user => adminNumber(user.withdrawnTotal)],
+    [t('adminJoined'), user => escapeHtml(formatDate(user.createdAt, true)), 'admin-number']
+  ], rows, user => `data-user="${escapeHtml(user.id)}"`);
+}
+
+function renderAdminPage() {
+  const heading = `<header class="page-heading"><div><h1>${escapeHtml(t('navAdmin'))}</h1><p>${escapeHtml(t('adminSubtitle'))}</p></div><button class="secondary-button heading-action" type="button" data-action="admin-refresh">${icon('retry')}${escapeHtml(t('adminRefresh'))}</button></header>`;
+  if (!state.admin) return `<div class="page admin-page">${heading}<div class="empty-state">${icon('retry')}<strong>${escapeHtml(t('adminLoading'))}</strong></div></div>`;
+  const { users, withdrawals } = state.admin;
+  const open = withdrawals.filter(row => adminOpen.includes(row.status));
+  const total = rows => Math.round(rows.reduce((sum, row) => sum + Number(row.netAmount), 0) * 1e6) / 1e6;
+  const metrics = [
+    ['clock', 'amber', t('adminPending'), String(open.length)],
+    ['withdraw', 'blue', t('adminPendingNet'), formatUsdt(total(open))],
+    ['users', 'neutral', t('adminUserCount'), String(users.length)],
+    ['check', 'primary', t('adminPaidTotal'), formatUsdt(total(withdrawals.filter(row => row.status === 'confirmed')))]
+  ];
+  const tabs = [['withdrawals', t('adminWithdrawals'), open.length], ['users', t('adminUsers'), users.length]]
+    .map(([tab, label, count]) => `<button type="button" data-action="admin-tab" data-tab="${tab}" aria-pressed="${state.adminTab === tab}">${escapeHtml(label)}<span class="nav-count">${count}</span></button>`).join('');
+  const body = state.adminTab === 'users'
+    ? `<section class="admin-panel"><div class="admin-toolbar"><div class="field-control admin-search">${icon('search')}<input id="admin-search" type="search" value="${escapeHtml(state.adminSearch)}" placeholder="${escapeHtml(t('adminSearch'))}" aria-label="${escapeHtml(t('adminSearch'))}" autocomplete="off" /></div></div><div id="admin-user-results">${renderAdminUserRows()}</div></section>`
+    : renderAdminWithdrawals();
+  return `<div class="page admin-page">${heading}<section class="metrics-grid">${metrics.map(([symbol, tone, label, value]) => `<article class="metric-card ${tone}"><div class="metric-top"><span>${escapeHtml(label)}</span>${icon(symbol)}</div><strong>${escapeHtml(value)}</strong></article>`).join('')}</section><nav class="admin-tabs" aria-label="${escapeHtml(t('navAdmin'))}">${tabs}</nav>${body}</div>`;
+}
+
+let adminRequest = 0;
+async function loadAdmin() {
+  if (!state.user?.isAdmin) return;
+  const requestId = ++adminRequest;
+  const userId = state.user.id;
+  try {
+    const data = await api('/api/admin/overview', { timeout: 20_000 });
+    if (requestId !== adminRequest || state.user?.id !== userId) return;
+    state.admin = data;
+  } catch (error) {
+    if (requestId === adminRequest) showToast(friendlyError(error), 'error');
+    return;
+  }
+  if (state.view === 'admin' && !state.modalTaskId && !state.walletModal && !state.helpOpen) render();
+}
+
+let adminArmTimer;
+async function adminDecision(action, id) {
+  if (state.busy) return;
+  if (state.adminArmed?.id !== id || state.adminArmed.action !== action) {
+    // Confirming or rejecting cannot be undone, so each takes a second deliberate click.
+    state.adminArmed = { id, action };
+    clearTimeout(adminArmTimer);
+    adminArmTimer = setTimeout(() => {
+      if (state.adminArmed?.id !== id) return;
+      state.adminArmed = null;
+      if (state.view === 'admin') render();
+    }, 6000);
+    render();
+    return;
+  }
+  state.adminArmed = null;
+  state.busy = true;
+  render();
+  try {
+    await api(`/api/admin/withdrawals/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: {} });
+    showToast(t(action === 'confirm' ? 'adminConfirmed' : 'adminRejected'));
+  } catch (error) {
+    showToast(friendlyError(error), 'error');
+  } finally {
+    state.busy = false;
+  }
+  await loadAdmin();
+  render();
+}
+
+function knownView(view) {
+  return ['home', 'tasks', 'wallet', 'vip', 'team', 'me', 'company', 'support'].includes(view) || (view === 'admin' && Boolean(state.user?.isAdmin));
+}
+
 function viewTitle() {
-  return t({ home: 'overview', tasks: 'navTasks', wallet: 'walletTitle', vip: 'navVip', team: 'navTeam', me: 'profile', company: 'company', support: 'support' }[state.view] || 'overview');
+  return t({ home: 'overview', tasks: 'navTasks', wallet: 'walletTitle', vip: 'navVip', team: 'navTeam', me: 'profile', company: 'company', support: 'support', admin: 'navAdmin' }[state.view] || 'overview');
 }
 
 function renderPublicPage() {
@@ -1161,6 +1325,7 @@ function drawEarnings() {
 function renderShell() {
   earningsChart?.destroy();
   const views = { home: renderHome, tasks: renderTasksPage, vip: renderVipPage, team: renderTeamPage, me: renderMePage, wallet: renderWalletPage, company: renderCompanyPage, support: renderSupportPage };
+  if (state.user.isAdmin) views.admin = renderAdminPage;
   const content = (views[state.view] || renderHome)();
   const modal = Boolean(state.modalTaskId || state.walletModal || state.helpOpen);
   app.innerHTML = `<div class="app-shell">
@@ -1170,12 +1335,12 @@ function renderShell() {
       <span class="nav-section-label">${escapeHtml(t('workspace'))}</span>
       <nav class="desktop-nav" aria-label="${escapeHtml(t('workspace'))}">${navItem('home', t('navHome'), 'home')}${navItem('tasks', t('navTasks'), 'tasks')}${navItem('wallet', t('walletTitle'), 'wallet')}${navItem('vip', t('navVip'), 'crown')}${navItem('team', t('navTeam'), 'users')}</nav>
       <span class="nav-section-label">${escapeHtml(t('platform'))}</span>
-      <nav class="desktop-nav" aria-label="${escapeHtml(t('platform'))}">${navItem('company', t('company'), 'briefcase')}${navItem('support', t('support'), 'help')}${navItem('me', t('profile'), 'settings')}</nav>
+      <nav class="desktop-nav" aria-label="${escapeHtml(t('platform'))}">${state.user.isAdmin ? navItem('admin', t('navAdmin'), 'shield') : ''}${navItem('company', t('company'), 'briefcase')}${navItem('support', t('support'), 'help')}${navItem('me', t('profile'), 'settings')}</nav>
       <div class="sidebar-bottom"><button class="sidebar-user" type="button" data-action="view" data-view="me"><span class="avatar">${escapeHtml(state.user.name.charAt(0).toUpperCase())}</span><span><strong>${escapeHtml(state.user.name)}</strong><small>${escapeHtml(state.user.email)}</small></span>${icon('chevron')}</button></div>
     </aside>
     <div class="workspace-main">
       <header class="topbar" ${modal ? 'inert' : ''}><div class="topbar-left"><button class="brand mobile-brand" type="button" data-action="view" data-view="home">${brand()}</button><span class="breadcrumb">TaskMall ${icon('chevron')}<strong>${escapeHtml(viewTitle())}</strong></span></div><div class="topbar-actions"><span class="topbar-date">${escapeHtml(formatDate(new Date(), true))}</span>${languageSelect('top-language')}<button class="icon-button topbar-help" type="button" data-action="help" aria-label="${escapeHtml(t('help'))}" title="${escapeHtml(t('help'))}">${icon('help')}</button><button class="avatar-button" type="button" data-action="view" data-view="me" aria-label="${escapeHtml(t('profile'))}" title="${escapeHtml(t('profile'))}">${escapeHtml(state.user.name.charAt(0).toUpperCase())}</button><button class="icon-button mobile-menu-toggle" type="button" data-action="mobile-menu" aria-label="${escapeHtml(t('menu'))}" aria-expanded="${state.mobileMenu}">${icon(state.mobileMenu ? 'close' : 'menu')}</button></div></header>
-      ${state.mobileMenu ? `<nav class="mobile-menu" aria-label="${escapeHtml(t('menu'))}">${navItem('me', t('profile'), 'profile')}${navItem('company', t('company'), 'briefcase')}${navItem('support', t('support'), 'help')}</nav>` : ''}
+      ${state.mobileMenu ? `<nav class="mobile-menu" aria-label="${escapeHtml(t('menu'))}">${state.user.isAdmin ? navItem('admin', t('navAdmin'), 'shield') : ''}${navItem('me', t('profile'), 'profile')}${navItem('company', t('company'), 'briefcase')}${navItem('support', t('support'), 'help')}</nav>` : ''}
       <main class="app-content" ${modal ? 'inert' : ''}>${content}</main>
       <footer class="workspace-footer"><span>TaskMall &copy; 2026</span><span>${escapeHtml(t('workspaceStatus'))}</span></footer>
     </div>
@@ -1427,6 +1592,11 @@ async function copyInvite(value) {
 }
 
 app.addEventListener('input', (event) => {
+  if (event.target.id === 'admin-search') {
+    state.adminSearch = event.target.value;
+    document.querySelector('#admin-user-results').innerHTML = renderAdminUserRows();
+    return;
+  }
   if (event.target.id === 'auth-referral') state.referralCode = event.target.value;
   if (event.target.name === 'amount' && event.target.closest('[data-wallet-form="withdraw"]')) {
     const output = event.target.form.querySelector('[data-withdraw-net]');
@@ -1506,6 +1676,17 @@ app.addEventListener('click', async (event) => {
     render();
   }
   if (action === 'export-history') exportHistory();
+  if (action === 'admin-tab') {
+    state.adminTab = target.dataset.tab;
+    render();
+  }
+  if (action === 'admin-filter') {
+    state.adminFilter = target.dataset.filter;
+    render();
+  }
+  if (action === 'admin-refresh') loadAdmin();
+  if (action === 'admin-confirm' || action === 'admin-reject') adminDecision(action.slice(6), target.dataset.id);
+  if (action === 'admin-copy') showToast(t(await copyInvite(target.dataset.value) ? 'adminCopied' : 'copyFailed'));
   if (['open-wallet', 'open-task', 'help'].includes(action)) {
     lastModalTrigger = { action, task: target.dataset.taskId, wallet: target.dataset.walletType };
   }
@@ -1528,6 +1709,7 @@ app.addEventListener('click', async (event) => {
     state.modalTaskId = null;
     state.walletModal = null;
     render();
+    if (state.view === 'admin') loadAdmin();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   if (action === 'filter') {
@@ -1587,6 +1769,9 @@ app.addEventListener('click', async (event) => {
     state.activities = [];
     state.vips = [];
     state.team = null;
+    state.admin = null;
+    state.adminArmed = null;
+    state.adminSearch = '';
     state.walletModal = null;
     state.depositWallet = null;
     state.walletChecking = false;
@@ -1627,13 +1812,14 @@ window.addEventListener('popstate', () => {
     render();
     return;
   }
-  if (!state.user || !['home', 'tasks', 'wallet', 'vip', 'team', 'me', 'company', 'support'].includes(view)) return;
+  if (!state.user || !knownView(view)) return;
   state.view = view;
   state.modalTaskId = null;
   state.walletModal = null;
   state.helpOpen = false;
   state.mobileMenu = false;
   render();
+  if (view === 'admin') loadAdmin();
 });
 
 matchMedia('(max-width: 760px)').addEventListener('change', () => {
@@ -1656,7 +1842,8 @@ async function init() {
     state.user = result.user;
     await loadPrivateData();
     const view = location.hash.slice(1);
-    if (['home', 'tasks', 'wallet', 'vip', 'team', 'me', 'company', 'support'].includes(view)) state.view = view;
+    if (knownView(view)) state.view = view;
+    if (state.view === 'admin') loadAdmin();
   } catch {
     state.user = null;
     const view = location.hash.slice(1);
@@ -1691,8 +1878,13 @@ setInterval(async () => {
     if (state.user?.id !== userId || state.walletChecking || dialogRequestId !== walletOpenRequest) return;
     const paymentsChanged = previousPayments !== JSON.stringify([state.paymentsAvailable, state.withdrawalsAvailable, state.paymentMode, state.minimumWithdrawalAmount, state.depositWallet?.address]);
     if (paymentsChanged) state.walletError = null;
-    if ((accountChanged || paymentsChanged) && (!state.walletModal || state.walletModal === 'deposit' || !document.querySelector('.modal-wallet-form')) && !state.modalTaskId && state.view !== 'me') render();
+    if ((accountChanged || paymentsChanged) && (!state.walletModal || state.walletModal === 'deposit' || !document.querySelector('.modal-wallet-form')) && !state.modalTaskId && state.view !== 'me' && document.activeElement?.id !== 'admin-search') render();
     if (credited) showToast(t('depositReceived'));
   } catch { /* Network interruptions do not change locally displayed balances. */ }
   finally { walletRefreshRunning = false; }
+}, 20_000);
+
+setInterval(() => {
+  if (state.view !== 'admin' || !state.user?.isAdmin || document.hidden || state.busy || state.adminArmed || document.activeElement?.id === 'admin-search') return;
+  loadAdmin();
 }, 20_000);

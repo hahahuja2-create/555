@@ -98,6 +98,29 @@ class OutgoingLedger {
     });
   }
 
+  // The administrator sends the payout by hand and then marks it paid; there is no transaction to verify.
+  async confirmManual(state, id) {
+    return this.transaction(async () => {
+      const record = await this.withdrawal(id);
+      if (!record) throw failure('WITHDRAWAL_NOT_FOUND', 404);
+      if (record.status === 'confirmed') return { record, changed: false };
+      if (!['requested', 'approved'].includes(record.status)) throw failure('WITHDRAWAL_ALREADY_IN_PROGRESS');
+      // A transfer prepared in the TronLink desk may already be signed; finish that one there instead.
+      if (await this.withdrawalIntent(id)) throw failure('WITHDRAWAL_ALREADY_IN_PROGRESS');
+      const user = state.users.find(item => item.id === record.user_id);
+      if (!user) throw failure('ACCOUNT_NOT_FOUND');
+      user.reservedBalance = amount(units(user.reservedBalance) - BigInt(record.gross_units));
+      user.withdrawnTotal = amount(units(user.withdrawnTotal || 0) + BigInt(record.net_units));
+      user.withdrawFeeTotal = amount(units(user.withdrawFeeTotal || 0) + BigInt(record.fee_units));
+      const activity = user.activities.find(item => item.id === id);
+      if (activity) activity.status = 'confirmed';
+      await this.sql.prepare("UPDATE withdrawals SET status='confirmed',issue=NULL,updated_at=? WHERE id=?").run(Date.now(), id);
+      await this.store.saveInside(state, 'manual-payout-confirmed');
+      await this.audit('admin', 'withdrawal-paid-manually', id);
+      return { record: await this.withdrawal(id), changed: true };
+    });
+  }
+
   async withdrawalIntent(id) { return this.sql.prepare('SELECT * FROM payout_intents WHERE job_id=?').get(id); }
 
   async prepareWithdrawal(id, transaction, feeLimit, validate) {

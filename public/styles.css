@@ -762,3 +762,62 @@ input:disabled { color: #8a9690; }
 .withdrawal-state { display: block; margin-top: 5px; font-size: 10px; color: #6a7d71; overflow-wrap: anywhere; }
 .transaction-explorer { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-size: 10px; color: #157152; }
 .transaction-explorer .icon { width: 12px; height: 12px; }
+
+/* Admin */
+.admin-page .metric-card > strong { white-space: normal; overflow-wrap: anywhere; }
+.admin-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.admin-tabs button { display: inline-flex; align-items: center; gap: 9px; min-height: 38px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: #5f6d66; font-size: 12px; font-weight: 600; }
+.admin-tabs button[aria-pressed="true"] { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+.admin-tabs .nav-count { margin-inline-start: 0; padding: 0 5px; }
+.admin-panel { padding: 18px; border: 1px solid var(--line); border-radius: 7px; background: #fff; margin-bottom: 16px; min-width: 0; }
+.admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.admin-filter { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.admin-filter button { padding: 7px 13px; font-size: 11px; color: #6b7873; }
+.admin-filter button[aria-pressed="true"] { background: var(--green-soft); color: var(--green); font-weight: 600; }
+.admin-search { width: min(360px, 100%); height: 40px; }
+.admin-search input::-webkit-search-cancel-button { cursor: pointer; }
+.admin-howto { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 14px; padding: 11px 13px; font-size: 11px; line-height: 1.8; color: #6b5a33; background: #faf7ef; border-radius: 5px; }
+.admin-howto .icon { width: 16px; height: 16px; margin-top: 2px; flex: 0 0 auto; }
+.admin-table { width: 100%; min-width: 960px; border-collapse: collapse; font-size: 12px; }
+.admin-table th { padding: 11px 12px; font-size: 10px; font-weight: 500; color: #8b9a90; background: #f8faf8; text-align: start; white-space: nowrap; }
+.admin-table td { padding: 13px 12px; border-bottom: 1px solid #edf1ed; color: var(--ink); vertical-align: middle; }
+.admin-table td small { display: block; margin-top: 4px; font-size: 10px; color: var(--muted); }
+.admin-table code { font-size: 11px; overflow-wrap: anywhere; }
+.admin-table strong { font-weight: 600; }
+.admin-number { white-space: nowrap; }
+.admin-copy { display: inline-flex; align-items: center; gap: 2px; }
+.admin-copy .icon-button { width: 28px; height: 28px; }
+.admin-copy .icon-button .icon { width: 14px; height: 14px; }
+.admin-status { display: inline-flex; padding: 4px 8px; border-radius: 4px; font-size: 11px; white-space: nowrap; color: var(--amber); background: var(--amber-soft); }
+.admin-status.confirmed { color: var(--green); background: var(--green-soft); }
+.admin-status.rejected { color: var(--red); background: #fbeeee; }
+.admin-table .transaction-explorer { display: flex; margin-top: 6px; }
+.admin-actions { text-align: end; white-space: nowrap; }
+.admin-actions button { min-height: 34px; padding: 6px 11px; font-size: 11px; margin-inline-start: 6px; }
+.admin-actions button .icon { width: 15px; height: 15px; }
+.admin-actions .primary-button.armed { background: #0c4535; border-color: #0c4535; }
+.admin-actions .danger-button.armed { color: #fff; background: var(--red); border-color: var(--red); }
+.admin-vip { font-weight: 600; }
+.admin-vip.expired { color: var(--muted); }
+.admin-address code { white-space: nowrap; }
+@media (max-width: 760px) {
+  .admin-panel { padding: 12px; }
+  .admin-search { width: 100%; }
+  .admin-tabs button { flex: 1; justify-content: center; }
+  /* On phones each row becomes a card so the address and buttons stay in view without sideways scrolling. */
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { display: block; min-width: 0; }
+  .admin-table thead { display: none; }
+  .admin-table tr { padding: 4px 12px 10px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 6px; }
+  .admin-table td { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 0; text-align: end; }
+  .admin-table td::before { content: attr(data-label); flex: 0 0 auto; max-width: 42%; color: var(--muted); font-size: 10px; text-align: start; }
+  .admin-table td[data-label=""]::before { display: none; }
+  .admin-table td > strong + small { margin-top: 2px; }
+  .admin-table td:has(> small) { flex-wrap: wrap; }
+  .admin-table td:has(> small) > small { flex-basis: 100%; }
+  .admin-address code, .admin-table code { white-space: normal; overflow-wrap: anywhere; text-align: end; }
+  .admin-copy { min-width: 0; }
+  .admin-send strong { font-size: 15px; }
+  .admin-actions { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; padding-top: 12px !important; border-bottom: 0; }
+  .admin-actions button { margin: 0; min-height: 40px; }
+  .admin-actions:empty { display: none !important; }
+}
