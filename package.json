@@ -2,7 +2,7 @@
   "name": "taskmall-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "TaskMall task, VIP membership, and wallet platform",
+  "description": "TaskMall Earn, synthetic market positions, referrals and USDT wallets",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --env-file-if-exists=.env --watch server.js",
@@ -43,9 +43,13 @@
     "test:backup-rotation": "node --test scripts/verify-backup-rotation.cjs",
     "check:backup": "node --check payments/backup-rotation.js && node --check scripts/secure-backup.cjs && node --check scripts/verify-backup-rotation.cjs",
     "test:payments": "node --test scripts/verify-payments.cjs",
-    "check": "node --check server.js && node --check task-catalog.js && node --check public/app.js && node --check payments/tron.js && node --check payments/store.js && node --check payments/watcher.js && node --check payments/vault.js && node --check payments/outgoing.js && node --check payments/operator.js && node --check payments/transactions.js && node --check payments/collector.js && node --check payments/payouts.js && node --check payments/portal.js && node --check scripts/verify-admin.cjs && node --check payments/collection-activation.js && node --check payments/private-terminal.js && node --check payments/offline-backup.js && node --check payments/iphone-backup.js && node --check payments/operator-ui/app.js && node --check payments/operator-ui/unlock.js && node --check scripts/payment-status.cjs && node --check scripts/wallet-backup.cjs && node --check scripts/iphone-backup.cjs && node --check scripts/verify-iphone-backup.cjs && node --check scripts/payment-operator.cjs && node --check scripts/collection-worker.cjs && node --check scripts/operator-open.cjs && node --check scripts/verify-tronlink.cjs && node --check scripts/verify-collection-activation.cjs && node --check scripts/tron-test-helpers.cjs && node --check scripts/tron-fixture-preload.cjs && npm run check:backup",
-    "test:ui": "node scripts/verify-ui.cjs",
-    "test:api": "node --test scripts/verify-api.cjs"
+    "check": "node --check server.js && node --check task-catalog.js && node --check public/app.js && node --check payments/tron.js && node --check payments/store.js && node --check payments/watcher.js && node --check payments/vault.js && node --check payments/outgoing.js && node --check payments/operator.js && node --check payments/transactions.js && node --check payments/collector.js && node --check payments/payouts.js && node --check payments/portal.js && node --check scripts/verify-admin.cjs && node --check payments/collection-activation.js && node --check payments/private-terminal.js && node --check payments/offline-backup.js && node --check payments/iphone-backup.js && node --check payments/operator-ui/app.js && node --check payments/operator-ui/unlock.js && node --check scripts/payment-status.cjs && node --check scripts/wallet-backup.cjs && node --check scripts/iphone-backup.cjs && node --check scripts/verify-iphone-backup.cjs && node --check scripts/payment-operator.cjs && node --check scripts/collection-worker.cjs && node --check scripts/operator-open.cjs && node --check scripts/verify-tronlink.cjs && node --check scripts/verify-collection-activation.cjs && node --check scripts/tron-test-helpers.cjs && node --check scripts/tron-fixture-preload.cjs && npm run check:backup && node --check public/pro-workspace.js && node --check public/earn-workspace.js && node --check markets/binance.js && node --check markets/earn.js && node --check markets/assistant.js && node --check markets/credentials.js && node --check markets/spot.js && node --check public/spot-workspace.js && node --check public/coin-logos.js",
+    "test:ui": "node scripts/verify-pro-ui.cjs",
+    "test:api": "node --test scripts/verify-api.cjs",
+    "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs",
+    "preview:design": "node scripts/design-preview.cjs",
+    "test:spot": "node --test scripts/verify-spot.cjs",
+    "test:assets": "node --test scripts/verify-assets.cjs"
   },
   "engines": {
     "node": ">=22.13"

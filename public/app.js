@@ -60,7 +60,7 @@ const state = {
 const en = {
   tagline: 'Tasks, VIP levels, and clear USDT balances',
   storyTitle: 'TaskMall keeps every balance in the right place.',
-  storyText: 'Deposits go directly to the VIP account. Task rewards go to the withdrawal account.',
+  storyText: 'Deposits go directly to the VIP account. Task rewards go to the Spot account.',
   story1: 'VIP account balance for purchases',
   story2: 'Task rewards credited separately',
   story3: 'Transfer rewards into VIP balance anytime',
@@ -103,7 +103,7 @@ const en = {
   heroText: 'Deposited funds appear in the VIP account automatically. Use that balance to buy VIP packages, add more funds later, or transfer task rewards into the VIP account.',
   lockedAccount: 'VIP account',
   lockedAccountShort: 'Deposits and transfers for VIP purchases',
-  withdrawAccount: 'Withdrawal account',
+  withdrawAccount: 'Spot account',
   withdrawAccountShort: 'Task earnings available for USDT withdrawal',
   deposit: 'Deposit',
   withdraw: 'Withdraw',
@@ -139,7 +139,7 @@ const en = {
   vipTitle: 'VIP packages',
   vipSubtitle: 'VIP is bought only from the VIP account.',
   tasksTitle: 'Task page',
-  tasksSubtitle: 'Complete available tasks and earn into the withdrawal account.',
+  tasksSubtitle: 'Complete available tasks and earn into the Spot account.',
   filterAll: 'All',
   filterAvailable: 'Available',
   filterCompleted: 'Completed',
@@ -186,12 +186,12 @@ const en = {
   faq1q: 'Where do deposits go?',
   faq1a: 'Deposits go to the VIP account automatically and are used for VIP purchases.',
   faq2q: 'Where do task rewards go?',
-  faq2a: 'Task rewards go to the withdrawal account, where USDT withdrawals can be requested.',
+  faq2a: 'Task rewards go to the Spot account, where USDT withdrawals can be requested.',
   faq3q: 'Can earnings buy VIP?',
-  faq3a: 'Yes. Transfer from the withdrawal account to the VIP account, then buy VIP.',
+  faq3a: 'Yes. Transfer from the Spot account to the VIP account, then buy VIP.',
   showPassword: 'Show password',
   language: 'Language',
-  taskSuccess: (amount) => `Task complete. ${amount} added to withdrawal balance.`,
+  taskSuccess: (amount) => `Task complete. ${amount} added to Spot balance.`,
   profileSaved: 'Profile updated.',
   depositSuccess: 'Deposit added to VIP account.',
   transferSuccess: 'Moved to VIP account.',
@@ -405,9 +405,9 @@ const copy = {
 };
 
 Object.assign(copy.ka, {
-  storyText: 'დეპოზიტი ავტომატურად ირიცხება VIP account-ზე. task reward ცალკე ჯდება withdrawal account-ზე.',
+  storyText: 'დეპოზიტი ავტომატურად ირიცხება VIP account-ზე. task reward ცალკე ჯდება Spot account-ზე.',
   story1: 'VIP account ბალანსი VIP შესაძენად',
-  heroText: 'ჩარიცხული თანხა ავტომატურად გამოჩნდება VIP account-ზე. ამ ბალანსით იყიდი VIP პაკეტებს, შემდეგ დაამატებ ახალ დეპოზიტს ან withdrawal account-იდან გადმოიტან task reward-ს.',
+  heroText: 'ჩარიცხული თანხა ავტომატურად გამოჩნდება VIP account-ზე. ამ ბალანსით იყიდი VIP პაკეტებს, შემდეგ დაამატებ ახალ დეპოზიტს ან Spot account-იდან გადმოიტან task reward-ს.',
   lockedAccount: 'VIP account',
   lockedAccountShort: 'დეპოზიტები და transfer-ები VIP შესაძენად',
   addLocked: 'Deposit VIP account-ზე',
@@ -415,15 +415,15 @@ Object.assign(copy.ka, {
   network: 'ქსელი',
   depositAddress: 'ჩარიცხვის მისამართი',
   copyAddress: 'მისამართის კოპირება',
-  walletNote: 'დეპოზიტი შედის VIP account-ზე და გამოიყენება VIP-ის შესაძენად. გატანა შესაძლებელია მხოლოდ task reward-ის withdrawal account-იდან.',
+  walletNote: 'დეპოზიტი შედის VIP account-ზე და გამოიყენება VIP-ის შესაძენად. გატანა შესაძლებელია მხოლოდ task reward-ის Spot account-იდან.',
   lockedInfo: 'VIP პაკეტების შესაძენად.',
   withdrawInfo: 'შეგიძლია USDT-ის გატანა ან VIP account-ზე გადატანა.',
   notEnoughLocked: 'VIP account ბალანსი არ კმარა',
   vipSubtitle: 'VIP იყიდება მხოლოდ VIP account-იდან.',
   teamVolume: 'Team VIP volume',
-  helpText: 'TaskMall თანხას ორ ანგარიშად ყოფს: VIP account VIP შესაძენად და withdrawal account task reward-ების გასატანად.',
+  helpText: 'TaskMall თანხას ორ ანგარიშად ყოფს: VIP account VIP შესაძენად და Spot account task reward-ების გასატანად.',
   faq1a: 'Deposit ავტომატურად შედის VIP account-ზე და გამოიყენება VIP პაკეტებისთვის.',
-  faq3a: 'კი. withdrawal account-იდან VIP account-ზე გადაიტან და VIP-ს იქიდან იყიდი.',
+  faq3a: 'კი. Spot account-იდან VIP account-ზე გადაიტან და VIP-ს იქიდან იყიდი.',
   depositSuccess: 'Deposit დაემატა VIP account-ს.',
   transferSuccess: 'თანხა გადავიდა VIP account-ზე.',
   addressCopied: 'ჩარიცხვის მისამართი დაკოპირდა.',
@@ -451,7 +451,7 @@ const errors = {
     AUTH_REQUIRED: 'Your session ended. Please sign in again.',
     INVALID_AMOUNT: 'Enter a valid USDT amount.',
     INVALID_WALLET: 'Enter a valid USDT wallet address.',
-    INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough withdrawal balance.',
+    INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough Spot balance.',
     INSUFFICIENT_LOCKED_BALANCE: 'Not enough locked VIP balance.',
     VIP_REQUIRED: 'A higher VIP level is required.',
     VIP_ALREADY_ACTIVE: 'This VIP level is already active.',
@@ -607,12 +607,12 @@ Object.assign(en, { membershipTerm: 'Membership term', days: 'days', expiresOn: 
 Object.assign(en, {
   navAdmin: 'Admin', adminSubtitle: 'Withdrawal requests and every account. Send the payout yourself, then confirm it here.',
   adminWithdrawals: 'Withdrawals', adminUsers: 'Users', adminPending: 'Under review', adminPendingNet: 'To send (net)',
-  adminUserCount: 'Users', adminPaidTotal: 'Paid out (net)', adminTotalVip: 'Total VIP balance', adminTotalWithdraw: 'Total withdrawal balance',
+  adminUserCount: 'Users', adminPaidTotal: 'Paid out (net)', adminTotalVip: 'Total VIP balance', adminTotalWithdraw: 'Total Spot balance',
   adminReservedNote: (amount) => `+ ${amount} reserved`, adminShowPending: 'Under review', adminShowAll: 'All',
   adminDate: 'Date', adminUser: 'User', adminAddress: 'TRC20 address', adminRequested: 'Requested', adminFee: 'Fee', adminToSend: 'To send',
   adminStatus: 'Status', adminConfirm: 'Confirm', adminConfirmAgain: 'Paid? Click again', adminReject: 'Reject', adminRejectAgain: 'Reject? Click again',
   adminNoWithdrawals: 'No withdrawal requests here.', adminSearch: 'Search by email or name', adminNoUsers: 'No users found.',
-  adminVip: 'VIP status', adminVipBalance: 'VIP balance', adminWithdrawBalance: 'Withdrawal balance', adminReserved: 'Reserved',
+  adminVip: 'VIP status', adminVipBalance: 'VIP balance', adminWithdrawBalance: 'Spot balance', adminReserved: 'Reserved',
   adminEarned: 'Total earned', adminWithdrawn: 'Total withdrawn', adminJoined: 'Registered', adminExpired: 'Expired', adminUntil: (date) => `until ${date}`,
   adminConfirmed: 'Confirmed. The user now sees the withdrawal as confirmed.', adminRejected: 'Rejected. The amount returned to the user balance.',
   adminCopied: 'Copied', adminRefresh: 'Refresh', adminLoading: 'Loading...', adminDeleted: 'Deleted account',
@@ -661,7 +661,7 @@ function icon(name, className = '') {
     flame: 'Flame', trophy: 'Trophy', crown: 'Crown', clock: 'Clock3', list: 'List',
     scan: 'ScanLine', wallet: 'Wallet', chart: 'ChartNoAxesCombined', calendar: 'CalendarDays',
     deposit: 'ArrowDownToLine', withdraw: 'ArrowUpFromLine', transfer: 'ArrowLeftRight',
-    briefcase: 'Building2', gift: 'Gift', copy: 'Copy', link: 'Link', close: 'X', logout: 'LogOut',
+    briefcase: 'Building2', gift: 'Gift', earn: 'HandCoins', copy: 'Copy', link: 'Link', close: 'X', logout: 'LogOut',
     save: 'Save', info: 'Info', search: 'Search', menu: 'Menu', download: 'Download',
     chevron: 'ChevronRight', globe: 'Globe2', shield: 'ShieldCheck', settings: 'Settings2', retry: 'RefreshCw'
   };
@@ -706,7 +706,7 @@ Object.assign(en, {
   exchangeHeadline: 'Every task.', exchangeHeadlineAccent: 'A new possibility.',
   exchangeSubtitle: 'Your tasks, rewards, and USDT accounts. One connected workspace.',
   exchangeEyebrow: 'YOUR NEXT CHAPTER STARTS HERE',
-  accountPreview: 'Your workspace, at a glance', accountPreviewNote: 'Account preview',
+  accountPreview: 'Your workspace, at a glance', accountPreviewNote: 'USDT · TRC20',
   startWith: 'Start with Free VIP', planOptions: 'Membership options',
   rewardCurrency: 'Reward currency', dailyOpportunity: 'One task. Every day.',
   dailyOpportunityText: 'Explore your daily task and keep track of every reward.',
@@ -718,7 +718,7 @@ Object.assign(copy.ka, {
   exchangeHeadline: 'ყოველი დავალება.', exchangeHeadlineAccent: 'ახალი შესაძლებლობა.',
   exchangeSubtitle: 'დავალებები, ჯილდოები და USDT ანგარიშები. ყველაფერი ერთ სივრცეში.',
   exchangeEyebrow: 'შენი ახალი შესაძლებლობა იწყება აქ',
-  accountPreview: 'შენი სივრცე ერთი შეხედვით', accountPreviewNote: 'ანგარიშის ნიმუში',
+  accountPreview: 'შენი სივრცე ერთი შეხედვით', accountPreviewNote: 'USDT · TRC20',
   startWith: 'დაიწყე Free VIP-ით', planOptions: 'წევრობის პაკეტი',
   rewardCurrency: 'ჯილდოს ვალუტა', dailyOpportunity: 'ერთი დავალება. ყოველდღე.',
   dailyOpportunityText: 'აღმოაჩინე დღიური დავალება და თვალი ადევნე თითოეულ ჯილდოს.',
@@ -728,7 +728,7 @@ Object.assign(copy.ka, {
 });
 
 function brand() {
-  return '<img class="brand-mark" src="/favicon.svg?v=exchange-1" width="36" height="36" alt="" /><span class="brand-wordmark">TaskMall<span class="brand-dot">.</span></span>';
+  return '<img class="brand-mark" src="/assets/brand/taskmall-mark.svg?v=brand-2" width="36" height="36" alt="" /><span class="brand-wordmark">TaskMall<span class="brand-dot">.</span></span>';
 }
 
 function setDocumentLanguage() {
@@ -887,6 +887,10 @@ function renderWalletDialog() {
   if (!type) return '';
   if (type !== 'transfer' && state.walletChecking) return renderWalletStatus(t(type === 'deposit' ? 'loadingAddress' : 'checkingPayments'), true);
   if (type !== 'transfer' && state.walletError) return renderWalletStatus(state.walletError);
+  if(type!=='transfer'&&state.paymentMode==='production-redirect'&&state.paymentOrigin){
+    const target=state.paymentOrigin+'/?wallet='+type+'#wallet';
+    return `<div class="dialog-backdrop" data-action="backdrop-close"><section class="dialog wallet-dialog" role="dialog" aria-modal="true" aria-labelledby="wallet-dialog-title"><div class="dialog-head"><span class="dialog-task-icon">${icon(type)}</span><button class="dialog-close" type="button" data-action="close-dialog" aria-label="${escapeHtml(t('close'))}">${icon('close')}</button></div><div class="dialog-body"><span class="dialog-kicker">TASKMALL · USDT TRC20</span><h2 id="wallet-dialog-title">${escapeHtml(t(type))}</h2><p class="dialog-description">${escapeHtml(state.lang==='ka'?'გააგრძელე TaskMall-ის მოქმედ გვერდზე. თანხა შენს რეალურ ანგარიშზე აისახება.':'Continue on the live TaskMall payment page. Funds are recorded in your live account.')}</p><a class="primary-button" data-live-payment-link href="${escapeHtml(target)}" target="_blank" rel="noopener noreferrer">${escapeHtml(state.lang==='ka'?'გადახდის გვერდის გახსნა':'Open payment page')}${icon('arrow')}</a></div></section></div>`;
+  }
   const available = type === 'deposit' ? state.paymentsAvailable : state.withdrawalsAvailable;
   if (type !== 'transfer' && (!available || (type === 'deposit' && state.paymentMode === 'tron-watch-only' && !state.depositWallet))) {
     return renderWalletStatus(t(type === 'withdraw' ? 'withdrawalUnavailable' : 'depositUnavailable'));
@@ -978,7 +982,7 @@ function weekEarnings() {
     return { date, amount: 0 };
   });
   for (const activity of state.activities) {
-    if (activity.type !== 'task') continue;
+    if (!['task','earn','referral'].includes(activity.type)) continue;
     const date = new Date(activity.at);
     date.setHours(0, 0, 0, 0);
     const bucket = days.find(day => day.date.getTime() === date.getTime());
@@ -1329,11 +1333,11 @@ async function adminDecision(action, id) {
 }
 
 function knownView(view) {
-  return ['home', 'tasks', 'wallet', 'vip', 'team', 'me', 'company', 'support'].includes(view) || (view === 'admin' && Boolean(state.user?.isAdmin));
+  return ['home', 'markets', 'earn', 'wallet', 'team', 'me', 'company', 'support'].includes(view) || (view === 'admin' && Boolean(state.user?.isAdmin));
 }
 
 function viewTitle() {
-  return t({ home: 'overview', tasks: 'navTasks', wallet: 'walletTitle', vip: 'navVip', team: 'navTeam', me: 'profile', company: 'company', support: 'support', admin: 'navAdmin' }[state.view] || 'overview');
+  return t({ home: 'overview', markets: 'markets', earn: 'earnTitle', tasks: 'navTasks', wallet: 'walletTitle', vip: 'navVip', team: 'navTeam', me: 'profile', company: 'company', support: 'support', admin: 'navAdmin' }[state.view] || 'overview');
 }
 
 function renderPublicPage() {
@@ -1365,7 +1369,7 @@ function drawEarnings() {
 
 function renderShell() {
   earningsChart?.destroy();
-  const views = { home: renderHome, tasks: renderTasksPage, vip: renderVipPage, team: renderTeamPage, me: renderMePage, wallet: renderWalletPage, company: renderCompanyPage, support: renderSupportPage };
+  const views = { home: renderHome, markets: renderMarketsPage, earn: renderEarnPage, team: renderTeamPage, me: renderMePage, wallet: renderWalletPage, company: renderCompanyPage, support: renderSupportPage };
   if (state.user.isAdmin) views.admin = renderAdminPage;
   const content = (views[state.view] || renderHome)();
   const modal = Boolean(state.modalTaskId || state.walletModal || state.helpOpen);
@@ -1374,7 +1378,7 @@ function renderShell() {
       <button class="brand" type="button" data-action="view" data-view="home">${brand()}</button>
       <div class="workspace-selector"><span class="workspace-avatar">TM</span><div><strong>TaskMall</strong><span>${escapeHtml(t('workspace'))}</span></div>${icon('chevron')}</div>
       <span class="nav-section-label">${escapeHtml(t('workspace'))}</span>
-      <nav class="desktop-nav" aria-label="${escapeHtml(t('workspace'))}">${navItem('home', t('navHome'), 'home')}${navItem('tasks', t('navTasks'), 'tasks')}${navItem('wallet', t('walletTitle'), 'wallet')}${navItem('vip', t('navVip'), 'crown')}${navItem('team', t('navTeam'), 'users')}</nav>
+      <nav class="desktop-nav" aria-label="${escapeHtml(t('workspace'))}">${navItem('home', t('navHome'), 'wallet')}${navItem('markets', t('markets'), 'chart')}${navItem('earn', t('earnTitle'), 'earn')}${navItem('wallet', t('walletTitle'), 'transfer')}${navItem('team', t('navTeam'), 'users')}</nav>
       <span class="nav-section-label">${escapeHtml(t('platform'))}</span>
       <nav class="desktop-nav" aria-label="${escapeHtml(t('platform'))}">${state.user.isAdmin ? navItem('admin', t('navAdmin'), 'shield') : ''}${navItem('company', t('company'), 'briefcase')}${navItem('support', t('support'), 'help')}${navItem('me', t('profile'), 'settings')}</nav>
       <div class="sidebar-bottom"><button class="sidebar-user" type="button" data-action="view" data-view="me"><span class="avatar">${escapeHtml(state.user.name.charAt(0).toUpperCase())}</span><span><strong>${escapeHtml(state.user.name)}</strong><small>${escapeHtml(state.user.email)}</small></span>${icon('chevron')}</button></div>
@@ -1385,7 +1389,7 @@ function renderShell() {
       <main class="app-content" ${modal ? 'inert' : ''}>${content}</main>
       <footer class="workspace-footer"><span>TaskMall &copy; 2026</span><span>${escapeHtml(t('workspaceStatus'))}</span></footer>
     </div>
-    <nav class="bottom-nav" aria-label="Mobile" ${modal ? 'inert' : ''}>${navItem('home', t('navHome'), 'home', true)}${navItem('tasks', t('navTasks'), 'tasks', true)}${navItem('vip', t('navVip'), 'crown', true)}${navItem('team', t('navTeam'), 'users', true)}${navItem('wallet', t('walletTitle'), 'wallet', true)}</nav>
+    <nav class="bottom-nav" aria-label="Mobile" ${modal ? 'inert' : ''}>${navItem('home', t('navHome'), 'home', true)}${navItem('markets', t('markets'), 'chart', true)}${navItem('earn', t('earnTitle'), 'earn', true)}${navItem('team', t('navTeam'), 'users', true)}${navItem('wallet', t('walletTitle'), 'wallet', true)}</nav>
     ${state.modalTaskId ? renderTaskDialog() : ''}${renderWalletDialog()}${renderHelpDialog()}
   </div>`;
   setDocumentLanguage();
@@ -1408,9 +1412,10 @@ function render() {
 }
 
 function applyPaymentConfig(config = {}) {
-  const mode = ['tron-watch-only', 'test-wallet'].includes(config.mode) ? config.mode : 'disabled';
+  const mode = ['tron-watch-only', 'test-wallet', 'production-redirect'].includes(config.mode) ? config.mode : 'disabled';
   if (state.paymentMode !== mode || config.available !== true) state.depositWallet = null;
   state.paymentMode = mode;
+  state.paymentOrigin=mode==='production-redirect'&&config.origin==='https://taskmall.app'?config.origin:null;
   state.paymentsAvailable = mode !== 'disabled' && config.available === true;
   state.withdrawalsAvailable = mode !== 'disabled' && config.withdrawalsAvailable === true;
   const minimum = Number(config.minimumWithdrawalAmount);

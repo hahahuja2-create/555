@@ -1,6 +1,8 @@
 # TaskMall
 
-TaskMall provides separate desktop and mobile workspaces for tasks, VIP memberships, accounts, wallet records, team invitations, company information, and support.
+TaskMall provides desktop and mobile workspaces for Earn, price-linked internal trading positions, USDT accounts, referrals and support. Binance supplies live prices only; positions are recorded by TaskMall and do not represent on-chain coins.
+
+The current production model uses `TASKMALL_EARN_ENABLED=1` and `TASKMALL_SPOT_ENABLED=1`. See [the current accounting, migration and deployment notes](EARN_REDESIGN.md). The membership rules below document the historical product and are retained for legacy reconciliation and tests; VIP purchases and task completion are retired when Earn is enabled.
 
 ## Run locally
 
@@ -13,7 +15,7 @@ npm start
 
 Open http://127.0.0.1:4173. Use `npm run dev` for automatic restarts.
 
-## Membership rules
+## Historical membership rules
 
 - Free VIP lasts 10 days from registration. VIP 1 through VIP 11 last 365 days.
 - Free VIP begins at registration and pays 0.30 USDT per completed daily task.

@@ -10,6 +10,10 @@ const { units, amount: usdtAmount } = require('./payments/tron');
 const { OutgoingLedger, SettlementWatcher, MINIMUM_WITHDRAWAL_USDT } = require('./payments/outgoing');
 const { loadOperatorToken, authorized } = require('./payments/operator');
 const { OperatorPortal } = require('./payments/portal');
+const { BinanceMarkets } = require('./markets/binance');
+const { assistantReply } = require('./markets/assistant');
+const earn = require('./markets/earn');
+const spot = require('./markets/spot');
 
 const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 const PORT = Number(process.env.PORT || 4173);
@@ -21,8 +25,14 @@ const FREE_VIP_DAYS = 10;
 const WITHDRAWAL_FEE_RATE = 0.1;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PUBLIC_ORIGIN = process.env.PUBLIC_ORIGIN || '';
+const REVIEW_PAYMENT_ORIGIN=!IS_PRODUCTION&&process.env.TASKMALL_REVIEW_ORIGIN==='https://taskmall.app'?'https://taskmall.app':'';
 const TEST_WALLET = process.env.NODE_ENV === 'test' && process.env.TASKMALL_TEST_WALLET === '1'
   && Boolean(process.env.TASKMALL_DATA_DIR) && path.resolve(DATA_DIR) !== path.join(__dirname, 'data');
+const DESIGN_PREVIEW = process.env.TASKMALL_DESIGN_PREVIEW === '1';
+const EARN_MODE = DESIGN_PREVIEW || process.env.TASKMALL_EARN_ENABLED === '1';
+if (DESIGN_PREVIEW && (IS_PRODUCTION || !process.env.TASKMALL_DATA_DIR || path.resolve(DATA_DIR) === path.join(__dirname,'data') || process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.TASKMALL_SQLITE === '1')) throw new Error('Design preview requires isolated local data and cannot use the live database.');
+const markets = new BinanceMarkets();
+
 if (process.env.TASKMALL_TEST_WALLET === '1' && !TEST_WALLET) throw new Error('Test wallet requires an isolated test data directory and NODE_ENV=test.');
 if (IS_PRODUCTION && (!PUBLIC_ORIGIN || new URL(PUBLIC_ORIGIN).protocol !== 'https:')) throw new Error('Production requires an HTTPS PUBLIC_ORIGIN.');
 const USE_SQLITE = !TEST_WALLET && process.env.TASKMALL_SQLITE === '1';
@@ -81,6 +91,7 @@ const seedTasks = vipPlans.map((plan) => ({
 }));
 
 let db = { users: [], tasks: seedTasks };
+const spotTrading=new spot.SpotTrading({markets,getState:()=>db,exclusive,save:async next=>{await saveDatabase(next);db=next;},enabled:()=>storageHealthy&&EARN_MODE&&process.env.TASKMALL_SPOT_ENABLED==='1'});
 let writeQueue = Promise.resolve();
 let storageHealthy = true;
 const operatorPortal = new OperatorPortal({ treasury: TREASURY, exclusive, json, readBody,
@@ -99,6 +110,8 @@ function planByLevel(level) {
 function money(value) {
   return usdtAmount(units(value === undefined ? 0 : value));
 }
+
+function balanceValue(value) { return usdtAmount(units(value)); }
 
 function displayNameFromEmail(email) {
   const localPart = String(email || '').split('@')[0] || 'TaskMall user';
@@ -146,12 +159,12 @@ function ensureUserShape(user) {
     user.inviteCode = makeInviteCode(user);
     changed = true;
   }
-  user.lockedBalance = money(user.lockedBalance);
-  user.withdrawBalance = money(user.withdrawBalance);
-  user.reservedBalance = money(user.reservedBalance);
-  user.earnedTotal = money(user.earnedTotal);
-  user.withdrawnTotal = money(user.withdrawnTotal);
-  user.withdrawFeeTotal = money(user.withdrawFeeTotal);
+  user.lockedBalance = balanceValue(user.lockedBalance);
+  user.withdrawBalance = balanceValue(user.withdrawBalance);
+  user.reservedBalance = balanceValue(user.reservedBalance);
+  user.earnedTotal = balanceValue(user.earnedTotal);
+  user.withdrawnTotal = balanceValue(user.withdrawnTotal);
+  user.withdrawFeeTotal = balanceValue(user.withdrawFeeTotal);
   if (!vipPlans.some((plan) => plan.id === user.vipId)) {
     user.vipId = 'free';
     changed = true;
@@ -186,12 +199,15 @@ function cleanUser(user) {
     streak: user.streak,
     completedCount: user.completedTaskIds.length,
     completedTaskIds: user.completedTaskIds,
-    lockedBalance: money(user.lockedBalance),
-    withdrawBalance: money(user.withdrawBalance),
-    reservedBalance: money(user.reservedBalance),
-    earnedTotal: money(user.earnedTotal),
-    withdrawnTotal: money(user.withdrawnTotal),
-    withdrawFeeTotal: money(user.withdrawFeeTotal),
+    lockedBalance: balanceValue(user.lockedBalance),
+    earningBalance: balanceValue(user.lockedBalance),
+    earnEnabled: EARN_MODE,
+    withdrawBalance: balanceValue(user.withdrawBalance),
+    spotBalance: balanceValue(user.withdrawBalance),
+    reservedBalance: balanceValue(user.reservedBalance),
+    earnedTotal: balanceValue(user.earnedTotal),
+    withdrawnTotal: balanceValue(user.withdrawnTotal),
+    withdrawFeeTotal: balanceValue(user.withdrawFeeTotal),
     withdrawalFeeRate: WITHDRAWAL_FEE_RATE,
     vipId: vip.id,
     vipLevel: vip.level,
@@ -281,8 +297,15 @@ async function loadDatabase() {
       } catch (error) { if (error.code !== 'ENOENT') throw error; }
     }
     if (saved && !Array.isArray(saved.users)) throw new Error('Database users must be an array.');
+    if(saved?.earn&&!EARN_MODE)throw new Error('Earn state requires TASKMALL_EARN_ENABLED=1; do not silently revert financial accounting.');
+    if(IS_PRODUCTION&&saved?.earn?.preview)throw new Error('Preview reward funds cannot be used in production.');
     db.users = saved?.users || [];
+    if(saved?.earn)db.earn=saved.earn;
+    if(saved?.spot)db.spot=saved.spot;
+    if(EARN_MODE)spot.initialize(db);
+    if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     for (const user of db.users) ensureUserShape(user);
+    if(EARN_MODE)earn.migrate(db,vipPlans);
     await paymentStore.save(db, 'initial-import-or-migration');
     outgoingLedger = new OutgoingLedger(paymentStore, TREASURY);
     if (process.env.TASKMALL_OPERATOR_ENABLED === '1') operatorToken = await loadOperatorToken(OPERATOR_FILE, true, process.env.TASKMALL_OPERATOR_TOKEN);
@@ -321,23 +344,32 @@ async function loadDatabase() {
     const raw = await fsp.readFile(DATA_FILE, 'utf8');
     const saved = JSON.parse(raw.replace(/^\uFEFF/, ''));
     if (!Array.isArray(saved.users)) throw new Error('Database users must be an array.');
+    if(saved.earn&&!EARN_MODE)throw new Error('Earn state requires TASKMALL_EARN_ENABLED=1; do not silently revert financial accounting.');
+    if(IS_PRODUCTION&&saved.earn?.preview)throw new Error('Preview reward funds cannot be used in production.');
     db.users = saved.users;
+    if(saved.earn)db.earn=saved.earn;
+    if(saved.spot)db.spot=saved.spot;
+    if(EARN_MODE)spot.initialize(db);
+    if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     db.tasks = seedTasks;
-    let changed = false;
+    let changed = EARN_MODE && (!saved.earn||saved.spot?.version!==2);
     for (const user of db.users) if (ensureUserShape(user)) changed = true;
+    if(EARN_MODE&&earn.migrate(db,vipPlans).length)changed=true;
     if (changed) await saveDatabase();
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
+    if(EARN_MODE)spot.initialize(db);
+    if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     await saveDatabase();
   }
 }
 
-async function saveDatabase() {
+async function saveDatabase(state = db) {
   if (paymentStore) {
-    try { await paymentStore.save(db); return; }
+    try { await paymentStore.save(state); return; }
     catch (error) { storageHealthy = false; throw error; }
   }
-  const payload = JSON.stringify(db, null, 2);
+  const payload = JSON.stringify(state, null, 2);
   writeQueue = writeQueue.then(async () => {
     const temporary = `${DATA_FILE}.tmp`;
     await fsp.writeFile(temporary, payload, { encoding: 'utf8', mode: 0o600 });
@@ -634,6 +666,7 @@ async function handleApi(req, res, url) {
   }
 
   if (req.method === 'GET' && url.pathname === '/api/payment-config') {
+    if(REVIEW_PAYMENT_ORIGIN&&!TRON_DEPOSITS)return json(res,200,{available:true,withdrawalsAvailable:true,mode:'production-redirect',origin:REVIEW_PAYMENT_ORIGIN,minimumWithdrawalAmount:MINIMUM_WITHDRAWAL_USDT,networks:[]});
     if (TRON_DEPOSITS) return json(res, 200, { available: storageHealthy && Boolean(depositWatcher?.ready()), mode: 'tron-watch-only',
       withdrawalsAvailable: storageHealthy && MANUAL_WITHDRAWALS && withdrawalReviewer() && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
       minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
@@ -810,11 +843,11 @@ async function handleApi(req, res, url) {
     const user = await requireUser(req, res);
     if (!user) return;
     const body = await readBody(req);
-    const amount = parseAmount(body.amount, 1, 100_000);
+    const amount = EARN_MODE ? parseExactUsdt(body.amount, 0.000001, 100_000) : parseAmount(body.amount, 1, 100_000);
     if (!amount) return json(res, 400, { error: 'INVALID_AMOUNT' });
     if (amount > user.withdrawBalance) return json(res, 400, { error: 'INSUFFICIENT_WITHDRAW_BALANCE' });
-    user.withdrawBalance = money(user.withdrawBalance - amount);
-    user.lockedBalance = money(user.lockedBalance + amount);
+    user.withdrawBalance = usdtAmount(units(user.withdrawBalance) - units(amount));
+    user.lockedBalance = usdtAmount(units(user.lockedBalance) + units(amount));
     addActivity(user, { type: 'transfer', amount });
     await saveDatabase();
     return json(res, 200, { user: cleanUser(user), activities: user.activities });
@@ -854,6 +887,7 @@ async function handleApi(req, res, url) {
 
   const vipMatch = url.pathname.match(/^\/api\/vips\/([a-z0-9-]+)\/buy$/);
   if (req.method === 'POST' && vipMatch) {
+    if(EARN_MODE)return json(res,410,{error:'PRODUCT_REPLACED_BY_EARN'});
     if (!allowRequest(req, 'buy-vip', 30, 60_000)) return json(res, 429, { error: 'TOO_MANY_REQUESTS' });
     const user = await requireUser(req, res);
     if (!user) return;
@@ -874,6 +908,7 @@ async function handleApi(req, res, url) {
 
   const completionMatch = url.pathname.match(/^\/api\/tasks\/([a-z0-9-]+)\/complete$/);
   if (req.method === 'POST' && completionMatch) {
+    if(EARN_MODE)return json(res,410,{error:'PRODUCT_REPLACED_BY_EARN'});
     if (!allowRequest(req, 'complete', 30, 60_000)) return json(res, 429, { error: 'TOO_MANY_REQUESTS' });
     const user = await requireUser(req, res);
     if (!user) return;
@@ -955,6 +990,80 @@ async function serveStatic(req, res, url) {
   }
 }
 
+async function handleExchangeApi(req,res,url) {
+  if(req.method==='GET'&&url.pathname==='/api/earn'){
+    const user=await requireUser(req,res);if(!user)return true;
+    json(res,200,earn.snapshot(db,user,Date.now(),EARN_MODE));return true;
+  }
+  if(req.method==='GET'&&url.pathname==='/api/earn/referrals'){
+    const user=await requireUser(req,res);if(!user)return true;
+    const direct=db.users.filter(item=>item.id!==user.id&&item.referredBy===user.inviteCode);
+    const codes=new Set(direct.map(item=>item.inviteCode));
+    const second=db.users.filter(item=>item.id!==user.id&&!direct.some(row=>row.id===item.id)&&codes.has(item.referredBy));
+    json(res,200,{level1:direct.length,level2:second.length,rates:[10,5]});return true;
+  }
+  if(req.method==='POST'&&url.pathname==='/api/earn/claim'){
+    const user=await requireUser(req,res);if(!user)return true;
+    if(!EARN_MODE){json(res,503,{error:'EARN_UNAVAILABLE'});return true;}
+    if(!allowRequest(req,'earn-claim',15,60_000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
+    await exclusive(async()=>{const next=structuredClone(db);const result=earn.claim(next,user.id,String(req.taskmallBody.requestKey||''));
+      await saveDatabase(next);db=next;const updated=db.users.find(item=>item.id===user.id);
+      json(res,200,{...result,user:cleanUser(updated),earn:earn.snapshot(db,updated,Date.now(),true),activities:updated.activities});});return true;
+  }
+  if(req.method==='POST'&&url.pathname==='/api/admin/earn/fund'){
+    const user=await requireUser(req,res);if(!user)return true;
+    if(!isAdmin(user)){json(res,403,{error:'FORBIDDEN'});return true;}
+    if(!allowRequest(req,'earn-funding',8,60_000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
+    const address=process.env.TRON_EARN_FUND_ADDRESS,txid=String(req.taskmallBody.txid||'').toLowerCase();
+    if(!EARN_MODE||DESIGN_PREVIEW||!address||address===TREASURY||!paymentStore||!/^[a-f0-9]{64}$/.test(txid)){json(res,400,{error:'EARN_FUNDING_NOT_CONFIGURED'});return true;}
+    const {TronGrid,decodeTransfers,addressHex}=require('./payments/tron');
+    try{addressHex(address);}catch{json(res,503,{error:'EARN_FUNDING_NOT_CONFIGURED'});return true;}
+    for(const customer of db.users){if((await paymentStore.address(customer.id))?.address===address){json(res,409,{error:'FUNDING_ADDRESS_IS_CUSTOMER_ADDRESS'});return true;}}
+    const client=new TronGrid(process.env.TRONGRID_API_KEY);
+    let events;
+    try{const [receipt,height]=await Promise.all([client.receipt(txid),client.solidHeight()]);events=decodeTransfers(receipt,txid,height).filter(event=>event.to===address);}
+    catch{json(res,503,{error:'FUNDING_VERIFICATION_UNAVAILABLE'});return true;}
+    if(!events.length){json(res,400,{error:'CONFIRMED_FUNDING_NOT_FOUND'});return true;}
+    await exclusive(async()=>{const next=structuredClone(db);let added=0;for(const event of events)if(earn.addFunding(next,event,user.id))added++;
+      await saveDatabase(next);db=next;json(res,200,{added,poolAvailable:usdtAmount(BigInt(db.earn.availableUnits))});});return true;
+  }
+  if (req.method === 'GET' && url.pathname === '/api/markets') {
+    json(res,200,await markets.get()); return true;
+  }
+  if (req.method === 'GET' && url.pathname === '/api/markets/stream') {
+    if (!allowRequest(req,'market-stream',8,60_000) || markets.listenerCount('update') >= 250) json(res,429,{error:'TOO_MANY_REQUESTS'});
+    else markets.stream(req,res);
+    return true;
+  }
+  if (req.method === 'GET' && url.pathname === '/api/markets/history') {
+    if (!allowRequest(req,'market-history',60,60_000)) json(res,429,{error:'TOO_MANY_REQUESTS'});
+    else json(res,200,await markets.history(url.searchParams.get('symbol'),url.searchParams.get('range') || '1D'));
+    return true;
+  }
+  if(req.method==='GET'&&url.pathname==='/api/spot/config'){
+    json(res,200,{mode:'synthetic',instrumentType:'synthetic',tradingEnabled:spotTrading.active(),feeRate:(db.spot?.feeBps||0)/10000,quoteLifetimeSeconds:15});return true;
+  }
+  if(req.method==='GET'&&url.pathname==='/api/spot/portfolio'){
+    const user=await requireUser(req,res);if(!user)return true;json(res,200,spot.portfolio(user));return true;
+  }
+  if(req.method==='POST'&&['/api/spot/quote','/api/spot/orders'].includes(url.pathname)){
+    const user=await requireUser(req,res);if(!user)return true;
+    if(!allowRequest(req,'spot-order',30,60000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
+    if(url.pathname==='/api/spot/quote')json(res,200,await spotTrading.quote(user.id,req.taskmallBody));
+    else{const result=await spotTrading.execute(user.id,String(req.taskmallBody.quoteId||''));const current=db.users.find(row=>row.id===user.id);json(res,200,{...result,user:cleanUser(current),activities:current.activities});}
+    return true;
+  }
+  if (url.pathname === '/api/assistant/message' && req.method === 'POST') {
+    if (!allowRequest(req,'assistant',30,60_000)) { json(res,429,{error:'TOO_MANY_REQUESTS'}); return true; }
+    const message=String(req.taskmallBody.message||'').trim();
+    if (!message || message.length > 600) { json(res,400,{error:'INVALID_MESSAGE'}); return true; }
+    const user=await currentUser(req);
+    json(res,200,assistantReply(message,req.taskmallBody.lang,user?cleanUser(user):null,markets.snapshot().markets)); return true;
+  }
+  return false;
+}
+
+markets.setMaxListeners(260);
 const server = http.createServer(async (req, res) => {
   try {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -976,6 +1085,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (url.pathname.startsWith('/api/')) {
       if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(req.method)) req.taskmallBody = await readBody(req);
+      if (await handleExchangeApi(req,res,url)) return;
       const failedRelease = url.pathname.match(/^\/api\/operator\/(withdrawals|collections)\/([a-f0-9-]{36})\/release-failed$/);
       if (req.method === 'POST' && failedRelease && authorized(req, operatorToken) && depositWatcher) {
         const row = failedRelease[1] === 'withdrawals' ? await outgoingLedger.withdrawal(failedRelease[2])
@@ -1016,6 +1126,7 @@ loadDatabase().then(() => {
 });
 
 function shutdown() {
+  markets.stop();
   depositWatcher?.stop();
   settlementWatcher?.stop();
   server.close(async () => { await exclusive(() => paymentStore?.close()); process.exit(0); });
