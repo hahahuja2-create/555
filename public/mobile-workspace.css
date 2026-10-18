@@ -139,7 +139,7 @@ body:has(.dialog-backdrop), body:has(.pro-trade-backdrop) { overflow: hidden; }
   .referral-overview { gap: 12px; }
   .referral-level > span { font-size: 11px; }
   .profile-card, .settings-card, .faq-item { border-radius: 18px; }
-  .bottom-nav { inset: auto 10px calc(10px + env(safe-area-inset-bottom)); height: 72px; padding: 7px 5px; border: 1px solid #ffffff13; border-radius: 24px; background: #20242cf2; box-shadow: 0 10px 40px #0008; backdrop-filter: blur(24px); }
+  .bottom-nav { inset: auto 10px calc(4px + env(safe-area-inset-bottom)); height: 72px; padding: 7px 5px; border: 1px solid #ffffff13; border-radius: 24px; background: #20242cf2; box-shadow: 0 10px 40px #0008; backdrop-filter: blur(24px); }
   .bottom-nav-button { position: relative; gap: 5px; padding: 6px 0; border-radius: 18px; font-size: 9px; color: #8993a3; transition: background .15s, color .15s; }
   .bottom-nav-button.active { background: #f4c34e15; color: #f4d58b; }
   .bottom-nav-button .icon { width: 22px; height: 22px; stroke-width: 1.7; }
