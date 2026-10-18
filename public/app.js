@@ -496,12 +496,12 @@ en.depositsReady = 'USDT TRC20 deposits are available. Withdrawals are not enabl
 Object.assign(en, { reservedFunds: 'Reserved for withdrawals', confirmWithdrawalPassword: 'Confirm your account password',
   minimumWithdrawal: (amount) => `Minimum withdrawal request: ${amount} USDT.`,
   netToReceive: 'You receive after the 10% fee', requested: 'Under review', approved: 'Approved', submitted: 'Awaiting blockchain confirmation',
-  confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Pending', paymentsManual: 'USDT TRC20 deposits and manually reviewed withdrawals are available.' });
+  confirmed: 'Confirmed', rejected: 'Rejected', pending: 'Pending', paymentsManual: 'USDT TRC20 deposits and withdrawal requests are available.' });
 Object.assign(copy.ka, { reservedFunds: 'გატანისთვის დაჯავშნილია', confirmWithdrawalPassword: 'დაადასტურე ანგარიშის პაროლი',
   minimumWithdrawal: (amount) => `გატანის მოთხოვნის მინიმუმი: ${amount} USDT.`,
   netToReceive: 'მიიღებ 10%-იანი საკომისიოს შემდეგ', requested: 'განხილვაში', approved: 'დამტკიცებულია',
   submitted: 'ბლოკჩეინზე დადასტურების მოლოდინში', confirmed: 'დადასტურებულია', rejected: 'უარყოფილია', pending: 'მოლოდინში',
-  paymentsManual: 'USDT TRC20 შევსება და ხელით განხილული გატანები ხელმისაწვდომია.' });
+  paymentsManual: 'USDT TRC20 შევსება და გატანის მოთხოვნები ხელმისაწვდომია.' });
 errors.en.PASSWORD_CONFIRMATION_REQUIRED = 'Confirm your current account password.';
 errors.ka.PASSWORD_CONFIRMATION_REQUIRED = 'დაადასტურე ანგარიშის მოქმედი პაროლი.';
 errors.en.WITHDRAWAL_BELOW_MINIMUM = 'The minimum withdrawal request is 10 USDT.';
