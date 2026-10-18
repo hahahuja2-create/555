@@ -486,6 +486,8 @@ errors.en.DEPOSITS_UNAVAILABLE = 'Deposits are temporarily unavailable. Please t
 errors.ka.DEPOSITS_UNAVAILABLE = 'შევსება დროებით მიუწვდომელია. სცადეთ მოგვიანებით.';
 
 Object.assign(en, {
+  authAccountsTitle: 'Earn + Spot', authAccountsDescription: 'Two accounts, one clear view of your funds.',
+  authEarnDescription: 'Deposits and principal for daily rewards', authSpotDescription: 'Rewards, trading and withdrawal requests',
   tronOnly: 'Send only USDT on the TRON (TRC20) network. Other assets and networks are not supported.',
   depositAutomatic: 'Your balance updates automatically after blockchain confirmation.',
   depositWaiting: 'Waiting for a confirmed deposit', depositUnavailable: 'Deposits are temporarily unavailable.',
@@ -509,6 +511,8 @@ errors.ka.WITHDRAWAL_BELOW_MINIMUM = 'გატანის მოთხოვ�
 errors.en.REQUEST_KEY_CONFLICT = 'This request was already used with different details. Close and reopen the withdrawal form.';
 errors.ka.REQUEST_KEY_CONFLICT = 'ეს მოთხოვნა სხვა მონაცემებით უკვე გამოყენებულია. დახურე და ხელახლა გახსენი გატანის ფორმა.';
 Object.assign(copy.ka, {
+  authAccountsTitle: 'Earn + Spot', authAccountsDescription: 'ორი ანგარიში — შენი თანხების მკაფიო სურათი.',
+  authEarnDescription: 'დეპოზიტები და დღიური ჯილდოს ძირითადი თანხა', authSpotDescription: 'ჯილდოები, ვაჭრობა და გატანის მოთხოვნები',
   tronOnly: 'გადმორიცხეთ მხოლოდ USDT, TRON (TRC20) ქსელით. სხვა აქტივები და ქსელები მხარდაჭერილი არ არის.',
   depositAutomatic: 'ბალანსი ავტომატურად განახლდება ბლოკჩეინზე დადასტურების შემდეგ.',
   depositWaiting: 'დადასტურებული ჩარიცხვის მოლოდინში', depositUnavailable: 'შევსება დროებით მიუწვდომელია.',
@@ -768,8 +772,9 @@ function renderAuth() {
         <div class="story-copy"><span class="eyebrow">${escapeHtml(t('exchangeEyebrow'))}</span><h1>${escapeHtml(t('exchangeHeadline'))}<br><span>${escapeHtml(t('exchangeHeadlineAccent'))}</span></h1><p>${escapeHtml(t('exchangeSubtitle'))}</p></div>
         <div class="auth-account-visual" aria-label="${escapeHtml(t('accountPreview'))}">
           <div class="visual-topline"><span>${icon('wallet')}${escapeHtml(t('accountPreview'))}</span><small>${escapeHtml(t('accountPreviewNote'))}</small></div>
-          <div class="visual-balance"><span>${escapeHtml(t('totalBalance'))}</span><strong>0.00 <small>USDT</small></strong><span class="visual-network"><i></i> TRON · TRC20</span></div>
-          <div class="visual-account-row"><span class="visual-coin">₮</span><div><strong>Tether</strong><span>USDT</span></div><span>${escapeHtml(t('rewardCurrency'))}</span>${icon('arrow')}</div>
+          <div class="visual-balance visual-product-summary"><strong>${escapeHtml(t('authAccountsTitle'))}</strong><p>${escapeHtml(t('authAccountsDescription'))}</p></div>
+          <div class="visual-account-row visual-account-detail"><span class="visual-coin">${icon('earn')}</span><div><strong>Earn</strong><span>${escapeHtml(t('authEarnDescription'))}</span></div></div>
+          <div class="visual-account-row visual-account-detail"><span class="visual-coin">${icon('wallet')}</span><div><strong>Spot</strong><span>${escapeHtml(t('authSpotDescription'))}</span></div></div>
           <div class="visual-steps"><span>${icon('user')}${escapeHtml(t('createAccount'))}</span>${icon('chevron')}<span>${icon('tasks')}${escapeHtml(t('navTasks'))}</span>${icon('chevron')}<span>${icon('wallet')}USDT</span></div>
         </div>
         <div class="auth-stats"><div><strong>12</strong><span>${escapeHtml(t('planOptions'))}</span></div><div><strong>USDT</strong><span>${escapeHtml(t('rewardCurrency'))}</span></div><div><strong>Free VIP</strong><span>${escapeHtml(t('startWith'))}</span></div></div>

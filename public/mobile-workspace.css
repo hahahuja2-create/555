@@ -2,6 +2,12 @@
 .brand-wordmark { color: #f4f2ed; font-weight: 680; letter-spacing: -.9px; }
 .brand-wordmark-light { font-weight: 420; color: #d7d5d0; }
 .brand-mark { border-radius: 0; }
+.visual-product-summary strong { font-size: clamp(28px, 3.5vw, 42px); letter-spacing: -1px; }
+.visual-product-summary p { color: #a8b3c2; font-size: 13px; line-height: 1.8; margin: 10px 0 0; }
+.visual-account-detail > div { flex: 1; min-width: 0; }
+.visual-account-detail > div > span { white-space: normal; line-height: 1.65; }
+.visual-account-detail .visual-coin { color: #f4c34e; background: #f4c34e12; }
+.visual-account-detail .visual-coin .icon { width: 22px; height: 22px; }
 body:has(.dialog-backdrop), body:has(.pro-trade-backdrop) { overflow: hidden; }
 .wallet-shortcut-icon { display: inline-flex; align-items: center; }
 .wallet-available { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; border: 1px solid #343944; border-radius: 12px; background: #20242c; }
