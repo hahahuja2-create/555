@@ -4,6 +4,9 @@
 .brand-mark { border-radius: 0; }
 body:has(.dialog-backdrop), body:has(.pro-trade-backdrop) { overflow: hidden; }
 .wallet-shortcut-icon { display: inline-flex; align-items: center; }
+.quote-review .quote-instrument { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.quote-instrument dd { max-width: 65%; text-align: end; }
+.quote-instrument small { display: block; color: #c4ccd8; font-size: 12px; line-height: 1.65; margin-top: 4px; }
 .wallet-available { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; border: 1px solid #343944; border-radius: 12px; background: #20242c; }
 .wallet-available > span { color: #a8b0bc; font-size: 11px; }
 .wallet-available strong { font-size: 14px; color: #f2f4f7; text-align: end; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
