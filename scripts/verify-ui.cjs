@@ -166,7 +166,7 @@ async function main() {
       const chart = Chart.getChart(canvas);
       const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
       let bars = 0;
-      for (let index = 0; index < pixels.length; index += 4) if (pixels[index] === 23 && pixels[index + 1] === 107 && pixels[index + 2] === 86 && pixels[index + 3] > 0) bars++;
+      for (let index = 0; index < pixels.length; index += 4) if (pixels[index] === 240 && pixels[index + 1] === 185 && pixels[index + 2] === 11 && pixels[index + 3] > 0) bars++;
       return { total: chart.data.datasets[0].data.reduce((sum, value) => sum + value, 0), bars };
     });
     assert.equal(graph.total, 30.3);

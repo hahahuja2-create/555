@@ -702,8 +702,33 @@ function showToast(message, type = 'success') {
   setTimeout(() => element.remove(), 3600);
 }
 
+Object.assign(en, {
+  exchangeHeadline: 'Every task.', exchangeHeadlineAccent: 'A new possibility.',
+  exchangeSubtitle: 'Your tasks, rewards, and USDT accounts. One connected workspace.',
+  exchangeEyebrow: 'YOUR NEXT CHAPTER STARTS HERE',
+  accountPreview: 'Your workspace, at a glance', accountPreviewNote: 'Account preview',
+  startWith: 'Start with Free VIP', planOptions: 'Membership options',
+  rewardCurrency: 'Reward currency', dailyOpportunity: 'One task. Every day.',
+  dailyOpportunityText: 'Explore your daily task and keep track of every reward.',
+  exploreTasks: 'Explore tasks', quickAccess: 'Quick access', accountOverview: 'Account overview',
+  allAccounts: 'All accounts', accountSecurity: 'Account settings',
+  securitySubtitle: 'Your profile and account preferences', supportSubtitle: 'Find answers in our support center'
+});
+Object.assign(copy.ka, {
+  exchangeHeadline: 'ყოველი დავალება.', exchangeHeadlineAccent: 'ახალი შესაძლებლობა.',
+  exchangeSubtitle: 'დავალებები, ჯილდოები და USDT ანგარიშები. ყველაფერი ერთ სივრცეში.',
+  exchangeEyebrow: 'შენი ახალი შესაძლებლობა იწყება აქ',
+  accountPreview: 'შენი სივრცე ერთი შეხედვით', accountPreviewNote: 'ანგარიშის ნიმუში',
+  startWith: 'დაიწყე Free VIP-ით', planOptions: 'წევრობის პაკეტი',
+  rewardCurrency: 'ჯილდოს ვალუტა', dailyOpportunity: 'ერთი დავალება. ყოველდღე.',
+  dailyOpportunityText: 'აღმოაჩინე დღიური დავალება და თვალი ადევნე თითოეულ ჯილდოს.',
+  exploreTasks: 'ნახე დავალებები', quickAccess: 'სწრაფი წვდომა', accountOverview: 'ანგარიშის მიმოხილვა',
+  allAccounts: 'ყველა ანგარიში', accountSecurity: 'ანგარიშის პარამეტრები',
+  securitySubtitle: 'პროფილი და ანგარიშის მართვა', supportSubtitle: 'იპოვე პასუხები დახმარების ცენტრში'
+});
+
 function brand() {
-  return '<img class="brand-mark" src="/favicon.svg?v=studio-2" width="36" height="36" alt="" /><span class="brand-wordmark">TaskMall<span class="brand-dot">.</span></span>';
+  return '<img class="brand-mark" src="/favicon.svg?v=exchange-1" width="36" height="36" alt="" /><span class="brand-wordmark">TaskMall<span class="brand-dot">.</span></span>';
 }
 
 function setDocumentLanguage() {
@@ -740,8 +765,14 @@ function renderAuth() {
     <main class="auth-page">
       <section class="auth-story">
         <a class="brand" href="#" data-action="auth-home">${brand()}</a>
-        <div class="story-copy"><span class="eyebrow">TASKMALL WORKSPACE</span><h1>TaskMall<span>.</span></h1><h2>${escapeHtml(t('authBrandText'))}</h2><p>${escapeHtml(t('authBrandSub'))}</p></div>
-        <div class="workspace-preview"><img src="/assets/taskmall-headquarters.png?v=studio-3" alt="TaskMall headquarters" width="1792" height="1024" /><span class="preview-label">${icon('building')} TaskMall Headquarters <span>Brand concept</span></span></div>
+        <div class="story-copy"><span class="eyebrow">${escapeHtml(t('exchangeEyebrow'))}</span><h1>${escapeHtml(t('exchangeHeadline'))}<br><span>${escapeHtml(t('exchangeHeadlineAccent'))}</span></h1><p>${escapeHtml(t('exchangeSubtitle'))}</p></div>
+        <div class="auth-account-visual" aria-label="${escapeHtml(t('accountPreview'))}">
+          <div class="visual-topline"><span>${icon('wallet')}${escapeHtml(t('accountPreview'))}</span><small>${escapeHtml(t('accountPreviewNote'))}</small></div>
+          <div class="visual-balance"><span>${escapeHtml(t('totalBalance'))}</span><strong>0.00 <small>USDT</small></strong><span class="visual-network"><i></i> TRON · TRC20</span></div>
+          <div class="visual-account-row"><span class="visual-coin">₮</span><div><strong>Tether</strong><span>USDT</span></div><span>${escapeHtml(t('rewardCurrency'))}</span>${icon('arrow')}</div>
+          <div class="visual-steps"><span>${icon('user')}${escapeHtml(t('createAccount'))}</span>${icon('chevron')}<span>${icon('tasks')}${escapeHtml(t('navTasks'))}</span>${icon('chevron')}<span>${icon('wallet')}USDT</span></div>
+        </div>
+        <div class="auth-stats"><div><strong>12</strong><span>${escapeHtml(t('planOptions'))}</span></div><div><strong>USDT</strong><span>${escapeHtml(t('rewardCurrency'))}</span></div><div><strong>Free VIP</strong><span>${escapeHtml(t('startWith'))}</span></div></div>
         <div class="story-footer"><span>TaskMall</span><span>${escapeHtml(t('workspace'))} / 2026</span></div>
       </section>
       <section class="auth-panel">
@@ -993,12 +1024,13 @@ function renderEmptyTasks() {
 function renderHome() {
   const recommended = [...state.tasks].filter(task => !task.completed).sort((a, b) => Number(a.locked) - Number(b.locked)).slice(0, 3);
   return `<div class="page dashboard-page">
-    <header class="page-heading"><div><span class="page-kicker">${escapeHtml(t('greeting', state.user.name))}</span><h1>${escapeHtml(t('overview'))}</h1><p>${escapeHtml(t('overviewText'))}</p></div><button class="secondary-button heading-action" type="button" data-action="view" data-view="wallet">${icon('wallet')}${escapeHtml(t('walletTitle'))}</button></header>
+    <header class="page-heading"><div><span class="page-kicker">${escapeHtml(t('greeting', state.user.name))}</span><h1>${escapeHtml(t('overview'))}</h1><p>${escapeHtml(t('overviewText'))}</p></div><div class="overview-actions"><button class="primary-button heading-action" type="button" data-action="open-wallet" data-wallet-type="deposit">${icon('deposit')}${escapeHtml(t('deposit'))}</button><button class="secondary-button heading-action" type="button" data-action="open-wallet" data-wallet-type="withdraw">${icon('withdraw')}${escapeHtml(t('withdraw'))}</button><button class="secondary-button heading-action" type="button" data-action="open-wallet" data-wallet-type="transfer">${icon('transfer')}${escapeHtml(t('transfer'))}</button></div></header>
     ${renderMetrics()}
     <div class="dashboard-grid">${renderEarnings()}${renderMembership()}
       <section class="daily-panel"><div class="section-heading"><div><h2>${escapeHtml(t('navTasks'))}</h2><p>${state.tasks.filter(task => !task.locked && !task.completed).length} ${escapeHtml(t('taskAvailable'))}</p></div><button class="text-button" type="button" data-action="view" data-view="tasks">${escapeHtml(t('viewAll'))}${icon('arrow')}</button></div><div class="daily-task-list">${recommended.map(renderTaskRow).join('') || renderEmptyTasks()}</div></section>
       <section class="recent-panel"><div class="section-heading"><h2>${escapeHtml(t('historyTitle'))}</h2><button class="icon-button" type="button" data-action="view" data-view="wallet" aria-label="${escapeHtml(t('viewAll'))}" title="${escapeHtml(t('viewAll'))}">${icon('arrow')}</button></div>${renderActivityList(3)}</section>
     </div>
+    <section class="workspace-discover" aria-label="${escapeHtml(t('quickAccess'))}"><button class="discover-feature" type="button" data-action="view" data-view="tasks"><span class="discover-icon">${icon('tasks')}</span><span><strong>${escapeHtml(t('dailyOpportunity'))}</strong><small>${escapeHtml(t('dailyOpportunityText'))}</small></span>${icon('arrow')}</button><button class="discover-link" type="button" data-action="view" data-view="me">${icon('shield')}<span><strong>${escapeHtml(t('accountSecurity'))}</strong><small>${escapeHtml(t('securitySubtitle'))}</small></span>${icon('chevron')}</button><button class="discover-link" type="button" data-action="view" data-view="support">${icon('help')}<span><strong>${escapeHtml(t('support'))}</strong><small>${escapeHtml(t('supportSubtitle'))}</small></span>${icon('chevron')}</button></section>
     <div class="mobile-wallet-actions"><button type="button" data-action="open-wallet" data-wallet-type="deposit">${icon('deposit')}${escapeHtml(t('deposit'))}</button><button type="button" data-action="open-wallet" data-wallet-type="withdraw">${icon('withdraw')}${escapeHtml(t('withdraw'))}</button><button type="button" data-action="open-wallet" data-wallet-type="transfer">${icon('transfer')}${escapeHtml(t('transfer'))}</button></div>
   </div>`;
 }
@@ -1097,11 +1129,16 @@ function activityAmount(activity) {
   return `${sign}${formatUsdt(activity.amount)}`;
 }
 
+function activityTone(activity) {
+  if (activity.type === 'withdraw' || activity.type === 'vip') return 'is-outflow';
+  return activity.type === 'transfer' ? 'is-transfer' : 'is-inflow';
+}
+
 function renderActivityList(limit = 0) {
   const items = limit ? state.activities.slice(0, limit) : state.activities;
   if (!items.length) return `<div class="empty-state"><span class="stat-icon">${icon('info')}</span>${escapeHtml(t('noHistory'))}</div>`;
   const activityIcons = { task: 'check', deposit: 'deposit', withdraw: 'withdraw', transfer: 'transfer', vip: 'crown', welcome: 'spark' };
-  return `<div class="activity-list">${items.map((activity) => `<article class="activity-item"><span class="activity-icon">${icon(activityIcons[activity.type] || 'info')}</span><div><strong class="activity-title">${escapeHtml(activityTitle(activity))}</strong><span class="activity-date">${escapeHtml(formatDate(activity.at))}</span></div><span class="activity-points">${escapeHtml(activityAmount(activity))}</span></article>`).join('')}</div>`;
+  return `<div class="activity-list">${items.map((activity) => `<article class="activity-item"><span class="activity-icon">${icon(activityIcons[activity.type] || 'info')}</span><div><strong class="activity-title">${escapeHtml(activityTitle(activity))}</strong><span class="activity-date">${escapeHtml(formatDate(activity.at))}</span></div><span class="activity-points ${activityTone(activity)}">${escapeHtml(activityAmount(activity))}</span></article>`).join('')}</div>`;
 }
 
 function renderMePage() {
@@ -1141,7 +1178,7 @@ let lastModalTrigger;
 function renderTransactions() {
   const size = innerHeight <= 740 ? 2 : innerHeight <= 800 ? 3 : 4;
   const items = state.activities.slice((state.activityPage - 1) * size, state.activityPage * size);
-  return `<section class="transactions-panel"><div class="section-heading"><h2>${escapeHtml(t('historyTitle'))}</h2><button class="icon-button" type="button" data-action="export-history" aria-label="${escapeHtml(t('download'))}" title="${escapeHtml(t('download'))}" ${state.activities.length ? '' : 'disabled'}>${icon('download')}</button></div><div class="table-wrap"><table class="transactions-table"><thead><tr><th>${escapeHtml(t('transactionType'))}</th><th>${escapeHtml(t('transactionDate'))}</th><th>${escapeHtml(t('transactionAmount'))}</th></tr></thead><tbody>${items.map(activity => `<tr><td><span class="table-transaction">${icon({ task: 'check', deposit: 'deposit', withdraw: 'withdraw', transfer: 'transfer', vip: 'crown', welcome: 'spark' }[activity.type] || 'info')}${escapeHtml(activityTitle(activity))}</span>${activity.type === 'withdraw' && activity.status ? `<small class="withdrawal-state">${escapeHtml(t(activity.status))}</small>` : ''}${/^[a-f0-9]{64}$/.test(activity.txid || '') ? `<a class="transaction-explorer" href="https://tronscan.org/#/transaction/${activity.txid}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('explorer'))}${icon('arrow')}</a>` : ''}</td><td>${escapeHtml(formatDate(activity.at))}</td><td class="table-amount">${escapeHtml(activityAmount(activity))}</td></tr>`).join('')}</tbody></table></div>${!items.length ? `<div class="empty-state">${icon('list')}<strong>${escapeHtml(t('noActivity'))}</strong><p>${escapeHtml(t('noActivityText'))}</p></div>` : ''}${pagination('activityPage', state.activities.length, size)}</section>`;
+  return `<section class="transactions-panel"><div class="section-heading"><h2>${escapeHtml(t('historyTitle'))}</h2><button class="icon-button" type="button" data-action="export-history" aria-label="${escapeHtml(t('download'))}" title="${escapeHtml(t('download'))}" ${state.activities.length ? '' : 'disabled'}>${icon('download')}</button></div><div class="table-wrap"><table class="transactions-table"><thead><tr><th>${escapeHtml(t('transactionType'))}</th><th>${escapeHtml(t('transactionDate'))}</th><th>${escapeHtml(t('transactionAmount'))}</th></tr></thead><tbody>${items.map(activity => `<tr><td><span class="table-transaction">${icon({ task: 'check', deposit: 'deposit', withdraw: 'withdraw', transfer: 'transfer', vip: 'crown', welcome: 'spark' }[activity.type] || 'info')}${escapeHtml(activityTitle(activity))}</span>${activity.type === 'withdraw' && activity.status ? `<small class="withdrawal-state">${escapeHtml(t(activity.status))}</small>` : ''}${/^[a-f0-9]{64}$/.test(activity.txid || '') ? `<a class="transaction-explorer" href="https://tronscan.org/#/transaction/${activity.txid}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('explorer'))}${icon('arrow')}</a>` : ''}</td><td>${escapeHtml(formatDate(activity.at))}</td><td class="table-amount ${activityTone(activity)}">${escapeHtml(activityAmount(activity))}</td></tr>`).join('')}</tbody></table></div>${!items.length ? `<div class="empty-state">${icon('list')}<strong>${escapeHtml(t('noActivity'))}</strong><p>${escapeHtml(t('noActivityText'))}</p></div>` : ''}${pagination('activityPage', state.activities.length, size)}</section>`;
 }
 
 function renderWalletPage() {
@@ -1156,7 +1193,7 @@ function paymentStatusLabel() {
 
 function renderCompanyPage() {
   return `<div class="page company-page">
-    <section class="company-masthead"><span class="eyebrow">TASKMALL / WORKSPACE</span><h1>TaskMall<span>.</span></h1><p>${escapeHtml(t('companySubtitle'))}</p><div class="company-signature"><img src="/favicon.svg?v=studio-2" alt="" width="68" height="68" /><span>${escapeHtml(t('platform'))}<strong>TaskMall Workspace</strong></span></div></section>
+    <section class="company-masthead"><span class="eyebrow">TASKMALL / WORKSPACE</span><h1>TaskMall<span>.</span></h1><p>${escapeHtml(t('companySubtitle'))}</p><div class="company-signature"><img src="/favicon.svg?v=exchange-1" alt="" width="68" height="68" /><span>${escapeHtml(t('platform'))}<strong>TaskMall Workspace</strong></span></div></section>
     <section class="company-intro"><span class="eyebrow">${escapeHtml(t('company'))}</span><h2>${escapeHtml(t('authBrandText'))}</h2><p>${escapeHtml(t('companyText'))}</p></section>
     <section class="company-principles">${[['shield', 1], ['users', 2], ['settings', 3]].map(([symbol, number]) => `<article><span class="principle-number">0${number}</span>${icon(symbol)}<h3>${escapeHtml(t(`companyPrinciple${number}`))}</h3><p>${escapeHtml(t(`companyPrinciple${number}Text`))}</p></article>`).join('')}</section>
     <section class="company-status"><div><h2>${escapeHtml(t('platformStatus'))}</h2><p>${escapeHtml(t(paymentStatusLabel()))}</p></div><span class="workspace-badge">TaskMall</span></section>
@@ -1312,15 +1349,15 @@ function drawEarnings() {
     type: 'bar',
     data: {
       labels: days.map(day => state.lang === 'ka' ? ['კვ', 'ორ', 'სა', 'ოთ', 'ხუ', 'პა', 'შა'][day.date.getDay()] : new Intl.DateTimeFormat(locale(), { weekday: 'short' }).format(day.date)),
-      datasets: [{ data: days.map(day => Math.round(day.amount * 100) / 100), backgroundColor: '#176b56', hoverBackgroundColor: '#23846a', borderRadius: 4, maxBarThickness: 36 }]
+      datasets: [{ data: days.map(day => Math.round(day.amount * 100) / 100), backgroundColor: '#f0b90b', hoverBackgroundColor: '#f8d12f', borderRadius: 4, maxBarThickness: 32 }]
     },
     options: {
       maintainAspectRatio: false,
       animation: false,
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: context => formatUsdt(context.raw) }, backgroundColor: '#1c2925', padding: 12 } },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { label: context => formatUsdt(context.raw) }, backgroundColor: '#2b3139', titleColor: '#eaecef', bodyColor: '#eaecef', padding: 12 } },
       scales: {
-        x: { grid: { display: false }, border: { display: false }, ticks: { color: '#7a8580', font: { family: 'Inter, Georgian', size: 11 } } },
-        y: { beginAtZero: true, suggestedMax: Math.max(1, ...days.map(day => day.amount)) * 1.15, border: { display: false }, grid: { color: '#edf0ee', drawTicks: false }, ticks: { maxTicksLimit: 4, color: '#7a8580', padding: 10, font: { family: 'Inter', size: 10 } } }
+        x: { grid: { display: false }, border: { display: false }, ticks: { color: '#848e9c', font: { family: 'Inter, Georgian', size: 11 } } },
+        y: { beginAtZero: true, suggestedMax: Math.max(1, ...days.map(day => day.amount)) * 1.15, border: { display: false }, grid: { color: '#2b3139', drawTicks: false }, ticks: { maxTicksLimit: 4, color: '#848e9c', padding: 10, font: { family: 'Inter', size: 10 } } }
       }
     }
   });

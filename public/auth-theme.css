@@ -1,0 +1,203 @@
+/* Authentication, public information pages, and dialogs share the exchange palette. */
+.auth-page {
+  grid-template-columns: 54% 46%;
+  background: var(--canvas, #181a20);
+  color: var(--ink, #eaecef);
+}
+.auth-story {
+  position: relative;
+  padding: 38px 10% 25px;
+  background: #14161c;
+  border-inline-end: 1px solid var(--line, #2b3139);
+}
+.auth-story::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+  inset: 0;
+  background: radial-gradient(ellipse at 15% 60%, #f0b90b06, transparent 65%);
+}
+.auth-story > * { position: relative; z-index: 1; }
+.auth-story .brand { align-self: flex-start; }
+.auth-story .brand-dot,
+.story-copy h1 span { color: var(--accent, #f0b90b); }
+.story-copy { padding-top: 35px; padding-bottom: 26px; max-width: 610px; }
+.story-copy .eyebrow { color: #848e9c; font-size: 10px; font-weight: 600; letter-spacing: 1.8px; }
+.story-copy h1 { color: #eaecef; font-size: clamp(38px, 3.2vw, 46px); font-weight: 700; line-height: 1.42; margin-top: 16px; letter-spacing: -.7px; }
+.story-copy h2 { color: #eaecef; max-width: 490px; font-size: clamp(25px, 2.2vw, 34px); line-height: 1.5; font-weight: 650; margin-top: 15px; }
+.story-copy p { color: #848e9c; font-size: 13px; line-height: 1.9; max-width: 420px; margin-top: 15px; }
+.story-footer { color: #5e6673; font-size: 10px; }
+.auth-panel { padding: 32px 10% 24px; background: var(--canvas, #181a20); }
+.auth-topline { gap: 24px; }
+.auth-topline .text-button { color: #b7bdc6; }
+.auth-topline .text-button:hover { color: var(--accent, #f0b90b); }
+.auth-content { max-width: 390px; }
+.auth-content > .eyebrow { color: var(--accent, #f0b90b); letter-spacing: 1.2px; font-size: 10px; font-weight: 600; }
+.auth-heading h2 { color: #eaecef; font-size: 29px; line-height: 1.5; font-weight: 650; }
+.auth-heading p { color: #848e9c; font-size: 12px; }
+.auth-tabs { padding: 0; border-radius: 0; border-bottom: 1px solid #2b3139; background: transparent; gap: 26px; margin: 25px 0 24px; }
+.auth-tab { position: relative; height: 42px; border-radius: 0; padding: 0 2px; font-size: 12px; font-weight: 600; color: #848e9c; }
+.auth-tab.active { background: transparent; box-shadow: none; color: #eaecef; }
+.auth-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 3px; background: var(--accent, #f0b90b); border-radius: 3px 3px 0 0; }
+.auth-tab:hover { color: #eaecef; }
+.auth-form .field label { color: #b7bdc6; font-size: 11px; font-weight: 500; }
+.auth-form .optional { color: #5e6673; margin-inline-start: 5px; }
+.auth-form .field-control { border-color: #383e47; background: #1e2329; border-radius: 7px; }
+.auth-form .field-control:hover { border-color: #5e6673; }
+.auth-form .field-control:focus-within { border-color: var(--accent, #f0b90b); box-shadow: 0 0 0 2px #f0b90b0b; }
+.auth-form .field-control > .icon { color: #5e6673; }
+.auth-form .field-control input { color: #eaecef; }
+.auth-form .field-control input::placeholder { color: #5e6673; }
+.auth-form .password-toggle { color: #848e9c; }
+.auth-form .password-toggle:hover { color: #eaecef; }
+.auth-form input:-webkit-autofill { -webkit-text-fill-color: #eaecef; box-shadow: 0 0 0 100px #1e2329 inset; caret-color: #eaecef; }
+.auth-submit { background: var(--accent, #f0b90b); color: #181a20; border-color: var(--accent, #f0b90b); border-radius: 7px; font-size: 12px; }
+.auth-submit:hover:not(:disabled) { background: #f8d12f; color: #181a20; border-color: #f8d12f; }
+.auth-submit:disabled { background: #383e47; border-color: #383e47; color: #848e9c; }
+.auth-footer { color: #5e6673; }
+.auth-page .language-select { background: transparent; color: #b7bdc6; border-color: #2b3139; border-radius: 6px; }
+.auth-page .language-select option { color: #eaecef; background: #1e2329; }
+.auth-page .form-message { color: #f6465d; }
+
+/* Public information retains the same navigation and readable content hierarchy. */
+.public-shell { min-height: 100dvh; background: var(--canvas, #181a20); color: var(--ink, #eaecef); }
+.public-header { background: #181a20; border-bottom-color: #2b3139; }
+.public-header .text-button { color: #b7bdc6; }
+.public-header .text-button:hover { color: var(--accent, #f0b90b); }
+.public-shell .language-select { color: #b7bdc6; background: #1e2329; border-color: #2b3139; }
+.public-shell .language-select option { color: #eaecef; background: #1e2329; }
+.public-shell .primary-button { color: #181a20; background: var(--accent, #f0b90b); border-color: var(--accent, #f0b90b); }
+.public-shell .primary-button:hover { background: #f8d12f; border-color: #f8d12f; }
+.public-footer { color: #5e6673; border-top: 1px solid #2b3139; }
+.company-masthead { padding: 42px; border: 1px solid #2b3139; border-radius: 14px; background: #1e2329; color: #eaecef; }
+.company-masthead .eyebrow { color: #848e9c; letter-spacing: 1.2px; font-size: 10px; }
+.company-masthead h1 { color: var(--accent, #f0b90b); font-size: 64px; font-weight: 700; letter-spacing: -1.5px; }
+.company-masthead h1 > span { color: var(--accent, #f0b90b); }
+.company-masthead p { color: #b7bdc6; }
+.company-signature { border-top-color: #383e47; }
+.company-signature > span { color: #848e9c; }
+.company-signature strong { color: #eaecef; }
+.company-intro { border-bottom-color: #2b3139; }
+.company-intro .eyebrow { color: var(--accent, #f0b90b); }
+.company-intro h2 { color: #eaecef; }
+.company-intro p { color: #848e9c; }
+.company-principles article { border-inline-start-color: #2b3139; }
+.company-principles .icon { color: var(--accent, #f0b90b); }
+.company-principles .principle-number { color: #474d57; font-variant-numeric: tabular-nums; }
+.company-principles h3 { color: #eaecef; }
+.company-principles p { color: #848e9c; }
+.company-status { border-top-color: #2b3139; }
+.company-status h2 { color: #eaecef; }
+.company-status p { color: #848e9c; }
+.company-status .workspace-badge { color: var(--accent, #f0b90b); background: #f0b90b0d; border: 1px solid #f0b90b26; }
+.support-page .page-heading p { color: #848e9c; }
+.faq-item { border-color: #2b3139; }
+.faq-item summary { color: #eaecef; }
+.faq-item summary .icon { color: #848e9c; }
+.faq-item summary:hover .icon { color: var(--accent, #f0b90b); }
+.faq-item > p { color: #848e9c; }
+.support-aside { border-inline-start-color: #2b3139; }
+.support-aside h2 { color: #eaecef; }
+.support-aside > p { color: #848e9c; }
+.support-aside .stat-icon { color: var(--accent, #f0b90b); background: #f0b90b10; }
+.support-aside .secondary-button { color: #eaecef; background: #2b3139; border-color: #383e47; }
+.support-aside .secondary-button:hover { background: #383e47; border-color: #474d57; }
+.support-aside .payment-notice { color: #c7ae61; background: #f0b90b0b; border: 1px solid #f0b90b1a; }
+
+/* Modal surfaces have the same contrast as the account area. */
+.dialog-backdrop { background: #080a0dc4; backdrop-filter: blur(5px); }
+.dialog { color: #eaecef; background: #1e2329; border: 1px solid #383e47; border-radius: 14px; box-shadow: 0 24px 90px #0008; }
+.dialog-task-icon { color: var(--accent, #f0b90b); background: #f0b90b12; border: 1px solid #f0b90b1a; border-radius: 9px; }
+.dialog-close { color: #848e9c; border-radius: 6px; }
+.dialog-close:hover { color: #eaecef; background: #2b3139; }
+.dialog-product-image { background: #181a20; border-radius: 8px; }
+.dialog-kicker { color: var(--accent, #f0b90b); font-size: 10px; letter-spacing: 1px; }
+.dialog-body h2 { color: #eaecef; }
+.dialog-description { color: #848e9c; }
+.dialog .meta-chip { color: #b7bdc6; background: #2b3139; border: 1px solid #383e47; border-radius: 5px; }
+.dialog .meta-chip .icon { color: var(--accent, #f0b90b); }
+.dialog .check-item { color: #b7bdc6; border-bottom-color: #2b3139; }
+.dialog .check-item input { accent-color: var(--accent, #f0b90b); }
+.dialog .primary-button { color: #181a20; background: var(--accent, #f0b90b); border-color: var(--accent, #f0b90b); }
+.dialog .primary-button:hover:not(:disabled) { color: #181a20; background: #f8d12f; border-color: #f8d12f; }
+.dialog .primary-button:disabled { color: #848e9c; background: #383e47; border-color: #383e47; }
+.dialog .secondary-button { color: #eaecef; background: #2b3139; border-color: #383e47; }
+.dialog .secondary-button:hover:not(:disabled) { background: #383e47; border-color: #474d57; }
+.dialog .wallet-form label > span { color: #b7bdc6; }
+.dialog .wallet-form input,
+.dialog .wallet-form select { color: #eaecef; border-color: #383e47; background: #181a20; border-radius: 6px; }
+.dialog .wallet-form input::placeholder { color: #5e6673; }
+.dialog .wallet-form input:focus,
+.dialog .wallet-form select:focus { border-color: var(--accent, #f0b90b); }
+.dialog .address-row input { color: #b7bdc6; background: #181a20; }
+.dialog .form-hint { color: #848e9c; }
+.dialog .payment-notice { color: #c7ae61; background: #f0b90b0b; border: 1px solid #f0b90b1a; }
+.dialog .help-item { border-top-color: #2b3139; }
+.dialog .help-item strong { color: #b7bdc6; }
+.dialog .help-item p { color: #848e9c; }
+.dialog .form-message { color: #f6465d; }
+
+@media (max-width: 1200px) and (min-width: 761px) {
+  .auth-story { padding-inline: 8%; }
+  .auth-panel { padding-inline: 8%; }
+  .story-copy h1 { font-size: 37px; }
+  .story-copy h2 { font-size: 25px; }
+  .auth-topline { gap: 16px; }
+  .auth-topline nav { gap: 14px; }
+  .auth-heading h2 { font-size: 26px; }
+}
+@media (min-width: 761px) and (max-height: 800px) {
+  .auth-story { padding-block: 26px 20px; }
+  .auth-panel { padding-block: 24px 20px; }
+  .auth-content { padding-block: 15px; }
+  .story-copy { padding-block: 24px; }
+  .story-copy h1 { font-size: 42px; margin-top: 10px; }
+  .story-copy h2 { font-size: 25px; margin-top: 10px; }
+  .story-copy p { font-size: 12px; margin-top: 10px; }
+  .auth-heading h2 { font-size: 25px; }
+  .auth-tabs { margin-block: 17px; }
+  .auth-form { gap: 11px; }
+}
+@media (max-width: 760px) {
+  .auth-page { display: block; }
+  .auth-panel { padding: 22px 24px 18px; }
+  .auth-topline { gap: 15px; }
+  .auth-content { max-width: 430px; padding: 30px 0 24px; }
+  .auth-content > .eyebrow { letter-spacing: 1px; }
+  .auth-heading h2 { font-size: 23px; }
+  .auth-heading p { font-size: 11px; }
+  .auth-tabs { margin: 20px 0; gap: 18px; }
+  .auth-tab { height: 39px; font-size: 11px; }
+  .auth-form { gap: 14px; }
+  .auth-form .field label { font-size: 11px; }
+  .auth-form .field-control input { font-size: 16px; }
+  .auth-company-link { color: #848e9c; }
+  .company-masthead { padding: 26px 22px; border-radius: 10px; }
+  .company-masthead h1 { font-size: 43px; }
+  .company-masthead p { font-size: 12px; }
+  .company-principles article { border-bottom-color: #2b3139; }
+  .public-header { padding: 18px; }
+  .public-footer { font-size: 9px; }
+  .dialog { border-radius: 12px; }
+  .dialog .wallet-form input,
+  .dialog .wallet-form select { font-size: 16px; }
+  .dialog .address-row input { font-size: 10px; }
+}
+@media (max-width: 760px) and (max-height: 740px) {
+  .auth-panel { padding-top: 16px; }
+  .auth-content { padding-top: 22px; padding-bottom: 18px; }
+  .auth-form { gap: 10px; }
+  .auth-tabs { margin-block: 15px; }
+  .auth-heading h2 { font-size: 21px; }
+}
+@media (max-width: 760px) and (max-height: 680px) {
+  .auth-panel { padding-block: 14px; }
+  .auth-content { padding-block: 16px; }
+  .auth-form { gap: 8px; }
+  .auth-form .field-control { height: 40px; }
+  .auth-tab { height: 35px; }
+  .auth-tabs { margin-block: 14px; }
+}
+@media (max-width: 360px) {
+  .auth-topline { gap: 8px; }
+}
