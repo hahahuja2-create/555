@@ -30,7 +30,7 @@ function marketError() { return `<div class="market-unavailable">${icon('globe')
 function proHeading(title,sub,actions='') { return `<header class="page-heading pro-heading"><div><h1>${title}</h1><p>${sub}</p></div>${actions}</header>`; }
 function assetValue() { return state.user.lockedBalance+state.user.withdrawBalance+(state.user.reservedBalance||0); }
 function spotValue() { return (pro.portfolio?.cash||0)+(pro.portfolio?.holdings||[]).reduce((total,item)=>total+item.quantity*(pro.markets.find(coin=>coin.base===item.base)?.price||0),0); }
-function walletButtons() { return `<div class="pro-wallet-buttons"><button class="primary-button" data-action="open-wallet" data-wallet-type="deposit">${icon('deposit')}${escapeHtml(t('deposit'))}</button><button class="secondary-button" data-action="open-wallet" data-wallet-type="withdraw">${escapeHtml(t('withdraw'))}</button><button class="secondary-button" data-action="open-wallet" data-wallet-type="transfer">${icon('transfer')}${escapeHtml(t('transfer'))}</button></div>`; }
+function walletButtons() { return `<div class="pro-wallet-buttons">${[['deposit','primary-button'],['withdraw','secondary-button'],['transfer','secondary-button']].map(([type,style])=>`<button class="${style}" data-action="open-wallet" data-wallet-type="${type}"><span class="wallet-shortcut-icon">${icon(type)}</span><span>${escapeHtml(t(type))}</span></button>`).join('')}</div>`; }
 
 renderHome = function() {
   const vip=currentVip();

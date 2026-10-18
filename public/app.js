@@ -728,7 +728,7 @@ Object.assign(copy.ka, {
 });
 
 function brand() {
-  return '<img class="brand-mark" src="/assets/brand/taskmall-mark.svg?v=brand-2" width="36" height="36" alt="" /><span class="brand-wordmark">TaskMall<span class="brand-dot">.</span></span>';
+  return '<img class="brand-mark" src="/assets/brand/taskmall-mark.svg?v=brand-3" width="36" height="36" alt="" /><span class="brand-wordmark">Task<span class="brand-wordmark-light">Mall</span></span>';
 }
 
 function setDocumentLanguage() {
@@ -882,6 +882,21 @@ function renderWalletStatus(message, loading = false) {
   return `<div class="dialog-backdrop" data-action="backdrop-close" role="presentation"><section class="dialog wallet-dialog" role="dialog" aria-modal="true" aria-labelledby="wallet-dialog-title" aria-busy="${loading}"><div class="dialog-head"><span class="dialog-task-icon">${icon(state.walletModal)}</span><button class="dialog-close" type="button" data-action="close-dialog" aria-label="${escapeHtml(t('close'))}">${icon('close')}</button></div><div class="dialog-body"><h2 id="wallet-dialog-title">${escapeHtml(t(state.walletModal))}</h2><p class="dialog-description" role="status">${escapeHtml(message)}</p>${loading ? '' : `<button class="secondary-button" type="button" data-action="retry-wallet">${icon('retry')}${escapeHtml(t('retry'))}</button>`}</div></section></div>`;
 }
 
+function walletMaximum() {
+  // Balance is already net of reserved withdrawals. Preserve all six USDT decimals.
+  const available = Math.max(0, Number(state.user?.withdrawBalance) || 0);
+  return Math.min(100000, available).toFixed(6).replace(/\.?0+$/, '');
+}
+
+function walletAmountField(type) {
+  const minimum = type === 'withdraw' ? state.minimumWithdrawalAmount : state.user?.earnEnabled ? '0.000001' : '1';
+  const available = state.lang === 'ka' ? 'ხელმისაწვდომი Spot ბალანსი' : 'Available Spot balance';
+  return `<div class="wallet-available"><span>${escapeHtml(available)}</span><strong data-wallet-available>${escapeHtml(formatUsdt(state.user.withdrawBalance))}</strong></div>
+    <label class="wallet-amount-label" for="wallet-amount"><span>${escapeHtml(t('amount'))}</span></label>
+    <div class="wallet-amount-control"><input id="wallet-amount" name="amount" type="number" inputmode="decimal" min="${minimum}" max="100000" step="0.000001" placeholder="0.00" ${type === 'withdraw' ? 'aria-describedby="withdrawal-minimum"' : ''} required /><span>USDT</span><button class="wallet-max" type="button" data-action="wallet-max" aria-label="${escapeHtml(state.lang === 'ka' ? 'მაქსიმალური ხელმისაწვდომი თანხა' : 'Use maximum available amount')}" ${Number(walletMaximum()) > 0 ? '' : 'disabled'}>MAX</button></div>
+    ${type === 'withdraw' ? `<small class="form-hint" id="withdrawal-minimum">${escapeHtml(t('minimumWithdrawal', state.minimumWithdrawalAmount))}</small>` : ''}`;
+}
+
 function renderWalletDialog() {
   const type = state.walletModal;
   if (!type) return '';
@@ -920,7 +935,7 @@ function renderWalletDialog() {
       button: 'secondary-button',
       fields: `
         <label><span>${escapeHtml(t('network'))}</span><select name="network">${networkOptions()}</select></label>
-        <label><span>${escapeHtml(t('amount'))}</span><input name="amount" type="number" min="${state.minimumWithdrawalAmount}" max="100000" step="${state.paymentMode === 'tron-watch-only' ? '0.000001' : '0.01'}" placeholder="10.00" aria-describedby="withdrawal-minimum" required /><small class="form-hint" id="withdrawal-minimum">${escapeHtml(t('minimumWithdrawal', state.minimumWithdrawalAmount))}</small></label>
+        ${walletAmountField('withdraw')}
         <label><span>${escapeHtml(t('usdtWallet'))}</span><input name="wallet" type="text" minlength="${state.paymentMode === 'tron-watch-only' ? 34 : 12}" maxlength="${state.paymentMode === 'tron-watch-only' ? 34 : 120}" placeholder="${escapeHtml(state.paymentMode === 'tron-watch-only' ? 'TRON (TRC20) address' : t('usdtWalletPlaceholder'))}" required /></label>
         ${state.paymentMode === 'tron-watch-only' ? `<label><span>${escapeHtml(t('confirmWithdrawalPassword'))}</span><input name="password" type="password" autocomplete="current-password" maxlength="128" required /></label><div class="withdrawal-preview"><span>${escapeHtml(t('netToReceive'))}</span><output data-withdraw-net>${escapeHtml(formatUsdt(0))}</output></div>` : ''}
         ${state.paymentMode === 'tron-watch-only' ? '' : `<p class="form-hint">${escapeHtml(t('withdrawalFeeNote'))}</p>`}`
@@ -932,7 +947,8 @@ function renderWalletDialog() {
       submit: t('moveToLocked'),
       button: 'secondary-button',
       fields: `
-        <label><span>${escapeHtml(t('amount'))}</span><input name="amount" type="number" min="1" step="0.01" placeholder="5.00" required /></label>
+        <div class="transfer-route"><span>${icon('wallet')}Spot balance</span>${icon('arrow')}<span>${icon('earn')}Earning balance</span></div>
+        ${walletAmountField('transfer')}
         <p class="form-hint">${escapeHtml(t('withdrawInfo'))}</p>`
     }
   }[type];
@@ -944,7 +960,7 @@ function renderWalletDialog() {
         <div class="dialog-body">
           ${type === 'withdraw' ? '' : '<span class="dialog-kicker">TaskMall Wallet</span>'}
           <h2 id="wallet-dialog-title">${escapeHtml(config.title)}</h2>
-          <p class="dialog-description">${escapeHtml(config.description)}</p>
+          ${type === 'transfer' ? '' : `<p class="dialog-description">${escapeHtml(config.description)}</p>`}
           <form class="wallet-form modal-wallet-form" data-wallet-form="${escapeHtml(type)}">
             ${config.fields}
             <button class="${config.button} dialog-action" type="submit">${escapeHtml(config.submit)}</button>
@@ -1699,6 +1715,15 @@ app.addEventListener('click', async (event) => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const action = target.dataset.action;
+
+  if (action === 'wallet-max') {
+    const input = target.closest('form')?.elements.namedItem('amount');
+    if (input) {
+      input.value = walletMaximum() || '0';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    return;
+  }
 
   if (action === 'auth-home') {
     event.preventDefault();

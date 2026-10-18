@@ -322,7 +322,7 @@ test('real withdrawal API requires password and operator authorization; mobile a
   const salt = crypto.randomBytes(16).toString('hex');
   await fs.writeFile(walletFile, JSON.stringify(await config()));
   await fs.writeFile(fixtureFile, JSON.stringify({ history: {}, receipts: {} }));
-  await fs.writeFile(path.join(directory, 'db.json'), JSON.stringify({ users: [{ ...state().users[0], email: 'outgoing@test.invalid', name: 'Test Account',
+  await fs.writeFile(path.join(directory, 'db.json'), JSON.stringify({ users: [{ ...state().users[0], email: 'outgoing@test.invalid', name: 'Test Account', withdrawBalance: 100.123456,
     passwordSalt: salt, passwordHash: crypto.scryptSync(password, salt, 64).toString('hex'), vipId: 'free', createdAt: new Date().toISOString() }] }));
   const child = spawn(process.execPath, ['--require', './scripts/tron-fixture-preload.cjs', 'server.js'], { cwd: root, windowsHide: true, stdio: 'pipe',
     env: { ...process.env, NODE_ENV: 'test', PORT: '0', HOST: '127.0.0.1', PUBLIC_ORIGIN: '', TRON_AUTO_WALLET: '', TASKMALL_TEST_WALLET: '',
@@ -422,6 +422,12 @@ test('real withdrawal API requires password and operator authorization; mobile a
     await page.locator('[data-wallet-form="withdraw"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').getAttribute('min'), '10');
     assert.match(await page.locator('#withdrawal-minimum').textContent(), /10 USDT/);
+    const liveAccount = (await request('/api/me', undefined, customer)).body.user;
+    await page.locator('[data-wallet-form="withdraw"] [data-action="wallet-max"]').click();
+    assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').inputValue(), String(liveAccount.withdrawBalance));
+    assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.checkValidity()), true);
+    assert.match(await page.locator('[data-wallet-available]').textContent(), /90\.123456 USDT/);
+    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '81.11111 USDT');
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('9.999999');
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.validity.rangeUnderflow), true);
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('10');
@@ -431,7 +437,10 @@ test('real withdrawal API requires password and operator authorization; mobile a
     assert.equal(await page.locator('[data-withdraw-net]').textContent(), '9.000004 USDT');
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('10');
     assert.equal(await page.locator('[name="password"]').count(), 1);
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: path.join(output, 'withdraw-' + name + '.png') });
+    const layout = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth,
+      overflow: [...document.querySelectorAll('.wallet-dialog, .wallet-dialog *')].filter(el => el.getBoundingClientRect().right > innerWidth + 1).map(el => ({ tag: el.tagName, class: el.className, right: el.getBoundingClientRect().right })) }));
+    assert.ok(layout.scroll <= layout.width, JSON.stringify(layout));
     const submitBox = await page.locator('[data-wallet-form="withdraw"] button[type="submit"]').boundingBox();
     assert.ok(submitBox && submitBox.y >= 0 && submitBox.y + submitBox.height <= viewport.height, 'Withdrawal submit button must fit the viewport');
     await page.screenshot({ path: path.join(output, 'withdraw-' + name + '.png') });
