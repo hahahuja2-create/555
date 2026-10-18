@@ -352,7 +352,7 @@ async function loadDatabase() {
     if(EARN_MODE)spot.initialize(db);
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     db.tasks = seedTasks;
-    let changed = EARN_MODE && (!saved.earn||saved.spot?.version!==2);
+    let changed = EARN_MODE && (saved.earn?.version!==2||saved.spot?.version!==2);
     for (const user of db.users) if (ensureUserShape(user)) changed = true;
     if(EARN_MODE&&earn.migrate(db,vipPlans).length)changed=true;
     if (changed) await saveDatabase();
@@ -1013,19 +1013,7 @@ async function handleExchangeApi(req,res,url) {
   if(req.method==='POST'&&url.pathname==='/api/admin/earn/fund'){
     const user=await requireUser(req,res);if(!user)return true;
     if(!isAdmin(user)){json(res,403,{error:'FORBIDDEN'});return true;}
-    if(!allowRequest(req,'earn-funding',8,60_000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
-    const address=process.env.TRON_EARN_FUND_ADDRESS,txid=String(req.taskmallBody.txid||'').toLowerCase();
-    if(!EARN_MODE||DESIGN_PREVIEW||!address||address===TREASURY||!paymentStore||!/^[a-f0-9]{64}$/.test(txid)){json(res,400,{error:'EARN_FUNDING_NOT_CONFIGURED'});return true;}
-    const {TronGrid,decodeTransfers,addressHex}=require('./payments/tron');
-    try{addressHex(address);}catch{json(res,503,{error:'EARN_FUNDING_NOT_CONFIGURED'});return true;}
-    for(const customer of db.users){if((await paymentStore.address(customer.id))?.address===address){json(res,409,{error:'FUNDING_ADDRESS_IS_CUSTOMER_ADDRESS'});return true;}}
-    const client=new TronGrid(process.env.TRONGRID_API_KEY);
-    let events;
-    try{const [receipt,height]=await Promise.all([client.receipt(txid),client.solidHeight()]);events=decodeTransfers(receipt,txid,height).filter(event=>event.to===address);}
-    catch{json(res,503,{error:'FUNDING_VERIFICATION_UNAVAILABLE'});return true;}
-    if(!events.length){json(res,400,{error:'CONFIRMED_FUNDING_NOT_FOUND'});return true;}
-    await exclusive(async()=>{const next=structuredClone(db);let added=0;for(const event of events)if(earn.addFunding(next,event,user.id))added++;
-      await saveDatabase(next);db=next;json(res,200,{added,poolAvailable:usdtAmount(BigInt(db.earn.availableUnits))});});return true;
+    json(res,410,{error:'EARN_FUNDING_NOT_REQUIRED'});return true;
   }
   if (req.method === 'GET' && url.pathname === '/api/markets') {
     json(res,200,await markets.get()); return true;

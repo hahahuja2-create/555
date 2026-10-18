@@ -10,9 +10,9 @@ On activation (TASKMALL_EARN_ENABLED=1), the server converts the current stored 
 
 - The common daily reset remains 00:00 UTC / 04:00 Asia/Tbilisi. Registration becomes eligible at the next reset. Existing daily claim dates and historical task rewards prevent a second reward in the same UTC day.
 - Claim pays 10% of current Earn principal to Spot, without reducing principal. Missed days do not accumulate.
-- Referral levels receive 10% and 5% of the claimed reward, as additional operator-funded credits.
-- Claims debit the separate Earn reward pool atomically with all credits. UUID receipts make retries idempotent. No insufficiently funded claim is booked.
-- The operator must fund the reward pool. This is independent of synthetic trading: removing the crypto inventory requirement does not mint an Earn reward fund. TRON_EARN_FUND_ADDRESS must be a dedicated operator address. The authenticated funding endpoint verifies solidified official USDT transfer logs and deduplicates them.
+- Referral levels receive 10% and 5% of the claimed reward, as additional account credits, without reducing the claimant’s reward.
+- Claims and both referral credits commit atomically to Spot without a prepaid reward-pool requirement. UUID receipts make retries idempotent. Earn principal remains unchanged.
+- The operator sends actual USDT after a withdrawal request, using the existing manual payout workflow. A Claim is a ledger accrual, not a completed external payment. Accounting schema v2 tracks totalAccruedUnits; prior funding records and totalPaidUnits are retained unchanged for history. The obsolete funding endpoint returns EARN_FUNDING_NOT_REQUIRED.
 
 ## Synthetic trading
 

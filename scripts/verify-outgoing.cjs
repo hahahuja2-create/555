@@ -110,6 +110,34 @@ test('the 10 USDT minimum is enforced without reserving rejected amounts', async
   assert.equal(app.users[0].reservedBalance, 10);
 });
 
+test('Claim credits Spot without pre-funding; actual payout stays manual until admin confirmation', async t => {
+  const { ledger, store, app } = await fixture(t);
+  const earn = require('../markets/earn'), now = Date.now(), user = app.users[0];
+  Object.assign(user, { lockedBalance: 100, withdrawBalance: 0, earnedTotal: 0, createdAt: new Date(now - earn.DAY).toISOString() });
+  earn.pool(app, now - earn.DAY);
+  const result = earn.claim(app, user.id, crypto.randomUUID(), now);
+  store.save(app, 'earn-account-credit');
+  assert.equal(result.receipt.status, 'credited');
+  assert.equal(user.withdrawBalance, 10);
+  assert.equal(user.lockedBalance, 100);
+  assert.equal(user.withdrawnTotal, 0);
+  assert.equal((await ledger.withdrawals(user.id)).length, 0);
+  const request = await ledger.request(app, user.id, { key: crypto.randomUUID(), destination, gross: '10' });
+  assert.equal(request.record.status, 'requested');
+  assert.equal(user.withdrawBalance, 0);
+  assert.equal(user.reservedBalance, 10);
+  assert.equal(user.withdrawnTotal, 0);
+  const confirmed = await ledger.confirmManual(app, request.record.id);
+  assert.equal(confirmed.record.status, 'confirmed');
+  assert.equal(user.reservedBalance, 0);
+  assert.equal(user.withdrawnTotal, 9);
+  assert.equal(user.withdrawFeeTotal, 1);
+  assert.equal(user.lockedBalance, 100);
+  const saved = structuredClone(app);
+  assert.equal((await ledger.confirmManual(app, request.record.id)).changed, false);
+  assert.deepEqual(app, saved);
+});
+
 test('payouts settle only the exact treasury transfer and cannot reuse a transaction', async t => {
   const { ledger, store, app } = await fixture(t);
   const row = (await ledger.request(app, 'a', { key: crypto.randomUUID(), destination, gross: '10' })).record;
