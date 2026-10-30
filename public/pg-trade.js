@@ -385,11 +385,11 @@ function walletSheet(type, meta) {
   if (type === 'withdraw') {
     if (!S.pay.withdrawals) return unavailable('Withdrawals are temporarily unavailable.');
     const strict = S.pay.mode === 'tron-watch-only';
-    const fee = num(S.user.withdrawalFeeRate, 0.1);
+    const fee = num(S.user.withdrawalFeeRate, 0.02), bps = BigInt(Math.round(fee * 10000));
     return `${head}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="withdraw" data-type="withdraw">${networkSelect()}${amountField('withdraw')}
       <label class="field"><span>Wallet address</span><div class="control">${icon('wallet')}<input name="wallet" type="text" minlength="${strict ? 34 : 12}" maxlength="${strict ? 34 : 120}" placeholder="${strict ? 'TRON (TRC20) address' : 'USDT wallet address'}" autocomplete="off" spellcheck="false" required></div></label>
       ${strict ? `<label class="field"><span>Confirm account password</span><div class="control">${icon('lock')}<input name="password" type="password" autocomplete="current-password" maxlength="128" required></div></label>` : ''}
-      <div class="summary"><span>Fee (${Math.round(fee * 100)}%)</span><output data-withdraw-fee>0.00 USDT</output><span>You receive</span><output data-withdraw-net>0.00 USDT</output></div>
+      <div class="summary"><span>Fee (${+(fee * 100).toFixed(2)}%)</span><output data-withdraw-fee>0.00 USDT</output><span>You receive</span><output data-withdraw-net>0.00 USDT</output></div>
       <p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">Request withdrawal</button>
       <p class="fine">${icon('info')}Withdrawals are reviewed before they are sent. Never share your password or seed phrase with anyone.</p></form>`;
   }
@@ -399,12 +399,13 @@ function walletSheet(type, meta) {
 function bindWalletSheet(type) {
   const amount = document.querySelector('#wallet-amount');
   if (type === 'withdraw' && amount) {
+    const bps = BigInt(Math.round(num(S.user.withdrawalFeeRate, 0.02) * 10000));
     const update = () => {
       let net = 0, fee = 0;
       if (/^\d+(\.\d{1,6})?$/.test(amount.value) && Number(amount.value) <= 100000) {
         const [whole, fraction = ''] = amount.value.split('.');
         const gross = BigInt(whole) * 1000000n + BigInt(fraction.padEnd(6, '0'));
-        const cut = (gross + 5n) / 10n;
+        const cut = (gross * bps + 5000n) / 10000n;
         fee = Number(cut) / 1e6; net = Number(gross - cut) / 1e6;
       }
       document.querySelector('[data-withdraw-fee]').textContent = `${usd(fee)} USDT`;

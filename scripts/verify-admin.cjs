@@ -123,7 +123,7 @@ test('admin sees every account and marks manual payouts paid; customers see unde
     ['VIP 1', true, 30, 78, 22, 100]);
   const request10 = overview.withdrawals.find(item => item.id === first);
   assert.deepEqual([request10.email, request10.destination, request10.amount, request10.fee, request10.netAmount, request10.status],
-    ['customer@test.invalid', destination, 10, 1, 9, 'requested']);
+    ['customer@test.invalid', destination, 10, 0.2, 9.8, 'requested']);
 
   const confirmed = await request(`/api/admin/withdrawals/${first}/confirm`, {}, asAdmin);
   assert.equal(confirmed.status, 200);
@@ -131,13 +131,13 @@ test('admin sees every account and marks manual payouts paid; customers see unde
   assert.equal((await request(`/api/admin/withdrawals/${first}/confirm`, {}, asAdmin)).body.withdrawal.status, 'confirmed', 'a second click changes nothing');
   assert.equal(await customerStatus(first), 'confirmed');
   let me = (await request('/api/me', undefined, asCustomer)).body.user;
-  assert.deepEqual([me.withdrawBalance, me.reservedBalance, me.withdrawnTotal, me.withdrawFeeTotal], [78, 12, 9, 1]);
+  assert.deepEqual([me.withdrawBalance, me.reservedBalance, me.withdrawnTotal, me.withdrawFeeTotal], [78, 12, 9.8, 0.2]);
   assert.equal((await request('/api/activity', undefined, asCustomer)).body.activities.find(item => item.id === first).status, 'confirmed');
 
   assert.equal((await request(`/api/admin/withdrawals/${second}/reject`, {}, asAdmin)).body.withdrawal.status, 'rejected');
   assert.equal((await request(`/api/admin/withdrawals/${second}/confirm`, {}, asAdmin)).body.error, 'WITHDRAWAL_ALREADY_IN_PROGRESS');
   me = (await request('/api/me', undefined, asCustomer)).body.user;
-  assert.deepEqual([me.withdrawBalance, me.reservedBalance, me.withdrawnTotal], [90, 0, 9], 'rejection returns the reserved amount');
+  assert.deepEqual([me.withdrawBalance, me.reservedBalance, me.withdrawnTotal], [90, 0, 9.8], 'rejection returns the reserved amount');
   await new Promise(resolve => setTimeout(resolve, 400));
   assert.equal(await customerStatus(first), 'confirmed', 'chain monitoring leaves a manual payout alone');
 

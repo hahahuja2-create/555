@@ -23,7 +23,7 @@ const xpub = branch.neuter().extendedKey;
 const treasury = deriveAddress(xpub, 9);
 const destination = deriveAddress(xpub, 7);
 const feeLimit = 2_500_000;
-const expectation = { from: treasury, to: destination, value: '9000000', feeLimit };
+const expectation = { from: treasury, to: destination, value: '9800000', feeLimit };
 
 function httpRequest(headers = {}, peer = '127.0.0.1') { return { socket: { remoteAddress: peer }, headers: { host: '127.0.0.1:4173', ...headers } }; }
 
@@ -311,15 +311,15 @@ test('private browser workspace signs with a fixture wallet, preserves unknown o
   assert.equal(await page.evaluate(() => walletFixture.signs), 2);
   afterRetry.receipts[txid] = { id: txid, blockNumber: 999, blockTimeStamp: Date.now(), receipt: { result: 'SUCCESS' }, log: [{
     address: addressHex(USDT_CONTRACT).slice(2), topics: [TRANSFER_TOPIC, addressHex(treasury).slice(2).padStart(64, '0'),
-      addressHex(destination).slice(2).padStart(64, '0')], data: (9_000_000).toString(16).padStart(64, '0') }] };
+      addressHex(destination).slice(2).padStart(64, '0')], data: (9_800_000).toString(16).padStart(64, '0') }] };
   await fs.writeFile(fixtureFile, JSON.stringify(afterRetry));
   let account;
   for (let i = 0; i < 60; i++) {
     account = (await request('/api/me', undefined, customer)).body.user;
-    if (account.withdrawnTotal === 9) break;
+    if (account.withdrawnTotal === 9.8) break;
     await new Promise(resolve => setTimeout(resolve, 100));
   }
-  assert.equal(account.withdrawnTotal, 9);
+  assert.equal(account.withdrawnTotal, 9.8);
   assert.equal(account.reservedBalance, 0);
   await page.locator('#close').click();
   await page.locator('#refresh').click();

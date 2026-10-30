@@ -117,7 +117,7 @@ function profileView() {
 const FAQ = [
   ['How do deposits work?', 'Send USDT on the TRON (TRC20) network to your personal deposit address. Once the transfer is confirmed on the blockchain it is credited to your Earn account automatically.'],
   ['How do I claim my daily reward?', 'Open Earn and tap Claim when the timer reaches zero. A new claim opens every day at 00:00 UTC. Rewards credit your Spot balance and your Earn principal stays untouched.'],
-  ['What are the withdrawal rules?', 'Withdrawals are requested from your Spot balance, confirmed with your password and reviewed before sending. A 10% fee applies and the minimum request is 10 USDT. Status updates appear under Assets → History.'],
+  ['What are the withdrawal rules?', 'Withdrawals are requested from your Spot balance, confirmed with your password and reviewed before sending. A 2% fee applies and the minimum request is 10 USDT. Status updates appear under Assets → History.'],
   ['How does trading work?', 'Choose a market, enter an amount in USDT and review a 15-second quote. Prices follow live Binance quotes; positions are recorded by Portgainy and settled in USDT.'],
   ['How do referrals pay out?', 'Level 1 earns 10% and level 2 earns 5% of the Earn rewards your network claims. Referral rewards credit your Spot balance.'],
   ['How do I stay safe?', 'Use a unique password, never share it, and remember that Portgainy staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.']
@@ -169,7 +169,7 @@ function refreshChat() {
 /* ----------------------------------------------------------------- about */
 
 function aboutView() {
-  const fee = Math.round(num(S.user?.withdrawalFeeRate, 0.1) * 100);
+  const fee = +(num(S.user?.withdrawalFeeRate, 0.02) * 100).toFixed(2);
   const status = S.pay.mode === 'disabled' && !S.pay.available ? 'Payment status is loading or temporarily unavailable.' : S.pay.withdrawals ? 'Deposits and reviewed withdrawals are available.' : 'Deposits are available. Withdrawals are currently paused.';
   const facts = [[`${S.markets.length || '80+'}`, 'Live markets'], ['10%', 'Daily Earn rate'], ['200', 'USDT to start Earn'], ['15s', 'Quote validity']];
   const products = [

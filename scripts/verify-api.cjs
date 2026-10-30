@@ -250,5 +250,5 @@ test('pending withdrawals do not count as settled payouts in isolated test mode'
   assert.equal(withdrawal.body.user.withdrawnTotal, 0);
   assert.equal(withdrawal.body.user.withdrawFeeTotal, 0);
   assert.equal(withdrawal.body.activities[0].status, 'pending');
-  assert.equal(withdrawal.body.activities[0].netAmount, 9);
+  assert.equal(withdrawal.body.activities[0].netAmount, 9.8);
 });

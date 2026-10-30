@@ -15,7 +15,7 @@ Deposits: customer -> allocated TRC20 address -> solidified official USDT receip
 
 Withdrawals: customer request with account-password confirmation -> exact gross amount reserved -> operator review/approval -> pinned unsigned transaction -> operator confirmation in TronLink -> validated signed bytes recorded before broadcast -> verified official USDT transfer from treasury to that customer -> confirmed payout and totals. No key is requested in the web interface.
 
-The minimum new withdrawal request is 10 USDT gross, enforced by the API and transactional ledger and supplied to the customer form by payment configuration. The application withdrawal fee is 10%, rounded to a micro-unit: a 10 USDT request pays 9 USDT net. Network resource costs are separate. A txid or a successful broadcast is not a confirmed payment. A transaction cannot pay two requests in this implementation; batching withdrawals is intentionally not supported. Existing requests are not rewritten when the minimum changes.
+The minimum new withdrawal request is 10 USDT gross, enforced by the API and transactional ledger and supplied to the customer form by payment configuration. The application withdrawal fee is 2%, rounded to a micro-unit: a 10 USDT request pays 9.8 USDT net. Each request stores the fee it was created with, so earlier requests are unchanged. Network resource costs are separate. A txid or a successful broadcast is not a confirmed payment. A transaction cannot pay two requests in this implementation; batching withdrawals is intentionally not supported. Existing requests are not rewritten when the minimum changes.
 
 ## Local Operator Access
 

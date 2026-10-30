@@ -4,6 +4,8 @@ const crypto = require('node:crypto');
 const { units, amount, addressHex, decodeTransfers } = require('./tron');
 
 const MINIMUM_WITHDRAWAL_USDT = 10;
+// Withdrawal fee in basis points (2%). Each request stores its own fee, so earlier requests keep the fee they were created with.
+const WITHDRAWAL_FEE_BPS = 200n;
 
 function failure(code, status = 409) { return Object.assign(new Error(code), { status }); }
 function transactionId(txid) { if (!/^[0-9a-f]{64}$/.test(txid)) throw failure('INVALID_TRANSACTION', 400); return txid; }
@@ -59,7 +61,7 @@ class OutgoingLedger {
       if (value < units(MINIMUM_WITHDRAWAL_USDT)) throw failure('WITHDRAWAL_BELOW_MINIMUM', 400);
       const user = state.users.find(item => item.id === userId);
       if (!user || units(user.withdrawBalance) < value) throw failure('INSUFFICIENT_WITHDRAW_BALANCE', 400);
-      const fee = (value + 5n) / 10n;
+      const fee = (value * WITHDRAWAL_FEE_BPS + 5000n) / 10000n;
       const id = crypto.randomUUID();
       const now = Date.now();
       user.withdrawBalance = amount(units(user.withdrawBalance) - value);
@@ -335,4 +337,4 @@ class SettlementWatcher {
   stop() { this.stopped = true; clearTimeout(this.timer); }
 }
 
-module.exports = { OutgoingLedger, SettlementWatcher, failure, MINIMUM_WITHDRAWAL_USDT };
+module.exports = { OutgoingLedger, SettlementWatcher, failure, MINIMUM_WITHDRAWAL_USDT, WITHDRAWAL_FEE_BPS };

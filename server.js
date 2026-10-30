@@ -13,7 +13,7 @@ const fsp = require('node:fs/promises');
 const crypto = require('node:crypto');
 const taskCatalog = require('./task-catalog');
 const { units, amount: usdtAmount } = require('./payments/tron');
-const { OutgoingLedger, SettlementWatcher, MINIMUM_WITHDRAWAL_USDT } = require('./payments/outgoing');
+const { OutgoingLedger, SettlementWatcher, MINIMUM_WITHDRAWAL_USDT, WITHDRAWAL_FEE_BPS } = require('./payments/outgoing');
 const { loadOperatorToken, authorized } = require('./payments/operator');
 const { OperatorPortal } = require('./payments/portal');
 const { BinanceMarkets } = require('./markets/binance');
@@ -34,7 +34,7 @@ const DATA_DIR = process.env.TASKMALL_DATA_DIR || process.env.RAILWAY_VOLUME_MOU
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 const FREE_VIP_DAYS = 10;
-const WITHDRAWAL_FEE_RATE = 0.1;
+const WITHDRAWAL_FEE_RATE = Number(WITHDRAWAL_FEE_BPS) / 10000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const PUBLIC_ORIGIN = process.env.PUBLIC_ORIGIN || '';
 const REVIEW_PAYMENT_ORIGIN=!IS_PRODUCTION&&process.env.TASKMALL_REVIEW_ORIGIN==='https://taskmall.app'?'https://taskmall.app':'';

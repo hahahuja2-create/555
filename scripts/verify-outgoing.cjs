@@ -74,8 +74,8 @@ test('withdrawal reservation is exact, idempotent and rolls back malformed reque
   const { ledger, store, app } = await fixture(t);
   const request = { key: crypto.randomUUID(), destination, gross: '10.000001' };
   const created = await ledger.request(app, 'a', request);
-  assert.equal(created.record.fee_units, '1000000');
-  assert.equal(created.record.net_units, '9000001');
+  assert.equal(created.record.fee_units, '200000');
+  assert.equal(created.record.net_units, '9800001');
   assert.equal(app.users[0].withdrawBalance, 89.999999);
   assert.equal(app.users[0].reservedBalance, 10.000001);
   assert.equal((await ledger.request(app, 'a', request)).changed, false);
@@ -106,7 +106,7 @@ test('the 10 USDT minimum is enforced without reserving rejected amounts', async
   }
   const row = (await ledger.request(app, 'a', { key: crypto.randomUUID(), destination, gross: '10' })).record;
   assert.equal(row.gross_units, '10000000');
-  assert.equal(row.net_units, '9000000');
+  assert.equal(row.net_units, '9800000');
   assert.equal(app.users[0].reservedBalance, 10);
 });
 
@@ -130,8 +130,8 @@ test('Claim credits Spot without pre-funding; actual payout stays manual until a
   const confirmed = await ledger.confirmManual(app, request.record.id);
   assert.equal(confirmed.record.status, 'confirmed');
   assert.equal(user.reservedBalance, 0);
-  assert.equal(user.withdrawnTotal, 9);
-  assert.equal(user.withdrawFeeTotal, 1);
+  assert.equal(user.withdrawnTotal, 9.8);
+  assert.equal(user.withdrawFeeTotal, 0.2);
   assert.equal(user.lockedBalance, 100);
   const saved = structuredClone(app);
   assert.equal((await ledger.confirmManual(app, request.record.id)).changed, false);
@@ -148,16 +148,16 @@ test('payouts settle only the exact treasury transfer and cannot reuse a transac
   assert.equal(app.users[0].withdrawnTotal, 0);
   assert.equal((await ledger.submitWithdrawal(app, row.id, submitted.txid)).status, 'submitted');
   for (const wrong of [event(submitted.txid, treasury, destination, 8_000_000),
-    event(submitted.txid, destination, treasury, 9_000_000), event(submitted.txid, treasury, deriveAddress(xpub, 8), 9_000_000)]) {
+    event(submitted.txid, destination, treasury, 9_800_000), event(submitted.txid, treasury, deriveAddress(xpub, 8), 9_800_000)]) {
     await assert.rejects(() => ledger.settleWithdrawal(structuredClone(app), submitted, [wrong]), /MISMATCH/);
   }
-  const exact = event(submitted.txid, treasury, destination, 9_000_000);
+  const exact = event(submitted.txid, treasury, destination, 9_800_000);
   await assert.rejects(() => ledger.settleWithdrawal(structuredClone(app), submitted, [exact, { ...exact, logIndex: 1 }]), /MISMATCH/);
-  assert.equal(await ledger.settleWithdrawal(app, submitted, [event(submitted.txid, treasury, destination, 9_000_000)]), true);
-  assert.equal(await ledger.settleWithdrawal(app, submitted, [event(submitted.txid, treasury, destination, 9_000_000)]), false);
+  assert.equal(await ledger.settleWithdrawal(app, submitted, [event(submitted.txid, treasury, destination, 9_800_000)]), true);
+  assert.equal(await ledger.settleWithdrawal(app, submitted, [event(submitted.txid, treasury, destination, 9_800_000)]), false);
   assert.equal(app.users[0].reservedBalance, 0);
-  assert.equal(app.users[0].withdrawnTotal, 9);
-  assert.equal(app.users[0].withdrawFeeTotal, 1);
+  assert.equal(app.users[0].withdrawnTotal, 9.8);
+  assert.equal(app.users[0].withdrawFeeTotal, 0.2);
   assert.equal(store.state().users[0].activities[0].status, 'confirmed');
   const another = (await ledger.request(app, 'a', { key: crypto.randomUUID(), destination, gross: '10' })).record;
   await ledger.decide(app, another.id, 'approve');
@@ -183,13 +183,13 @@ test('settlement recovers after outage and never treats a wrong or failed paymen
   info = receipt(txid, treasury, destination, 17_000_000);
   await watcher.poll();
   assert.equal((await ledger.withdrawal(row.id)).issue, 'PAYOUT_RECEIPT_MISMATCH');
-  info = receipt(txid, treasury, destination, 18_000_000);
+  info = receipt(txid, treasury, destination, 19_600_000);
   info.receipt.result = 'REVERT';
   await watcher.poll();
   assert.equal(current.users[0].withdrawnTotal, 0);
   info.receipt.result = 'SUCCESS';
   await watcher.poll();
-  assert.equal(current.users[0].withdrawnTotal, 18);
+  assert.equal(current.users[0].withdrawnTotal, 19.6);
   assert.equal((await ledger.withdrawal(row.id)).status, 'confirmed');
 });
 
@@ -200,7 +200,7 @@ test('only a solidified failed payout can release a reservation; missing and suc
   const txid = '7'.repeat(64);
   await ledger.submitWithdrawal(app, row.id, txid);
   await assert.rejects(() => ledger.releaseFailed(structuredClone(app), 'withdrawal', row.id, {}, 1000));
-  const info = receipt(txid, treasury, destination, 9_000_000);
+  const info = receipt(txid, treasury, destination, 9_800_000);
   await assert.rejects(() => ledger.releaseFailed(structuredClone(app), 'withdrawal', row.id, info, 1000), /NOT_VERIFIED/);
   info.receipt.result = 'REVERT';
   await assert.rejects(() => ledger.releaseFailed(structuredClone(app), 'withdrawal', row.id, info, 998), /solidified/);
@@ -382,14 +382,14 @@ test('real withdrawal API requires password and operator authorization; mobile a
   assert.equal((await request('/api/operator/withdrawals/' + id + '/approve', {}, admin)).status, 200);
   const txid = '6'.repeat(64);
   assert.equal((await request('/api/operator/withdrawals/' + id + '/record', { txid }, admin)).status, 200);
-  await fs.writeFile(fixtureFile, JSON.stringify({ history: {}, receipts: { [txid]: receipt(txid, treasury, destination, 9_000_000) } }));
+  await fs.writeFile(fixtureFile, JSON.stringify({ history: {}, receipts: { [txid]: receipt(txid, treasury, destination, 9_800_000) } }));
   let account;
   for (let i = 0; i < 40; i++) {
     account = (await request('/api/me', undefined, customer)).body.user;
-    if (account.withdrawnTotal === 9) break;
+    if (account.withdrawnTotal === 9.8) break;
     await new Promise(resolve => setTimeout(resolve, 50));
   }
-  assert.equal(account.withdrawnTotal, 9);
+  assert.equal(account.withdrawnTotal, 9.8);
   assert.equal(account.reservedBalance, 0);
   assert.equal((await request('/api/wallet/withdrawals', undefined, customer)).body.withdrawals.find(item => item.id === id).status, 'confirmed');
   const failed = await request('/api/wallet/withdraw', { ...body, amount: '10', requestKey: crypto.randomUUID() }, customer);
@@ -398,13 +398,13 @@ test('real withdrawal API requires password and operator authorization; mobile a
   const failedTxid = '8'.repeat(64);
   await request('/api/operator/withdrawals/' + failedId + '/approve', {}, admin);
   await request('/api/operator/withdrawals/' + failedId + '/record', { txid: failedTxid }, admin);
-  const failedInfo = receipt(failedTxid, treasury, destination, 9_000_000);
+  const failedInfo = receipt(failedTxid, treasury, destination, 9_800_000);
   failedInfo.receipt.result = 'REVERT';
   await fs.writeFile(fixtureFile, JSON.stringify({ history: {}, receipts: {
-    [txid]: receipt(txid, treasury, destination, 9_000_000), [failedTxid]: failedInfo } }));
+    [txid]: receipt(txid, treasury, destination, 9_800_000), [failedTxid]: failedInfo } }));
   assert.equal((await request('/api/operator/withdrawals/' + failedId + '/release-failed', {}, admin)).status, 200);
   assert.equal((await request('/api/me', undefined, customer)).body.user.reservedBalance, 0);
-  assert.equal((await request('/api/me', undefined, customer)).body.user.withdrawnTotal, 9);
+  assert.equal((await request('/api/me', undefined, customer)).body.user.withdrawnTotal, 9.8);
   const { chromium } = require('playwright');
   browser = await chromium.launch();
   const context = await browser.newContext();
@@ -426,14 +426,14 @@ test('real withdrawal API requires password and operator authorization; mobile a
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').inputValue(), String(liveAccount.withdrawBalance));
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.checkValidity()), true);
     assert.match(await page.locator('[data-wallet-available]').textContent(), /90\.123456 USDT/);
-    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '81.11111 USDT');
+    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '88.320987 USDT');
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('9.999999');
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.validity.rangeUnderflow), true);
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('10');
-    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '9.00 USDT');
+    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '9.80 USDT');
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.checkValidity()), true);
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('10.000005');
-    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '9.000004 USDT');
+    assert.equal(await page.locator('[data-withdraw-net]').textContent(), '9.800005 USDT');
     await page.locator('[data-wallet-form="withdraw"] [name="amount"]').fill('10');
     assert.equal(await page.locator('[name="password"]').count(), 1);
     await page.screenshot({ path: path.join(output, 'withdraw-' + name + '.png') });
@@ -450,7 +450,7 @@ test('real withdrawal API requires password and operator authorization; mobile a
   await page.locator('[data-wallet-form="withdraw"] button[type="submit"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor({ state: 'detached' });
   const queued = (await request('/api/wallet/withdrawals', undefined, customer)).body.withdrawals;
-  assert.equal(queued.filter(row => row.status === 'requested' && row.amount === 10 && row.netAmount === 9).length, 1);
+  assert.equal(queued.filter(row => row.status === 'requested' && row.amount === 10 && row.netAmount === 9.8).length, 1);
   assert.equal((await request('/api/me', undefined, customer)).body.user.reservedBalance, 10);
   await page.reload();
   await page.locator('.hero-card').waitFor();
