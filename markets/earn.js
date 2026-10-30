@@ -1,7 +1,9 @@
 'use strict';
 const crypto=require('node:crypto');
 const {units,amount}=require('../payments/tron');
+const promotion=require('./referral-promotion');
 const DAY=86_400_000;
+const minimum=state=>promotion.minimumUnits(state);
 const fail=(message,status=409)=>Object.assign(new Error(message),{status});
 const nextReset=time=>(Math.floor(time/DAY)+1)*DAY;
 function claimSchedule(state,user,now){
@@ -25,9 +27,10 @@ function pool(state,now=Date.now()){
   return state.earn;
 }
 function snapshot(state,user,now=Date.now(),enabled=false){
-  const reward=units(user.lockedBalance)/10n;
+  const reward=promotion.rewardUnits(state,user,now);
   const schedule=claimSchedule(state,user,now),{nextClaimAt}=schedule;
-  return {enabled,mode:'accrued',payoutModel:'manual-withdrawal',fundingRequired:false,rate:0.1,referralRates:[0.1,0.05],cycleHours:24,
+  const MINIMUM=minimum(state),balance=units(user.lockedBalance),shortfall=balance<MINIMUM?MINIMUM-balance:0n;
+  return {enabled,minimum:amount(MINIMUM),shortfall:amount(shortfall),mode:'accrued',payoutModel:'manual-withdrawal',fundingRequired:false,rate:promotion.rateBps(state,user,now)/10000,promotion:promotion.snapshot(state,user,now),referralRates:[0.1,0.05],cycleHours:24,
     earningBalance:amount(units(user.lockedBalance)),withdrawalBalance:amount(units(user.withdrawBalance)),spotBalance:amount(units(user.withdrawBalance)),
     nextReward:amount(reward),...schedule,serverTime:now,canClaim:enabled&&reward>0n&&now>=nextClaimAt,
     lastClaimAt:user.earnLastClaimAt||null,earned:amount(units(user.earnClaimTotal||0)),referralEarned:amount(units(user.earnReferralTotal||0)),
@@ -43,8 +46,10 @@ function claim(state,userId,key,now=Date.now()){
   const book=pool(state,now);
   const next=claimSchedule(state,user,now).nextClaimAt;
   if(now<next)throw fail('EARN_COOLDOWN');
-  const reward=units(user.lockedBalance)/10n;if(!reward)throw fail('NO_EARNING_BALANCE',400);
-  const credits=[{user,units:reward,type:'earn',level:0,rate:10}];
+  if(units(user.lockedBalance)<minimum(state))throw fail('EARN_MINIMUM_REQUIRED',400);
+  const reward=promotion.rewardUnits(state,user,now);if(!reward)throw fail('NO_EARNING_BALANCE',400);
+  const rate=promotion.rateBps(state,user,now)/100;
+  const credits=[{user,units:reward,type:'earn',level:0,rate}];
   let code=user.referredBy;const seen=new Set([user.id]);
   for(const [level,rate]of[[1,10n],[2,5n]]){
     const parent=state.users.find(item=>item.inviteCode===code);
@@ -61,7 +66,7 @@ function claim(state,userId,key,now=Date.now()){
     row.user.activities.unshift({id:crypto.randomUUID(),at,type:row.type,amount:amount(row.units),claimId,level:row.level,rate:row.rate,mode:'accrued'});
   }
   book.totalAccruedUnits=(BigInt(book.totalAccruedUnits)+total).toString();
-  user.earnLastClaimAt=now;user.earnLastReceipt={id:claimId,requestKey:key,amount:amount(reward),status:'credited',at,nextClaimAt:nextReset(now)};
+  user.earnLastClaimAt=now;user.earnLastReceipt={id:claimId,requestKey:key,amount:amount(reward),rate:rate/100,status:'credited',at,nextClaimAt:nextReset(now)};
   user.earnReceipts||={};user.earnReceipts[key]=user.earnLastReceipt;
   return{receipt:user.earnLastReceipt,replayed:false};
 }
@@ -80,4 +85,21 @@ function migrate(state,plans,now=Date.now()){
   }
   return report;
 }
-module.exports={DAY,pool,snapshot,claim,migrate,nextReset,claimSchedule};
+// One-time: every account that existed before the 200 USDT minimum is brought up to it. Later accounts are never topped up.
+function topUp(state,now=Date.now()){
+  state.earn||={};
+  if(state.earn.minimumTopUp?.version===1)return[];
+  const report=[],MINIMUM=minimum(state);
+  for(const user of state.users){
+    const before=units(user.lockedBalance);
+    if(before>=MINIMUM)continue;
+    const credit=MINIMUM-before;
+    user.lockedBalance=amount(MINIMUM);
+    user.earnMinimum={version:1,at:new Date(now).toISOString(),previous:amount(before),credited:amount(credit)};
+    (user.activities||=[]).unshift({id:crypto.randomUUID(),at:new Date(now).toISOString(),type:'topup',amount:amount(credit)});
+    report.push({userId:user.id,previous:amount(before),credited:amount(credit)});
+  }
+  state.earn.minimumTopUp={version:1,at:new Date(now).toISOString(),accounts:report.length,totalUnits:report.reduce((s,r)=>s+units(r.credited),0n).toString()};
+  return report;
+}
+module.exports={DAY,topUp,pool,snapshot,claim,migrate,nextReset,claimSchedule};

@@ -7,5 +7,5 @@ test('all supported coins have genuine locally hosted image assets',()=>{
     assert.match(entry.path,/^\/assets\/coins\/[A-Z0-9]+\.(png|jpg)$/);assert.match(entry.source,/^https:\/\/(raw\.githubusercontent\.com\/trustwallet\/assets|coin-images\.coingecko\.com)\//);
     const image=fs.readFileSync(path.join(folder,entry.path)),png=image.subarray(0,8).toString('hex')==='89504e470d0a1a0a',jpg=image[0]===255&&image[1]===216;assert.ok(png||jpg,base+' image signature');assert.equal(image.length,entry.bytes);
   }
-  const mark=fs.readFileSync(path.join(folder,'assets/brand/taskmall-mark.svg'),'utf8');assert.match(mark,/<svg/);assert.equal(mark,fs.readFileSync(path.join(folder,'favicon.svg'),'utf8'));
+  const mark=fs.readFileSync(path.join(folder,'assets/brand/portgainy-mark.svg'),'utf8');assert.match(mark,/<svg/);assert.equal(mark,fs.readFileSync(path.join(folder,'favicon.svg'),'utf8'));
 });

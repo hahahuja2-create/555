@@ -14,6 +14,16 @@ On activation (TASKMALL_EARN_ENABLED=1), the server converts the current stored 
 - Claims and both referral credits commit atomically to Spot without a prepaid reward-pool requirement. UUID receipts make retries idempotent. Earn principal remains unchanged.
 - The operator sends actual USDT after a withdrawal request, using the existing manual payout workflow. A Claim is a ledger accrual, not a completed external payment. Accounting schema v2 tracks totalAccruedUnits; prior funding records and totalPaidUnits are retained unchanged for history. The obsolete funding endpoint returns EARN_FUNDING_NOT_REQUIRED.
 
+## Personal referral promotion
+
+The `active-referrals-15-v1` campaign starts once, when the updated Earn server first launches. Existing accounts receive ten days from that timestamp; later accounts receive ten days from their registration timestamp. Restarts do not extend either window.
+
+Ten distinct direct referrals unlock a permanent 15% daily Earn rate when each referral reaches 50 USDT in cumulative confirmed deposits before the owner's deadline. Existing qualifying referrals count immediately. Historical threshold timestamps also qualify an owner who returns after the deadline. A referral reaching 50 USDT at or after the deadline cannot unlock a late upgrade. Internal transfers, rewards, imported balances and VIP principal restoration do not qualify as deposits.
+
+The initial counters are backfilled from the verified deposit ledger; subsequent confirmed receipts update the counters in the same financial transaction as the deposit credit. Claim still runs once per UTC day, preserves principal and uses six-decimal integer arithmetic. First- and second-level commissions remain 10% and 5% of the actual claimed reward. Earlier idempotent Claim receipts are not recalculated.
+
+The account stores the announcement receipt on the server, so concurrent sessions, another device and later logins cannot display it again. The announcement and referral progress card support all ten interface languages and display the account's own deadline.
+
 ## Synthetic trading
 
 Binance is a public price source only. TaskMall does not send exchange orders. Buyers receive price-linked internal positions, not on-chain coins or crypto withdrawal rights; the trade dialog and Company page explain this.

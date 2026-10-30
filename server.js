@@ -1,5 +1,11 @@
 'use strict';
 
+if (process.env.TASKMALL_LOCAL_LIVE_PROXY === '1') {
+  const gateway = require('./scripts/local-live.cjs');
+  gateway.main().catch(gateway.reportStartupError);
+  return;
+}
+
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs');
@@ -13,7 +19,13 @@ const { OperatorPortal } = require('./payments/portal');
 const { BinanceMarkets } = require('./markets/binance');
 const { assistantReply } = require('./markets/assistant');
 const earn = require('./markets/earn');
+const referralPromotion = require('./markets/referral-promotion');
 const spot = require('./markets/spot');
+const maintenanceConfiguration = require('./config/platform-maintenance.json');
+if (process.env.TASKMALL_MAINTENANCE_ENABLED !== undefined && !['0', '1'].includes(process.env.TASKMALL_MAINTENANCE_ENABLED)) throw new Error('INVALID_MAINTENANCE_CONFIGURATION');
+const maintenance = require('./platform-maintenance').createMaintenance({ ...maintenanceConfiguration,
+  enabled: process.env.TASKMALL_MAINTENANCE_ENABLED === undefined
+    ? maintenanceConfiguration.enabled && process.env.NODE_ENV !== 'test' : process.env.TASKMALL_MAINTENANCE_ENABLED === '1' });
 
 const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1');
 const PORT = Number(process.env.PORT || 4173);
@@ -114,9 +126,9 @@ function money(value) {
 function balanceValue(value) { return usdtAmount(units(value)); }
 
 function displayNameFromEmail(email) {
-  const localPart = String(email || '').split('@')[0] || 'TaskMall user';
+  const localPart = String(email || '').split('@')[0] || 'Portgainy player';
   const name = localPart.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 50);
-  return name.length >= 2 ? name : 'TaskMall user';
+  return name.length >= 2 ? name : 'Portgainy player';
 }
 
 function makeInviteCode(user) {
@@ -202,6 +214,9 @@ function cleanUser(user) {
     lockedBalance: balanceValue(user.lockedBalance),
     earningBalance: balanceValue(user.lockedBalance),
     earnEnabled: EARN_MODE,
+    earnRate: EARN_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
+    nextEarnReward: EARN_MODE ? usdtAmount(referralPromotion.rewardUnits(db,user)) : null,
+    referralPromotion: null,
     withdrawBalance: balanceValue(user.withdrawBalance),
     spotBalance: balanceValue(user.withdrawBalance),
     reservedBalance: balanceValue(user.reservedBalance),
@@ -253,6 +268,7 @@ function adminUserRow(user) {
     lastCompletionDate: user.lastCompletionDate,
     inviteCode: user.inviteCode,
     referredBy: user.referredBy,
+    earnRate: EARN_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
     createdAt: user.createdAt
   };
 }
@@ -306,6 +322,11 @@ async function loadDatabase() {
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     for (const user of db.users) ensureUserShape(user);
     if(EARN_MODE)earn.migrate(db,vipPlans);
+    if(EARN_MODE)earn.topUp(db);
+    if(EARN_MODE){
+      const history=db.earn.referralPromotion?[]:await paymentStore.sql.prepare('SELECT user_id,amount_units,timestamp,txid,log_index FROM deposits ORDER BY timestamp,txid,log_index').all();
+      referralPromotion.initialize(db,history);
+    }
     await paymentStore.save(db, 'initial-import-or-migration');
     outgoingLedger = new OutgoingLedger(paymentStore, TREASURY);
     if (process.env.TASKMALL_OPERATOR_ENABLED === '1') operatorToken = await loadOperatorToken(OPERATOR_FILE, true, process.env.TASKMALL_OPERATOR_TOKEN);
@@ -320,11 +341,13 @@ async function loadDatabase() {
         interval: process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000,
         async credit(event) {
           if (!storageHealthy) throw new Error('Storage is unavailable.');
+          const history=EARN_MODE?await paymentStore.sql.prepare('SELECT d.user_id,d.amount_units,d.timestamp,d.txid,d.log_index FROM deposits d JOIN deposit_addresses a ON a.user_id=d.user_id WHERE a.address=? ORDER BY d.timestamp,d.txid,d.log_index').all(event.to):[];
           const next = structuredClone(db);
           const credited = await paymentStore.credit(event, next, (state, userId, transfer) => {
             const user = state.users.find(item => item.id === userId);
             if (!user) throw new Error('Deposit account was not found.');
             user.lockedBalance = usdtAmount(units(user.lockedBalance) + BigInt(transfer.units));
+            if(EARN_MODE)referralPromotion.hydrateUser(user,[...history,{user_id:userId,amount_units:transfer.units,timestamp:transfer.timestamp,txid:transfer.txid,log_index:transfer.logIndex}]);
             addActivity(user, { type: 'deposit', amount: usdtAmount(transfer.units), amountUnits: transfer.units,
               network: 'USDT TRC20', address: transfer.to, txid: transfer.txid, logIndex: transfer.logIndex,
               blockNumber: transfer.blockNumber, status: 'confirmed', at: new Date(transfer.timestamp).toISOString() });
@@ -355,11 +378,15 @@ async function loadDatabase() {
     let changed = EARN_MODE && (saved.earn?.version!==2||saved.spot?.version!==2);
     for (const user of db.users) if (ensureUserShape(user)) changed = true;
     if(EARN_MODE&&earn.migrate(db,vipPlans).length)changed=true;
+    if(EARN_MODE&&earn.topUp(db).length)changed=true;
+    if(EARN_MODE&&referralPromotion.initialize(db))changed=true;
     if (changed) await saveDatabase();
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
     if(EARN_MODE)spot.initialize(db);
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
+    if(EARN_MODE)earn.topUp(db);
+    if(EARN_MODE)referralPromotion.initialize(db);
     await saveDatabase();
   }
 }
@@ -1000,7 +1027,18 @@ async function handleExchangeApi(req,res,url) {
     const direct=db.users.filter(item=>item.id!==user.id&&item.referredBy===user.inviteCode);
     const codes=new Set(direct.map(item=>item.inviteCode));
     const second=db.users.filter(item=>item.id!==user.id&&!direct.some(row=>row.id===item.id)&&codes.has(item.referredBy));
-    json(res,200,{level1:direct.length,level2:second.length,rates:[10,5]});return true;
+    json(res,200,{level1:direct.length,level2:second.length,rates:[10,5],promotion:null});return true;
+  }
+  if(req.method==='POST'&&url.pathname==='/api/earn/promotion/announcement'){
+    json(res,200,{show:false,promotion:null});return true;
+  }
+  if(false){
+    const user=await requireUser(req,res);if(!user)return true;
+    if(!EARN_MODE){json(res,503,{error:'EARN_UNAVAILABLE'});return true;}
+    await exclusive(async()=>{const next=structuredClone(db),current=next.users.find(item=>item.id===user.id);
+      const result=referralPromotion.claimAnnouncement(next,current);
+      if(result.show){await saveDatabase(next);db=next;}
+      json(res,200,result);});return true;
   }
   if(req.method==='POST'&&url.pathname==='/api/earn/claim'){
     const user=await requireUser(req,res);if(!user)return true;
@@ -1061,6 +1099,7 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'");
     if (IS_PRODUCTION) res.setHeader('Strict-Transport-Security', 'max-age=31536000');
     const url = new URL(req.url, `http://${HOST}:${PORT}`);
+    if (await maintenance.handle(req, res, url)) return;
     if (url.pathname.startsWith('/operator/')) {
       await operatorPortal.handle(req, res, url);
       return;

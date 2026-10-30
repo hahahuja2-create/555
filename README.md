@@ -1,6 +1,6 @@
-# TaskMall
+# Portgainy
 
-TaskMall provides desktop and mobile workspaces for Earn, price-linked internal trading positions, USDT accounts, referrals and support. Binance supplies live prices only; positions are recorded by TaskMall and do not represent on-chain coins.
+Portgainy provides desktop and mobile workspaces for Earn, price-linked internal trading positions, USDT accounts, referrals and support. Binance supplies live prices only; positions are recorded by TaskMall and do not represent on-chain coins.
 
 The current production model uses `TASKMALL_EARN_ENABLED=1` and `TASKMALL_SPOT_ENABLED=1`. See [the current accounting, migration and deployment notes](EARN_REDESIGN.md). The membership rules below document the historical product and are retained for legacy reconciliation and tests; VIP purchases and task completion are retired when Earn is enabled.
 
@@ -10,10 +10,30 @@ Requires Node.js 22.13 or newer.
 
 ```powershell
 npm ci
-npm start
+npm run start:local
 ```
 
-Open http://127.0.0.1:4173. Use `npm run dev` for automatic restarts.
+Open http://127.0.0.1:4173. `npm run preview:design` starts the same local gateway in the background.
+
+The local Portgainy interface forwards every `/api/` request to the existing
+Railway backend at `https://taskmall.app`. It uses the same accounts, password
+verification, balances, Earn, referrals, deposits and withdrawal ledger. It
+does not open MySQL/SQLite, import accounts, create another database, or run a
+second financial writer. Changes made while testing apply to the real account.
+
+Railway CLI authentication and the existing `TASKMALL_RAILWAY_*` identity variables
+in the private `.env` are required. A dedicated `TASKMALL_LOCAL_REVIEW_TOKEN` is
+retrieved through authenticated Railway SSH and held only in the gateway's memory.
+It permits customer APIs during maintenance; it does not sign in an account or
+grant operator permissions. Public pages remain closed until the scheduled time.
+Normal account authentication is still required. The browser never receives the
+review token or database credentials. The gateway binds only to `127.0.0.1` and
+rejects foreign origins and operator endpoints.
+
+This workstation's `.env` uses `TASKMALL_LOCAL_LIVE_PROXY=1`, so `npm start` and
+`npm run dev` also select this gateway before any database code is loaded.
+Railway continues to start the original `server.js` backend without this local flag.
+Run `npm run test:local-live` for HTTP-only checks that create no database.
 
 ## Historical membership rules
 

@@ -187,7 +187,7 @@ test('TronGrid queries are confirmed, contract-filtered and reject unsafe pagina
 
 async function startProcess(t, script, env, preload = false) {
   const child = spawn(process.execPath, [...(preload ? ['--require', './scripts/tron-fixture-preload.cjs'] : []), script], {
-    cwd: root, windowsHide: true, stdio: 'pipe', env: { ...process.env, TRON_AUTO_WALLET: '', ...env }
+    cwd: root, windowsHide: true, stdio: 'pipe', env: { ...process.env, TRON_AUTO_WALLET: '', TRON_TREASURY_ADDRESS: treasury, ...env }
   });
   let errors = '';
   child.stderr.on('data', chunk => { errors += chunk; });
@@ -247,7 +247,6 @@ test('real API wiring allocates separate addresses and credits verified receipt 
   t.after(() => browser.close());
   const context = await browser.newContext();
   await context.addCookies([{ name: 'taskmall_session', value: cookie.split('=')[1], url }]);
-  await context.addInitScript(() => localStorage.setItem('taskmall_language', 'en'));
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -255,14 +254,15 @@ test('real API wiring allocates separate addresses and credits verified receipt 
   await fs.mkdir(output, { recursive: true });
   for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 360, height: 740 }]]) {
     await page.setViewportSize(viewport);
-    await page.goto(url + '/#wallet');
-    await page.locator('.wallet-command-bar [data-wallet-type="deposit"]').click();
+    await page.goto(url + '/#assets');
+    await page.locator('.hero-card [data-act="wallet-deposit"]').click();
     await page.locator('.deposit-qr').waitFor();
-    assert.equal(await page.locator('.native-address-row code').textContent(), address.body.address);
+    assert.equal(await page.locator('#dep-address').inputValue(), address.body.address);
     assert.equal(await page.locator('form[data-wallet-form="deposit"]').count(), 0);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     assert.equal(await page.evaluate(() => document.querySelector('.deposit-qr').naturalWidth > 0), true);
     await page.screenshot({ path: path.join(output, 'deposit-' + name + '.png') });
+    await page.keyboard.press('Escape');
   }
   assert.equal(errors.length, 0, errors.join('\n'));
 });
