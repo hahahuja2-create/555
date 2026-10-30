@@ -1,0 +1,576 @@
+{
+  "updatedAt": "2026-10-18T10:23:13.267Z",
+  "sources": [
+    "https://github.com/trustwallet/assets",
+    "https://www.coingecko.com/"
+  ],
+  "assets": [
+    {
+      "base": "BTC",
+      "name": "Bitcoin",
+      "path": "/assets/coins/BTC.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoin/info/logo.png",
+      "bytes": 4918
+    },
+    {
+      "base": "ETH",
+      "name": "Ethereum",
+      "path": "/assets/coins/ETH.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
+      "bytes": 2984
+    },
+    {
+      "base": "BNB",
+      "name": "BNB",
+      "path": "/assets/coins/BNB.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png",
+      "bytes": 16072
+    },
+    {
+      "base": "SOL",
+      "name": "Solana",
+      "path": "/assets/coins/SOL.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/info/logo.png",
+      "bytes": 54309
+    },
+    {
+      "base": "XRP",
+      "name": "XRP",
+      "path": "/assets/coins/XRP.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ripple/info/logo.png",
+      "bytes": 7004
+    },
+    {
+      "base": "DOGE",
+      "name": "Dogecoin",
+      "path": "/assets/coins/DOGE.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/doge/info/logo.png",
+      "bytes": 2243
+    },
+    {
+      "base": "ADA",
+      "name": "Cardano",
+      "path": "/assets/coins/ADA.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/cardano/info/logo.png",
+      "bytes": 32008
+    },
+    {
+      "base": "TRX",
+      "name": "TRON",
+      "path": "/assets/coins/TRX.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+      "bytes": 25773
+    },
+    {
+      "base": "LINK",
+      "name": "Chainlink",
+      "path": "/assets/coins/LINK.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png",
+      "bytes": 21377
+    },
+    {
+      "base": "AVAX",
+      "name": "Avalanche",
+      "path": "/assets/coins/AVAX.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
+      "bytes": 23229
+    },
+    {
+      "base": "SUI",
+      "name": "Sui",
+      "path": "/assets/coins/SUI.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sui/info/logo.png",
+      "bytes": 6535
+    },
+    {
+      "base": "TON",
+      "name": "Toncoin",
+      "path": "/assets/coins/TON.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png",
+      "bytes": 6185
+    },
+    {
+      "base": "DOT",
+      "name": "Polkadot",
+      "path": "/assets/coins/DOT.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polkadot/info/logo.png",
+      "bytes": 14415
+    },
+    {
+      "base": "LTC",
+      "name": "Litecoin",
+      "path": "/assets/coins/LTC.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/litecoin/info/logo.png",
+      "bytes": 2557
+    },
+    {
+      "base": "BCH",
+      "name": "Bitcoin Cash",
+      "path": "/assets/coins/BCH.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/bitcoincash/info/logo.png",
+      "bytes": 7908
+    },
+    {
+      "base": "UNI",
+      "name": "Uniswap",
+      "path": "/assets/coins/UNI.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
+      "bytes": 29535
+    },
+    {
+      "base": "NEAR",
+      "name": "NEAR Protocol",
+      "path": "/assets/coins/NEAR.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png",
+      "bytes": 1900
+    },
+    {
+      "base": "APT",
+      "name": "Aptos",
+      "path": "/assets/coins/APT.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/aptos/info/logo.png",
+      "bytes": 5466
+    },
+    {
+      "base": "AAVE",
+      "name": "Aave",
+      "path": "/assets/coins/AAVE.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png",
+      "bytes": 3143
+    },
+    {
+      "base": "ICP",
+      "name": "Internet Computer",
+      "path": "/assets/coins/ICP.png",
+      "source": "https://coin-images.coingecko.com/coins/images/14495/small/Internet_Computer_logo.png?1696514180",
+      "bytes": 2944
+    },
+    {
+      "base": "ETC",
+      "name": "Ethereum Classic",
+      "path": "/assets/coins/ETC.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/classic/info/logo.png",
+      "bytes": 2953
+    },
+    {
+      "base": "FIL",
+      "name": "Filecoin",
+      "path": "/assets/coins/FIL.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/filecoin/info/logo.png",
+      "bytes": 5606
+    },
+    {
+      "base": "ATOM",
+      "name": "Cosmos",
+      "path": "/assets/coins/ATOM.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/cosmos/info/logo.png",
+      "bytes": 5944
+    },
+    {
+      "base": "OP",
+      "name": "Optimism",
+      "path": "/assets/coins/OP.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/info/logo.png",
+      "bytes": 2506
+    },
+    {
+      "base": "POL",
+      "name": "POL",
+      "path": "/assets/coins/POL.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",
+      "bytes": 10248
+    },
+    {
+      "base": "INJ",
+      "name": "Injective",
+      "path": "/assets/coins/INJ.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xe28b3B32B6c345A34Ff64674606124Dd5Aceca30/logo.png",
+      "bytes": 12362
+    },
+    {
+      "base": "RENDER",
+      "name": "Render",
+      "path": "/assets/coins/RENDER.png",
+      "source": "https://coin-images.coingecko.com/coins/images/11636/small/rndr.png?1696511529",
+      "bytes": 3173
+    },
+    {
+      "base": "FET",
+      "name": "Artificial Superintelligence",
+      "path": "/assets/coins/FET.png",
+      "source": "https://coin-images.coingecko.com/coins/images/5681/small/ASI.png?1719827289",
+      "bytes": 1229
+    },
+    {
+      "base": "SHIB",
+      "name": "Shiba Inu",
+      "path": "/assets/coins/SHIB.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE/logo.png",
+      "bytes": 99246
+    },
+    {
+      "base": "WIF",
+      "name": "dogwifhat",
+      "path": "/assets/coins/WIF.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm/logo.png",
+      "bytes": 82939
+    },
+    {
+      "base": "SEI",
+      "name": "Sei",
+      "path": "/assets/coins/SEI.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sei/info/logo.png",
+      "bytes": 27592
+    },
+    {
+      "base": "JUP",
+      "name": "Jupiter",
+      "path": "/assets/coins/JUP.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4B1E80cAC91e2216EEb63e29B957eB91Ae9C2Be8/logo.png",
+      "bytes": 45702
+    },
+    {
+      "base": "PYTH",
+      "name": "Pyth Network",
+      "path": "/assets/coins/PYTH.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3/logo.png",
+      "bytes": 15145
+    },
+    {
+      "base": "GRT",
+      "name": "The Graph",
+      "path": "/assets/coins/GRT.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc944E90C64B2c07662A292be6244BDf05Cda44a7/logo.png",
+      "bytes": 46342
+    },
+    {
+      "base": "ALGO",
+      "name": "Algorand",
+      "path": "/assets/coins/ALGO.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/algorand/info/logo.png",
+      "bytes": 3070
+    },
+    {
+      "base": "XLM",
+      "name": "Stellar",
+      "path": "/assets/coins/XLM.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/stellar/info/logo.png",
+      "bytes": 2943
+    },
+    {
+      "base": "HBAR",
+      "name": "Hedera",
+      "path": "/assets/coins/HBAR.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/hedera/info/logo.png",
+      "bytes": 4762
+    },
+    {
+      "base": "VET",
+      "name": "VeChain",
+      "path": "/assets/coins/VET.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/vechain/info/logo.png",
+      "bytes": 6043
+    },
+    {
+      "base": "QNT",
+      "name": "Quant",
+      "path": "/assets/coins/QNT.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4a220E6096B25EADb88358cb44068A3248254675/logo.png",
+      "bytes": 10015
+    },
+    {
+      "base": "EGLD",
+      "name": "MultiversX",
+      "path": "/assets/coins/EGLD.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/elrond/info/logo.png",
+      "bytes": 6724
+    },
+    {
+      "base": "THETA",
+      "name": "Theta Network",
+      "path": "/assets/coins/THETA.png",
+      "source": "https://coin-images.coingecko.com/coins/images/2538/small/theta-token-logo.png?1696503349",
+      "bytes": 1847
+    },
+    {
+      "base": "RUNE",
+      "name": "THORChain",
+      "path": "/assets/coins/RUNE.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/thorchain/info/logo.png",
+      "bytes": 13760
+    },
+    {
+      "base": "IMX",
+      "name": "Immutable",
+      "path": "/assets/coins/IMX.png",
+      "source": "https://coin-images.coingecko.com/coins/images/17233/small/immutableX-symbol-BLK-RGB.png?1696516787",
+      "bytes": 1485
+    },
+    {
+      "base": "SAND",
+      "name": "The Sandbox",
+      "path": "/assets/coins/SAND.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x3845badAde8e6dFF049820680d1F14bD3903a5d0/logo.png",
+      "bytes": 6430
+    },
+    {
+      "base": "MANA",
+      "name": "Decentraland",
+      "path": "/assets/coins/MANA.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x0F5D2fB29fb7d3CFeE444a200298f468908cC942/logo.png",
+      "bytes": 8323
+    },
+    {
+      "base": "AXS",
+      "name": "Axie Infinity",
+      "path": "/assets/coins/AXS.png",
+      "source": "https://coin-images.coingecko.com/coins/images/13029/small/axie_infinity_logo.png?1696512817",
+      "bytes": 3977
+    },
+    {
+      "base": "GALA",
+      "name": "Gala",
+      "path": "/assets/coins/GALA.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xd1d2Eb1B1e90B638588728b4130137D262C87cae/logo.png",
+      "bytes": 5912
+    },
+    {
+      "base": "ENS",
+      "name": "Ethereum Name Service",
+      "path": "/assets/coins/ENS.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72/logo.png",
+      "bytes": 7787
+    },
+    {
+      "base": "CRV",
+      "name": "Curve DAO",
+      "path": "/assets/coins/CRV.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xD533a949740bb3306d119CC777fa900bA034cd52/logo.png",
+      "bytes": 16821
+    },
+    {
+      "base": "LDO",
+      "name": "Lido DAO",
+      "path": "/assets/coins/LDO.png",
+      "source": "https://coin-images.coingecko.com/coins/images/13573/small/Lido_DAO.png?1696513326",
+      "bytes": 3749
+    },
+    {
+      "base": "PENDLE",
+      "name": "Pendle",
+      "path": "/assets/coins/PENDLE.png",
+      "source": "https://coin-images.coingecko.com/coins/images/15069/small/Pendle_Logo_Normal-03.png?1696514728",
+      "bytes": 1635
+    },
+    {
+      "base": "STX",
+      "name": "Stacks",
+      "path": "/assets/coins/STX.png",
+      "source": "https://coin-images.coingecko.com/coins/images/2069/small/Stacks_Logo_png.png?1709979332",
+      "bytes": 3171
+    },
+    {
+      "base": "S",
+      "name": "Sonic",
+      "path": "/assets/coins/S.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/sonic/info/logo.png",
+      "bytes": 26234
+    },
+    {
+      "base": "ENA",
+      "name": "Ethena",
+      "path": "/assets/coins/ENA.png",
+      "source": "https://coin-images.coingecko.com/coins/images/36530/small/ethena.png?1711701436",
+      "bytes": 1827
+    },
+    {
+      "base": "JTO",
+      "name": "Jito",
+      "path": "/assets/coins/JTO.png",
+      "source": "https://coin-images.coingecko.com/coins/images/33228/small/jto.png?1701137022",
+      "bytes": 2781
+    },
+    {
+      "base": "ZK",
+      "name": "ZKsync",
+      "path": "/assets/coins/ZK.png",
+      "source": "https://coin-images.coingecko.com/coins/images/38043/small/ZKTokenBlack.png?1718614502",
+      "bytes": 1251
+    },
+    {
+      "base": "STRK",
+      "name": "Starknet",
+      "path": "/assets/coins/STRK.png",
+      "source": "https://coin-images.coingecko.com/coins/images/26433/small/starknet.png?1696525507",
+      "bytes": 3901
+    },
+    {
+      "base": "APE",
+      "name": "ApeCoin",
+      "path": "/assets/coins/APE.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4d224452801ACEd8B2F0aebE155379bb5D594381/logo.png",
+      "bytes": 58566
+    },
+    {
+      "base": "COMP",
+      "name": "Compound",
+      "path": "/assets/coins/COMP.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png",
+      "bytes": 13602
+    },
+    {
+      "base": "SNX",
+      "name": "Synthetix",
+      "path": "/assets/coins/SNX.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/8cTNUtcV2ueC3royJ642uRnvTxorJAWLZc58gxAo7y56/logo.png",
+      "bytes": 11898
+    },
+    {
+      "base": "CHZ",
+      "name": "Chiliz",
+      "path": "/assets/coins/CHZ.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/5TtSKAamFq88grN1QGrEaZ1AjjyciqnCya1aiMhAgFvG/logo.png",
+      "bytes": 12445
+    },
+    {
+      "base": "CAKE",
+      "name": "PancakeSwap",
+      "path": "/assets/coins/CAKE.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82/logo.png",
+      "bytes": 23324
+    },
+    {
+      "base": "FLOKI",
+      "name": "Floki",
+      "path": "/assets/coins/FLOKI.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xcf0C122c6b73ff809C693DB761e7BaeBe62b6a2E/logo.png",
+      "bytes": 26432
+    },
+    {
+      "base": "XTZ",
+      "name": "Tezos",
+      "path": "/assets/coins/XTZ.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tezos/info/logo.png",
+      "bytes": 6839
+    },
+    {
+      "base": "IOTA",
+      "name": "IOTA",
+      "path": "/assets/coins/IOTA.png",
+      "source": "https://coin-images.coingecko.com/coins/images/692/small/IOTA_Thumbnail_%281%29.png?1743772896",
+      "bytes": 3184
+    },
+    {
+      "base": "KAVA",
+      "name": "Kava",
+      "path": "/assets/coins/KAVA.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/kava/info/logo.png",
+      "bytes": 17152
+    },
+    {
+      "base": "DASH",
+      "name": "Dash",
+      "path": "/assets/coins/DASH.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/dash/info/logo.png",
+      "bytes": 11802
+    },
+    {
+      "base": "ZEC",
+      "name": "Zcash",
+      "path": "/assets/coins/ZEC.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/zcash/info/logo.png",
+      "bytes": 2174
+    },
+    {
+      "base": "NEO",
+      "name": "Neo",
+      "path": "/assets/coins/NEO.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/neo/info/logo.png",
+      "bytes": 27029
+    },
+    {
+      "base": "USDT",
+      "name": "Tether",
+      "path": "/assets/coins/USDT.png",
+      "source": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png",
+      "bytes": 21909
+    },
+    {
+      "base": "ARB",
+      "name": "Arbitrum",
+      "path": "/assets/coins/ARB.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/16547/small/arb.jpg?1721358242",
+      "bytes": 2419
+    },
+    {
+      "base": "TAO",
+      "name": "Bittensor",
+      "path": "/assets/coins/TAO.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/28452/small/ARUsPeNQ_400x400.jpeg?1696527447",
+      "bytes": 1220
+    },
+    {
+      "base": "PEPE",
+      "name": "Pepe",
+      "path": "/assets/coins/PEPE.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/29850/small/pepe-token.jpeg?1696528776",
+      "bytes": 1889
+    },
+    {
+      "base": "BONK",
+      "name": "Bonk",
+      "path": "/assets/coins/BONK.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/28600/small/bonk.jpg?1696527587",
+      "bytes": 1987
+    },
+    {
+      "base": "TIA",
+      "name": "Celestia",
+      "path": "/assets/coins/TIA.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/31967/small/tia.jpg?1696530772",
+      "bytes": 2185
+    },
+    {
+      "base": "FLOW",
+      "name": "Flow",
+      "path": "/assets/coins/FLOW.png",
+      "source": "https://coin-images.coingecko.com/coins/images/13446/small/5f6294c0c7a8cda55cb1c936_Flow_Wordmark.png?1696513210",
+      "bytes": 2802
+    },
+    {
+      "base": "WLD",
+      "name": "Worldcoin",
+      "path": "/assets/coins/WLD.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/31069/small/worldcoin.jpeg?1696529903",
+      "bytes": 1538
+    },
+    {
+      "base": "AR",
+      "name": "Arweave",
+      "path": "/assets/coins/AR.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/4343/small/oRt6SiEN_400x400.jpg?1696504946",
+      "bytes": 1975
+    },
+    {
+      "base": "W",
+      "name": "Wormhole",
+      "path": "/assets/coins/W.png",
+      "source": "https://coin-images.coingecko.com/coins/images/35087/small/W_Token_%283%29.png?1758122686",
+      "bytes": 2500
+    },
+    {
+      "base": "ZRO",
+      "name": "LayerZero",
+      "path": "/assets/coins/ZRO.jpg",
+      "source": "https://coin-images.coingecko.com/coins/images/28206/small/ftxG9_TJ_400x400.jpeg?1696527208",
+      "bytes": 1169
+    },
+    {
+      "base": "DEXE",
+      "name": "DeXe",
+      "path": "/assets/coins/DEXE.png",
+      "source": "https://coin-images.coingecko.com/coins/images/12713/small/DEXE_token_logo.png?1696512514",
+      "bytes": 1327
+    }
+  ]
+}

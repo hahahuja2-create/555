@@ -1,0 +1,35 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');const{spawn}=require('node:child_process');
+test('Earn API: concurrency, persistence, exact transfers and protected balances',async t=>{
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'taskmall-earn-'));const now=Date.now(),salt='test-earn-salt',password='EarnApiPass2026';
+ const make=(email,code,ref)=>({id:crypto.randomUUID(),name:'Test Earn',email,passwordSalt:salt,passwordHash:crypto.scryptSync(password,salt,64).toString('hex'),inviteCode:code,referredBy:ref,vipId:'free',createdAt:new Date(now-86400000).toISOString(),lockedBalance:email==='a@earn.test'?30.43:0,withdrawBalance:6.36,earnedTotal:0,activities:[],earnLastClaimAt:now-86400000});
+ const a=make('a@earn.test','AAAA','BBBB'),b=make('b@earn.test','BBBB','CCCC'),c=make('c@earn.test','CCCC',null);await fs.writeFile(path.join(directory,'db.json'),JSON.stringify({users:[a,b,c],earn:{version:1,startedAt:now-86400000,availableUnits:'0',totalPaidUnits:'0',funding:[],preview:false}}));
+ const child=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'..'),windowsHide:true,stdio:'pipe',env:{...process.env,NODE_ENV:'development',TASKMALL_MAINTENANCE_ENABLED:'0',HOST:'127.0.0.1',PORT:'4191',PUBLIC_ORIGIN:'',TASKMALL_DATA_DIR:directory,TASKMALL_DESIGN_PREVIEW:'0',TASKMALL_EARN_ENABLED:'1',TASKMALL_SPOT_ENABLED:'1',MYSQL_URL:'',DATABASE_URL:'',TASKMALL_SQLITE:'',TRON_DEPOSITS_ENABLED:'0',TRON_AUTO_WALLET:'0',TASKMALL_OPERATOR_ENABLED:'0',TRON_MANUAL_WITHDRAWALS_ENABLED:'0',BINANCE_CREDENTIAL_FILE:path.join(directory,'missing')}});
+ t.after(async()=>{child.kill();await new Promise(resolve=>child.exitCode!==null?resolve():child.once('exit',resolve));assert.ok(path.resolve(directory).startsWith(path.resolve(os.tmpdir())+path.sep)&&path.basename(directory).startsWith('taskmall-earn-'));await fs.rm(directory,{recursive:true,force:true});});
+ const base='http://127.0.0.1:4191';for(let i=0;i<60;i++){try{if((await fetch(base+'/api/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+ const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:a.email,password})});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie').split(';')[0];
+ const request=(url,body)=>fetch(base+url,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Cookie:cookie},body:body?JSON.stringify(body):undefined});
+ const config=await(await request('/api/spot/config')).json();assert.equal(config.mode,'synthetic');assert.equal(config.tradingEnabled,true);assert.equal((await request('/api/preview/session',{})).status,404);
+ const eligible=await(await request('/api/earn')).json();assert.equal(eligible.canClaim,true);assert.equal(eligible.fundingRequired,false);assert.equal(eligible.payoutModel,'manual-withdrawal');
+ const statuses=await Promise.all([request('/api/earn/claim',{requestKey:crypto.randomUUID()}),request('/api/earn/claim',{requestKey:crypto.randomUUID()})]);assert.deepEqual(statuses.map(r=>r.status).sort(),[200,409]);
+ const data=await(await request('/api/earn')).json();assert.equal(data.earningBalance,30.43);assert.equal(data.withdrawalBalance,9.403);assert.equal(data.nextReward,3.043);assert.equal(data.canClaim,false);
+ const transfer=await request('/api/wallet/transfer',{amount:'1.003'});assert.equal(transfer.status,200);const moved=await transfer.json();assert.equal(moved.user.lockedBalance,31.433);assert.equal(moved.user.withdrawBalance,8.4);
+ const legacy=await request('/api/vips/vip1/buy',{});assert.equal(legacy.status,410);const tasks=await request('/api/tasks/free-daily-task/complete',{});assert.equal(tasks.status,410);
+ const saved=JSON.parse(await fs.readFile(path.join(directory,'db.json'),'utf8'));assert.equal(saved.users.find(u=>u.id===b.id).withdrawBalance,6.6643);assert.equal(saved.users.find(u=>u.id===c.id).withdrawBalance,6.51215);assert.equal(saved.earn.availableUnits,'0');assert.equal(saved.earn.totalAccruedUnits,'3499450');assert.equal(saved.earn.version,2);
+ const sourceUser=saved.users.find(u=>u.id===a.id);assert.equal(sourceUser.lockedBalance+sourceUser.withdrawBalance,39.833);assert.equal(sourceUser.earnClaimTotal,3.043);
+});
+
+test('startup conversion preserves Spot/reserved balances and restores purchased principal only once',async t=>{
+ const directory=await fs.mkdtemp(path.join(os.tmpdir(),'taskmall-earn-migration-')),now=Date.now(),salt='migration-test',password='MigrationPass2026';
+ const user={id:crypto.randomUUID(),name:'Existing account',email:'existing@earn.test',passwordSalt:salt,passwordHash:crypto.scryptSync(password,salt,64).toString('hex'),createdAt:new Date(now-86400000).toISOString(),vipId:'vip1',vipStartedAt:new Date(now-3600000).toISOString(),vipExpiresAt:new Date(now+86400000).toISOString(),lockedBalance:.43,withdrawBalance:6.36,reservedBalance:2,earnedTotal:0,activities:[{type:'vip',amount:30,at:new Date(now-3600000).toISOString()}],lastCompletionDate:new Date(now).toISOString().slice(0,10)};
+ await fs.writeFile(path.join(directory,'db.json'),JSON.stringify({users:[user]}));
+ let child;
+ const stop=async()=>{if(child&&child.exitCode===null&&child.signalCode===null){child.kill();await new Promise(resolve=>child.once('exit',resolve));}child=null;};
+ t.after(async()=>{await stop();assert.ok(path.resolve(directory).startsWith(path.resolve(os.tmpdir())+path.sep)&&path.basename(directory).startsWith('taskmall-earn-migration-'));await fs.rm(directory,{recursive:true,force:true});});
+ for(let launch=0;launch<2;launch++){
+  child=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'..'),windowsHide:true,stdio:'ignore',env:{...process.env,NODE_ENV:'test',HOST:'127.0.0.1',PORT:'4193',PUBLIC_ORIGIN:'',TASKMALL_DATA_DIR:directory,TASKMALL_EARN_ENABLED:'1',TASKMALL_SPOT_ENABLED:'1',TASKMALL_DESIGN_PREVIEW:'0',TASKMALL_SQLITE:'',MYSQL_URL:'',DATABASE_URL:'',TRON_DEPOSITS_ENABLED:'0',TASKMALL_OPERATOR_ENABLED:'0'}});
+  const base='http://127.0.0.1:4193';let ready=false;for(let i=0;i<50;i++){try{if((await fetch(base+'/api/health')).ok){ready=true;break;}}catch{}await new Promise(resolve=>setTimeout(resolve,100));}assert.equal(ready,true);
+  const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:user.email,password})});assert.equal(login.status,200);const account=(await login.json()).user;assert.equal(account.earningBalance,30.43);assert.equal(account.spotBalance,6.36);assert.equal(account.reservedBalance,2);
+  const cookie=login.headers.get('set-cookie').split(';')[0],reward=await(await fetch(base+'/api/earn',{headers:{Cookie:cookie}})).json();assert.equal(new Date(reward.nextClaimAt).getUTCHours(),0);assert.ok(reward.nextClaimAt>now);
+  await stop();const saved=JSON.parse(await fs.readFile(path.join(directory,'db.json'),'utf8'));assert.equal(saved.users[0].earnMigration.principalRestored,30);assert.equal(saved.spot.model,'synthetic');
+ }
+});

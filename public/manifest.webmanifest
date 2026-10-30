@@ -1,0 +1,16 @@
+{
+  "name": "Portgainy",
+  "short_name": "Portgainy",
+  "description": "Trade. Earn. Level up.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "id": "/",
+  "scope": "/",
+  "icons": [
+    { "src": "/assets/brand/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/brand/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

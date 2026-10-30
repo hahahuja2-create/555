@@ -1,0 +1,76 @@
+{
+  "name": "portgainy-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portgainy Earn, referrals, synthetic trading and USDT wallets using the existing Railway MySQL ledger",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env --watch server.js",
+    "db:migrate": "node --env-file-if-exists=.env scripts/mysql-migrate.cjs",
+    "test:mysql": "node --test scripts/verify-mysql.cjs",
+    "test:cutover": "node --test scripts/verify-deployment-cutover.cjs",
+    "check:cutover": "node --check payments/deployment-cutover.js && node --check scripts/verify-deployment-cutover.cjs",
+    "check:mysql": "node --check database/mysql.js && node --check payments/mysql-store.js && node --check platform-catalog.js && node --check scripts/mysql-migrate.cjs && node --check scripts/verify-mysql.cjs",
+    "payments:check": "node --env-file-if-exists=.env scripts/payment-status.cjs",
+    "payments:operator": "node --env-file-if-exists=.env scripts/payment-operator.cjs",
+    "payments:automation-check": "node --env-file-if-exists=.env scripts/automation-preflight.cjs",
+    "test:railway-operator": "node --test scripts/verify-railway-operator.cjs",
+    "payments:desk": "node --env-file-if-exists=.env scripts/operator-open.cjs",
+    "test:admin": "node --test scripts/verify-admin.cjs",
+    "collections": "node --env-file-if-exists=.env scripts/collection-worker.cjs",
+    "collections:prepare": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --copy-backup",
+    "collections:prepare-local": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --local-backup",
+    "collections:enable": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --run",
+    "collections:railway-check": "node --env-file-if-exists=.env scripts/collection-worker.cjs --railway",
+    "collections:railway-enable": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --run --railway",
+    "collections:authorize": "node --env-file-if-exists=.env scripts/collection-service.cjs --authorize",
+    "collections:service": "node --env-file-if-exists=.env scripts/collection-service.cjs --run",
+    "collections:service-check": "node --env-file-if-exists=.env scripts/collection-service.cjs --check",
+    "collections:install": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File scripts/install-collection-service.ps1",
+    "collections:start": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File scripts/install-collection-service.ps1 -Start",
+    "collections:stop": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy RemoteSigned -File scripts/install-collection-service.ps1 -Stop",
+    "test:collection-service": "node --test scripts/verify-collection-service.cjs",
+    "check:collection-service": "node --check payments/collection-service.js && node --check scripts/collection-service.cjs && node --check scripts/verify-collection-service.cjs && node --check scripts/automation-preflight.cjs",
+    "test:collections": "node --test scripts/verify-collection-activation.cjs",
+    "test:outgoing": "node --test scripts/verify-outgoing.cjs",
+    "test:tronlink": "node --test scripts/verify-tronlink.cjs",
+    "wallet:backup": "node --env-file-if-exists=.env scripts/wallet-backup.cjs",
+    "wallet:iphone": "node --env-file-if-exists=.env scripts/iphone-backup.cjs",
+    "wallet:iphone-verify": "node --env-file-if-exists=.env scripts/iphone-backup.cjs --verify-return",
+    "test:iphone-backup": "node --test scripts/verify-iphone-backup.cjs",
+    "wallet:secure-backup": "node --env-file-if-exists=.env scripts/secure-backup.cjs",
+    "wallet:finish-backup": "node --env-file-if-exists=.env scripts/secure-backup.cjs --verify-return",
+    "test:backup-rotation": "node --test scripts/verify-backup-rotation.cjs",
+    "check:backup": "node --check payments/backup-rotation.js && node --check scripts/secure-backup.cjs && node --check scripts/verify-backup-rotation.cjs",
+    "test:payments": "node --test scripts/verify-payments.cjs",
+    "check": "node --check server.js && node --check task-catalog.js && node --check public/pg-core.js && node --check public/pg-views.js && node --check public/pg-trade.js && node --check public/pg-more.js && node --check public/pg-main.js && node --check payments/tron.js && node --check payments/store.js && node --check payments/watcher.js && node --check payments/vault.js && node --check payments/outgoing.js && node --check payments/operator.js && node --check payments/transactions.js && node --check payments/collector.js && node --check payments/payouts.js && node --check payments/portal.js && node --check scripts/verify-admin.cjs && node --check payments/collection-activation.js && node --check payments/private-terminal.js && node --check payments/offline-backup.js && node --check payments/iphone-backup.js && node --check payments/operator-ui/app.js && node --check payments/operator-ui/unlock.js && node --check scripts/payment-status.cjs && node --check scripts/wallet-backup.cjs && node --check scripts/iphone-backup.cjs && node --check scripts/verify-iphone-backup.cjs && node --check scripts/payment-operator.cjs && node --check scripts/collection-worker.cjs && node --check scripts/operator-open.cjs && node --check scripts/verify-tronlink.cjs && node --check scripts/verify-collection-activation.cjs && node --check scripts/tron-test-helpers.cjs && node --check scripts/tron-fixture-preload.cjs && npm run check:backup && node --check markets/binance.js && node --check markets/earn.js && node --check markets/assistant.js && node --check markets/credentials.js && node --check markets/spot.js && node --check public/coin-logos.js",
+    "test:ui": "node scripts/verify-ui.cjs",
+    "test:api": "node --test scripts/verify-api.cjs",
+    "test:maintenance": "node --test scripts/verify-maintenance.cjs",
+    "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs scripts/verify-referral-promotion.cjs scripts/verify-referral-promotion-api.cjs",
+    "check:referral-promotion": "node --check markets/referral-promotion.js && node --check scripts/verify-referral-promotion-api.cjs",
+    "test:spot": "node --test scripts/verify-spot.cjs",
+    "test:assets": "node --test scripts/verify-assets.cjs"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/noto-sans-georgian": "^5.3.0",
+    "chart.js": "^4.5.1",
+    "ethers": "6.17.0",
+    "lucide": "^1.52.0",
+    "mysql2": "^3.24.5",
+    "qrcode": "1.5.4",
+    "tronweb": "6.5.1"
+  },
+  "overrides": {
+    "tronweb": {
+      "axios": "1.20.0"
+    }
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
