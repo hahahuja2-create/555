@@ -22,12 +22,12 @@ function earnView() {
         <p>Claim once per UTC day. Rewards are paid to your Spot balance and your principal stays in Earn.</p>
       </div>
       ${active ? '' : `<div class="earn-gate"><div class="earn-gate-top"><span>${icon('lock')}Earn starts at ${earnMin()} USDT</span><b>${usd(short)} USDT to go</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(num(u.lockedBalance) / earnMin(), 0, 1) * 100)}%"></b></i><p>Your Earn balance is ${money(u.lockedBalance)} USDT. Add ${usd(short)} USDT more to unlock daily rewards.</p><button class="btn btn-lime btn-block" type="button" data-act="wallet-deposit">${icon('deposit')}Add ${usd(short)} USDT</button></div>`}
-      <div class="claim-box ${ready ? 'is-ready' : ''}">
+      ${active ? `      <div class="claim-box ${ready ? 'is-ready' : ''}">
         <div><small>Next reward</small><strong>${usd(reward)} <span>USDT</span></strong></div>
         <div><small>${ready || !active ? 'Status' : 'Opens in'}</small><strong class="${ready ? 'up' : ''}" ${active ? 'data-earn-timer' : ''}>${ready ? 'Ready' : !active ? 'Locked' : e ? clock(e.nextClaimAt - serverNow()) : '--:--:--'}</strong></div>
         <button class="btn ${ready ? 'btn-lime' : 'btn-dark'} btn-lg btn-block" type="button" data-act="claim" data-claim-btn ${ready ? '' : 'disabled'}><span data-claim-label>${ready ? 'Claim reward' : !active ? `Earn starts at ${earnMin()} USDT` : reward > 0 ? 'Waiting for next claim' : 'No reward available'}</span></button>
         <p class="form-msg" id="earn-error" role="alert"></p>
-      </div>
+      </div>` : ''}
     </article>
     <section class="tiles">
       <article class="tile"><span class="tile-ic">${icon('earn')}</span><small>Earn balance</small><strong>${money(u.lockedBalance)}</strong><div class="btn-row"><button class="btn btn-lime btn-sm" data-act="wallet-deposit">${icon('deposit')}Deposit</button><button class="btn btn-ghost btn-sm" data-act="wallet-transfer">${icon('transfer')}Move</button></div></article>

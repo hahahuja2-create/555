@@ -12,7 +12,8 @@ function render() {
   const active = document.activeElement;
   const keep = active && active.id && /^(admin-search|market-search|faq-search|chat-input|order-input|calc-amount)$/.test(active.id)
     ? { id: active.id, start: active.selectionStart, end: active.selectionEnd } : null;
-  const y = window.scrollY;
+  const y = S.renderedView === S.view ? window.scrollY : 0;
+  S.renderedView = S.view;
   S.trade.chart?.destroy(); S.trade.chart = null;
   if (S.loading) renderLoading();
   else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else renderAuth(); }
