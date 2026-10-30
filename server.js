@@ -405,6 +405,7 @@ async function loadDatabase() {
         const { OwnerSweeps } = require('./payments/owner-sweeps');
         ownerSweeps = new OwnerSweeps({store:paymentStore, ledger:outgoingLedger, exclusive, signer:automaticPayouts, client:depositWatcher.client,
           source:TREASURY, destination:process.env.TRON_OWNER_TREASURY_ADDRESS, privateKey:process.env.TRON_WORKING_WALLET_PRIVATE_KEY,
+          fuelAddress:process.env.TRON_FUEL_ADDRESS || null,
           feeLimit:Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
         automaticPayouts.hasPendingSweep = async () => Boolean(await ownerSweeps.pendingInside());
         automaticPayouts.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
@@ -799,6 +800,8 @@ async function handleApi(req, res, url) {
       const recent = await ownerSweeps.latestInside();
       return json(res, 200, {address:TREASURY, destination:ownerSweeps.destination,
         balance:ownerSweeps.balanceUnits == null ? null : usdtAmount(ownerSweeps.balanceUnits), balanceAt:ownerSweeps.balanceAt || null,
+        workingTrx:ownerSweeps.trxSun == null ? null : Number(ownerSweeps.trxSun)/1_000_000,
+        fuelAddress:ownerSweeps.fuelAddress || null, fuelTrx:ownerSweeps.fuelSun == null ? null : Number(ownerSweeps.fuelSun)/1_000_000,
         issue:ownerSweeps.lastIssue || null,
         payoutIssue:automaticPayouts?.lastIssue || null, collectionIssue:automaticCollections?.lastIssue || null,
         pending:pending ? {id:pending.id,amount:usdtAmount(pending.amount_units),status:pending.status,txid:pending.txid} : null,

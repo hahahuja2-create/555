@@ -271,7 +271,10 @@ function adminWorkingWallet(wallet) {
     SIGNED_TRANSACTION_EXPIRED:'A signed collection needs review.', PAUSED_FOR_REVIEW:'Deposit collection needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'Deposit collection is temporarily unavailable.'}[wallet.collectionIssue];
   return `<section class="card">${sectionHead('Working wallet')}
     <dl class="facts"><div><dt>Balance</dt><dd>${wallet.balance == null ? 'Unavailable' : `${money(wallet.balance)} USDT`}</dd></div>
+      <div><dt>Working wallet TRX</dt><dd>${wallet.workingTrx == null ? 'Unavailable' : `${money(wallet.workingTrx)} TRX`}</dd></div>
+      ${wallet.fuelAddress ? `<div><dt>Fuel wallet TRX</dt><dd>${wallet.fuelTrx == null ? 'Unavailable' : `${money(wallet.fuelTrx)} TRX`}</dd></div>` : ''}
       <div><dt>Working address</dt><dd><code>${esc(wallet.address)}</code></dd></div>
+      ${wallet.fuelAddress ? `<div><dt>Fuel address</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
       <div><dt>Send to your treasury</dt><dd><code>${esc(wallet.destination)}</code></dd></div></dl>
     <p class="note">${icon('info')}Funds stay here until you request a transfer. Keep enough USDT and TRX available for customer withdrawals.</p>
     ${payoutIssue ? `<p class="note">${icon('info')}${esc(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${esc(collectionIssue)}</p>` : ''}

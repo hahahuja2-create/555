@@ -7,10 +7,11 @@ const { failure } = require('./outgoing');
 // Requests are manually created by the administrator. This worker cannot choose
 // a destination: every transfer is pinned to the configured owner address.
 class OwnerSweeps {
-  constructor({store, ledger, exclusive, signer, client, source, destination, privateKey, feeLimit, isEnabled}) {
+  constructor({store, ledger, exclusive, signer, client, source, destination, fuelAddress, privateKey, feeLimit, isEnabled}) {
     addressHex(source); addressHex(destination);
+    if (fuelAddress) addressHex(fuelAddress);
     if (source === destination) throw new Error('SWEEP_DESTINATION_EQUALS_SOURCE');
-    Object.assign(this,{store,ledger,exclusive,signer,client,source,destination,privateKey,feeLimit:boundedSun(feeLimit,'sweep fee limit'),isEnabled});
+    Object.assign(this,{store,ledger,exclusive,signer,client,source,destination,fuelAddress,privateKey,feeLimit:boundedSun(feeLimit,'sweep fee limit'),isEnabled});
     this.sql=store.sql; this.transaction=(store.transactionAsync||store.transaction).bind(store); this.stopped=false;
     if (store.dialect !== 'mysql') this.sql.exec(`CREATE TABLE IF NOT EXISTS automation_sweeps (
       id TEXT PRIMARY KEY, request_key TEXT NOT NULL UNIQUE, destination TEXT NOT NULL, amount_units TEXT NOT NULL,
@@ -100,6 +101,8 @@ class OwnerSweeps {
     if(this.stopped || !this.isEnabled())return;
     try { this.balanceUnits=(await tokenBalance(this.client,this.source)).toString(); this.balanceAt=Date.now(); }
     catch { this.balanceUnits=null; this.balanceAt=null; }
+    try { this.trxSun=(await trxBalance(this.client,this.source)).toString(); } catch { this.trxSun=null; }
+    if(this.fuelAddress) { try { this.fuelSun=(await trxBalance(this.client,this.fuelAddress)).toString(); } catch { this.fuelSun=null; } }
     return this.signer.enqueue(()=>this.processInside());
   }
   start(interval=30_000){const loop=async()=>{try{await this.cycle();this.lastIssue=null;}catch(error){
