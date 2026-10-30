@@ -284,8 +284,12 @@ function adminWithdrawals(all) {
 }
 
 function adminUsers(users) {
+  return `<div class="search-field"><span>${icon('search')}</span><input id="admin-search" type="search" value="${esc(S.adminSearch)}" placeholder="Search users" autocomplete="off"></div>
+    <div id="admin-users-results">${adminUserResults(users)}</div>`;
+}
+
+function adminUserResults(users) {
   const q = S.adminSearch.trim().toLowerCase();
   const rows = [...users].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).filter(u => !q || `${u.email} ${u.name}`.toLowerCase().includes(q));
-  return `<div class="search-field"><span>${icon('search')}</span><input id="admin-search" type="search" value="${esc(S.adminSearch)}" placeholder="Search users" autocomplete="off"></div>
-    ${rows.length ? `<ul class="admin-list" id="admin-users">${rows.map(u => `<li class="admin-card" data-user="${esc(u.id)}"><div class="admin-row"><b>${esc(u.email)}</b><span class="tag">${Math.round(num(u.earnRate ?? 0.1) * 100)}% / 24h</span></div><small>${esc(u.name)} · joined ${esc(dateText(u.createdAt, true))}</small><div class="admin-kv"><span>Earn</span>${adminNum(u.lockedBalance)}<span>Spot</span>${adminNum(u.withdrawBalance)}<span>Reserved</span>${adminNum(u.reservedBalance)}<span>Earned</span>${adminNum(u.earnedTotal)}<span>Withdrawn</span>${adminNum(u.withdrawnTotal)}</div></li>`).join('')}</ul>` : emptyState('users', 'No users found')}`;
+  return `${rows.length ? `<ul class="admin-list" id="admin-users">${rows.map(u => `<li class="admin-card" data-user="${esc(u.id)}"><div class="admin-row"><b>${esc(u.email)}</b><span class="tag">${Math.round(num(u.earnRate ?? 0.1) * 100)}% / 24h</span></div><small>${esc(u.name)} · joined ${esc(dateText(u.createdAt, true))}</small><div class="admin-kv"><span>Earn</span>${adminNum(u.lockedBalance)}<span>Spot</span>${adminNum(u.withdrawBalance)}<span>Reserved</span>${adminNum(u.reservedBalance)}<span>Earned</span>${adminNum(u.earnedTotal)}<span>Withdrawn</span>${adminNum(u.withdrawnTotal)}</div></li>`).join('')}</ul>` : emptyState('users', 'No users found')}`;
 }

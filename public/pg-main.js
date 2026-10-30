@@ -102,14 +102,18 @@ async function loadAdmin() {
 
 let feed = null;
 let previousPrices = new Map();
+let pendingMarketView = null;
+const isEditing = () => Boolean(document.activeElement?.matches?.('input, textarea, select, [contenteditable="true"]'));
 
 function acceptMarkets(data) {
   const first = !S.markets.length;
   S.markets = Array.isArray(data.markets) ? data.markets : [];
   S.marketStatus = data.status || 'live'; S.marketUpdated = data.updatedAt;
   if (!S.user && !PUBLIC_VIEWS.includes(S.view)) return;
-  if (first && S.markets.length && S.user && ['home', 'markets', 'trade', 'assets'].includes(S.view) && !sheetEl) render();
-  else refreshCells();
+  if (first && S.markets.length && S.user && ['home', 'markets', 'trade', 'assets'].includes(S.view) && !sheetEl) {
+    if (isEditing()) { pendingMarketView = S.view; refreshCells(); }
+    else render();
+  } else refreshCells();
   checkAlerts();
 }
 
@@ -239,10 +243,12 @@ function updateTimers() {
       button.disabled = !ready || S.claimBusy;
       button.classList.toggle('btn-lime', ready); button.classList.toggle('btn-dark', !ready);
     }
-    if (ready && !S.readyRendered) { S.readyRendered = true; if (['home', 'earn'].includes(S.view) && !sheetEl) render(); }
+    if (ready && !S.readyRendered && !isEditing()) { S.readyRendered = true; if (['home', 'earn'].includes(S.view) && !sheetEl) render(); }
     if (!ready) S.readyRendered = false;
   }
   for (const el of document.querySelectorAll('[data-promo-timer]')) el.textContent = promoRemaining(Number(el.dataset.promoTimer));
+  if (pendingMarketView && pendingMarketView !== S.view) pendingMarketView = null;
+  if (pendingMarketView && !isEditing() && !sheetEl) { pendingMarketView = null; render(); }
 }
 
 setInterval(updateTimers, 1000);
@@ -259,7 +265,7 @@ setInterval(async () => {
     const changed = JSON.stringify(me.user) !== JSON.stringify(S.user) || JSON.stringify(activity.activities) !== JSON.stringify(S.activities);
     S.user = me.user; S.activities = activity.activities;
     if (config) applyPayConfig(config);
-    if (changed) { await refreshAccount().catch(() => {}); const typing = document.activeElement?.matches?.('input,textarea,select'); if (!sheetEl && !typing && S.view !== 'profile') render(); }
+    if (changed) { await refreshAccount().catch(() => {}); if (!sheetEl && !isEditing() && S.view !== 'profile') render(); }
     if (credited) toast('A confirmed USDT deposit was credited.', 'ok', 'Deposit received');
   } catch { /* network interruptions never change displayed balances */ } finally { refreshRunning = false; }
 }, 20000);
@@ -348,7 +354,7 @@ document.addEventListener('input', event => {
   const t = event.target;
   if (t.id === 'market-search') { S.marketQuery = t.value; refreshMarketList(); }
   else if (t.id === 'faq-search') { S.faqQuery = t.value; document.querySelector('#faq-list').innerHTML = faqList(FAQ.filter(([a, b]) => !t.value || `${a} ${b}`.toLowerCase().includes(t.value.toLowerCase()))); }
-  else if (t.id === 'admin-search') { S.adminSearch = t.value; render(); }
+  else if (t.id === 'admin-search') { S.adminSearch = t.value; const results = document.querySelector('#admin-users-results'); if (results && S.admin) results.innerHTML = adminUserResults(S.admin.users); }
   else if (t.id === 'order-input') {
     const places = S.trade.side === 'BUY' ? 6 : 8;
     let v = t.value.replace(',', '.').replace(/[^\d.]/g, '');

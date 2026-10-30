@@ -276,3 +276,12 @@
   .auth-stage { align-self: center; }
   .auth-card { align-content: center; margin: 0; padding: 40px; border-radius: 0; box-shadow: inset 1px 0 0 var(--line-2); }
 }
+
+/* Keep editable controls at a readable size on touch devices. iOS Safari otherwise
+   zooms the page when a small-text field receives focus. Pinch zoom stays enabled. */
+@media (max-width: 639px), (pointer: coarse) {
+  input:not([type="hidden"]):not([type="range"]), textarea, select,
+  .control input, .control select, .control.addr input, .search-field input, .chat-form input {
+    font-size: 16px;
+  }
+}
