@@ -153,6 +153,15 @@ function earnProgress() {
   return `<button class="earn-meter" type="button" data-act="wallet-deposit"><span>${icon('earn')}Earn starts at ${e} USDT · <b>${usd(short)} USDT</b> to go</span><i class="bar"><b style="width:${Math.round(clamp(bal / e, 0, 1) * 100)}%"></b></i></button>`;
 }
 
+function referralCard() {
+  const code = S.team?.inviteCode || S.user.inviteCode, r = S.referrals || {};
+  return `<article class="card ref-card"><div class="sec-head"><h2>Referral program</h2><button class="more-link" type="button" data-act="goto" data-view="referrals">Details${icon('chevron')}</button></div>
+    <div class="ref-top"><div><small>Your invite code</small><code>${esc(code)}</code></div><button class="icon-btn" type="button" data-act="copy-invite" aria-label="Copy code">${icon('copy')}</button></div>
+    <div class="ref-stats"><div><small>Level 1 · 10%</small><b>${r.level1 || 0}</b></div><div><small>Level 2 · 5%</small><b>${r.level2 || 0}</b></div><div><small>Earned</small><b class="up">${S.hide ? '••••' : usd(S.earn?.referralEarned || 0)}</b></div></div>
+    <p class="ref-note">Earn 10% of every reward your friends claim, and 5% from the friends they invite.</p>
+    <div class="btn-row"><button class="btn btn-lime btn-sm" type="button" data-act="copy-invite-link">${icon('link')}Copy link</button><button class="btn btn-ghost btn-sm" type="button" data-act="share-invite">${icon('share')}Share</button></div></article>`;
+}
+
 function allocationCard() {
   const u = S.user;
   const parts = [
@@ -229,6 +238,7 @@ function homeView() {
     </article>
     ${claimStrip()}
     ${allocationCard()}
+    ${referralCard()}
     </div><div class="col">
     <section class="card">
       <div class="tabs" role="tablist">${tabs.map(([key, label]) => `<button class="${S.marketTab === key ? 'is-on' : ''}" type="button" role="tab" data-act="market-tab" data-tab="${key}">${label}</button>`).join('')}<button class="more-link push" type="button" data-act="goto" data-view="markets">All${icon('chevron')}</button></div>

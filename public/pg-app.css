@@ -519,3 +519,16 @@
 .about-end h2 { font: 800 28px/1 var(--f-display); text-transform: uppercase; }
 .about-end p { color: var(--text-3); }
 @media (min-width: 640px) { .facts-strip { grid-template-columns: repeat(4, 1fr); } .acct-cards { grid-template-columns: repeat(3, 1fr); } .pillars.safety { grid-template-columns: repeat(3, 1fr); } }
+
+/* ---- Referral card on Home ---- */
+.ref-card { display: grid; gap: 10px; background: radial-gradient(90% 100% at 100% 0, rgba(69, 214, 255, 0.12), transparent 60%), linear-gradient(180deg, var(--s2), var(--s1)); }
+.ref-card .sec-head { margin-bottom: 0; }
+.ref-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ref-top small, .ref-stats small { display: block; color: var(--text-3); font: 600 9.5px var(--f-hud); letter-spacing: 0.1em; text-transform: uppercase; }
+.ref-top code { display: block; margin-top: 2px; color: var(--lime); font: 800 28px/1 var(--f-display); letter-spacing: 0.1em; text-shadow: 0 0 16px rgba(200, 247, 81, 0.35); }
+.ref-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ref-stats > div { padding: 8px 10px; background: rgba(255, 255, 255, 0.05); }
+.ref-stats b { display: block; margin-top: 2px; font: 800 20px/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.ref-note { color: var(--text-3); font-size: 12px; }
+.ref-card .btn-row { margin-top: 0; }
+@media (max-width: 1023px) { .home { grid-template-columns: minmax(0, 1fr); } }
