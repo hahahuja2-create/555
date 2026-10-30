@@ -47,7 +47,7 @@ class OutgoingLedger {
 
   async withdrawal(id) { return this.sql.prepare('SELECT * FROM withdrawals WHERE id=?').get(id); }
 
-  async request(state, userId, { key, destination, gross }) {
+  async request(state, userId, { key, destination, gross, automatic = false }) {
     if (typeof key !== 'string' || !/^[a-zA-Z0-9_-]{16,128}$/.test(key)) throw failure('INVALID_REQUEST_KEY', 400);
     try { addressHex(destination); } catch { throw failure('INVALID_WALLET', 400); }
     const value = units(gross);
@@ -58,6 +58,9 @@ class OutgoingLedger {
         if (previous.destination !== destination || previous.gross_units !== value.toString()) throw failure('REQUEST_KEY_CONFLICT');
         return { record: previous, changed: false };
       }
+      if (automatic === true && (destination === this.treasury || await this.sql.prepare('SELECT 1 FROM deposit_addresses WHERE address=?').get(destination))) {
+        throw failure('WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS',400);
+      }
       if (value < units(MINIMUM_WITHDRAWAL_USDT)) throw failure('WITHDRAWAL_BELOW_MINIMUM', 400);
       const user = state.users.find(item => item.id === userId);
       if (!user || units(user.withdrawBalance) < value) throw failure('INSUFFICIENT_WITHDRAW_BALANCE', 400);
@@ -67,20 +70,26 @@ class OutgoingLedger {
       user.withdrawBalance = amount(units(user.withdrawBalance) - value);
       user.reservedBalance = amount(units(user.reservedBalance || 0) + value);
       user.activities.unshift({ id, type: 'withdraw', amount: amount(value), fee: amount(fee), netAmount: amount(value - fee),
-        network: 'USDT TRC20', wallet: destination, status: 'requested', at: new Date(now).toISOString() });
+        network: 'USDT TRC20', wallet: destination, status: 'requested', ...(automatic === true ? {automatic:true} : {}), at: new Date(now).toISOString() });
       await this.sql.prepare('INSERT INTO withdrawals VALUES (?,?,?,?,?,?,?,?,?,?,NULL,NULL)').run(id, userId, key, destination,
         value.toString(), fee.toString(), (value - fee).toString(), 'requested', now, now);
       await this.store.saveInside(state, 'withdrawal-reservation');
       await this.audit(userId, 'withdrawal-requested', id);
+      if (automatic === true) await this.audit('automatic-payout', 'automatic-payout-eligible', id);
       return { record: await this.withdrawal(id), changed: true };
     });
   }
 
-  async decide(state, id, decision) {
+  async automaticEligible(id) {
+    return Boolean(await this.sql.prepare("SELECT 1 FROM payment_audit WHERE action='automatic-payout-eligible' AND job_id=?").get(id));
+  }
+
+  async decide(state, id, decision, actor = 'operator') {
     if (!['approve', 'reject'].includes(decision)) throw failure('INVALID_DECISION', 400);
     return this.transaction(async () => {
       const record = await this.withdrawal(id);
       if (!record) throw failure('WITHDRAWAL_NOT_FOUND', 404);
+      if (await this.automaticEligible(id) && actor !== 'automatic-payout') throw failure('AUTOMATIC_PAYOUT_IN_PROGRESS');
       const status = decision === 'approve' ? 'approved' : 'rejected';
       if (record.status === status) return { record, changed: false };
       // Once approved, a transfer may already have been signed outside this application.
@@ -95,7 +104,7 @@ class OutgoingLedger {
       if (activity) activity.status = status;
       await this.sql.prepare('UPDATE withdrawals SET status=?,updated_at=? WHERE id=?').run(status, Date.now(), id);
       await this.store.saveInside(state, 'withdrawal-' + status);
-      await this.audit('operator', 'withdrawal-' + status, id);
+      await this.audit(actor, 'withdrawal-' + status, id);
       return { record: await this.withdrawal(id), changed: true };
     });
   }
@@ -105,6 +114,7 @@ class OutgoingLedger {
     return this.transaction(async () => {
       const record = await this.withdrawal(id);
       if (!record) throw failure('WITHDRAWAL_NOT_FOUND', 404);
+      if (await this.automaticEligible(id)) throw failure('AUTOMATIC_PAYOUT_IN_PROGRESS');
       if (record.status === 'confirmed') return { record, changed: false };
       if (!['requested', 'approved'].includes(record.status)) throw failure('WITHDRAWAL_ALREADY_IN_PROGRESS');
       // A transfer prepared in the TronLink desk may already be signed; finish that one there instead.
@@ -148,7 +158,7 @@ class OutgoingLedger {
     return row?.payload ? JSON.parse(row.payload) : null;
   }
 
-  async recordSignedWithdrawal(state, id, transaction, validate) {
+  async recordSignedWithdrawal(state, id, transaction, validate, actor = 'tronlink') {
     const intent = await this.withdrawalIntent(id);
     const record = await this.withdrawal(id);
     if (!intent || !record) throw failure('PAYOUT_NOT_PREPARED');
@@ -156,10 +166,10 @@ class OutgoingLedger {
     const prepared = JSON.parse(intent.payload);
     if (transaction.txID !== intent.txid || transaction.raw_data_hex !== prepared.raw_data_hex) throw failure('PAYOUT_INTENT_MISMATCH');
     if (record.txid === transaction.txID && !await this.signedWithdrawal(id)) throw failure('PAYOUT_SIGNATURE_NOT_RECORDED');
-    return this.submitWithdrawal(state, id, transaction.txID, transaction);
+    return this.submitWithdrawal(state, id, transaction.txID, transaction, actor);
   }
 
-  async submitWithdrawal(state, id, txid, transaction = null) {
+  async submitWithdrawal(state, id, txid, transaction = null, signer = 'tronlink') {
     transactionId(txid);
     return this.transaction(async () => {
       const record = await this.withdrawal(id);
@@ -176,8 +186,8 @@ class OutgoingLedger {
       const activity = user?.activities.find(item => item.id === id);
       if (activity) { activity.status = 'submitted'; activity.txid = txid; }
       await this.store.saveInside(state, 'withdrawal-submitted');
-      await this.audit('operator', 'withdrawal-submitted', id);
-      if (transaction) await this.audit('tronlink', 'withdrawal-signed-before-broadcast', id);
+      await this.audit(transaction ? signer : 'operator', 'withdrawal-submitted', id);
+      if (transaction) await this.audit(signer, 'withdrawal-signed-before-broadcast', id);
       return this.withdrawal(id);
     });
   }
@@ -309,7 +319,19 @@ class SettlementWatcher {
         info = await this.client.receipt(job.txid);
         if (!info.id || info.blockNumber > height) throw failure('AWAITING_CONFIRMATION');
         events = decodeTransfers(info, job.txid, height);
-        if (info.receipt?.result !== 'SUCCESS') throw failure('CHAIN_TRANSACTION_FAILED');
+        if (info.receipt?.result !== 'SUCCESS') {
+          if (job.kind === 'withdrawal' && await this.exclusive(() => this.ledger.automaticEligible(job.id))) {
+            // Only a verified, solidified, recognized failure may release funds;
+            // a timeout, missing receipt or expired signed transaction never can.
+            await this.exclusive(async () => {
+              const state = structuredClone(this.getState());
+              await this.ledger.releaseFailed(state, 'withdrawal', job.id, info, height);
+              this.commitState(state);
+            });
+            continue;
+          }
+          throw failure('CHAIN_TRANSACTION_FAILED');
+        }
       } catch (error) {
         await this.exclusive(() => this.ledger.issue(job.kind, job.id, error.message));
         continue;

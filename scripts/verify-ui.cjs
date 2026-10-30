@@ -103,6 +103,15 @@ const root = path.resolve(__dirname, '..');
       assert.match(await page.locator('#admin-users-results').innerText(), /No users found/);
       await page.locator('#admin-search').fill('');
       assert.equal(await page.locator('#admin-users-results [data-user]').count(), 2);
+      await page.evaluate(() => {
+        S.admin.workingWallet = {address:'TWorkingWalletFixture11111111111111',destination:'TOwnerWalletFixture111111111111111',balance:10,pending:null};
+        S.adminTab='working-wallet'; render();
+      });
+      await checkEditableSizes('working-wallet');
+      assert.match(await page.locator('#content').innerText(), /Funds stay here until you request a transfer/);
+      await page.locator('[data-form="owner-sweep"] [name=amount]').fill('2.5');
+      assert.equal(await page.locator('[data-form="owner-sweep"] [name=amount]').inputValue(),'2.5');
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),true);
       const display = await page.evaluate(() => {
         S.user = {...S.user, id: '05fd1537-af76-49d9-afb0-b11859451ed9', isAdmin: true, earnedTotal: 2.6136};
         S.referrals = {level1: 0, level2: 0}; S.earn = {...S.earn, referralEarned: 0}; S.hide = false;

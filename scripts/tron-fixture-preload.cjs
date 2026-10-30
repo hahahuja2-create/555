@@ -23,7 +23,9 @@ globalThis.fetch = async (input, options = {}) => {
     const transaction = JSON.parse(options.body);
     fixture.broadcasts ||= [];
     fixture.broadcasts.push(transaction);
-    fs.writeFileSync(process.env.TASKMALL_TRON_FIXTURE, JSON.stringify(fixture));
+    const staged = process.env.TASKMALL_TRON_FIXTURE + '.staged';
+    fs.writeFileSync(staged, JSON.stringify(fixture));
+    fs.renameSync(staged, process.env.TASKMALL_TRON_FIXTURE);
     result = fixture.payouts.lostAck ? { result: false } : { result: true };
   }
   else {

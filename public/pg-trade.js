@@ -293,7 +293,7 @@ function withdrawalsList() {
   const rows = S.wallet.withdrawals;
   if (!rows) return `<div class="skeleton-list"><i class="skeleton"></i><i class="skeleton"></i></div>`;
   if (!rows.length) return emptyState('withdraw', 'No withdrawals', 'Your withdrawal requests and their status will show here.');
-  return `<ul class="acts">${rows.map(w => `<li class="act"><span class="act-ic withdraw">${icon('withdraw')}</span><span class="act-copy"><b>${usd(w.amount)} USDT <em class="st withdrawal-state st-${esc(w.status)}">${esc(WITHDRAW_STATUS[w.status] || w.status)}</em></b><small>${esc(dateText(w.createdAt))} · to ${esc(shortAddress(w.destination))}${/^[a-f0-9]{64}$/.test(w.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">TXID</a>` : ''}</small></span><span class="act-amt">${S.hide ? '••••' : usd(w.netAmount)}<small>net</small></span></li>`).join('')}</ul>`;
+  return `<ul class="acts">${rows.map(w => `<li class="act"><span class="act-ic withdraw">${icon('withdraw')}</span><span class="act-copy"><b>${usd(w.amount)} USDT <em class="st withdrawal-state st-${esc(w.status)}">${esc(withdrawStatus(w))}</em></b><small>${esc(dateText(w.createdAt))} · to ${esc(shortAddress(w.destination))}${/^[a-f0-9]{64}$/.test(w.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">TXID</a>` : ''}</small></span><span class="act-amt">${S.hide ? '••••' : usd(w.netAmount)}<small>net</small></span></li>`).join('')}</ul>`;
 }
 
 const shortAddress = value => (String(value || '').length > 14 ? `${value.slice(0, 6)}…${value.slice(-6)}` : String(value || ''));
@@ -316,6 +316,7 @@ function applyPayConfig(config = {}) {
   S.pay.origin = mode === 'production-redirect' && config.origin === 'https://taskmall.app' ? config.origin : null;
   S.pay.available = mode !== 'disabled' && config.available === true;
   S.pay.withdrawals = mode !== 'disabled' && config.withdrawalsAvailable === true;
+  S.pay.automaticWithdrawals = config.automaticWithdrawals === true;
   const min = Number(config.minimumWithdrawalAmount);
   S.pay.minimum = Number.isFinite(min) && min >= 10 ? min : 10;
   S.pay.networks = Array.isArray(config.networks) ? config.networks : [];
@@ -391,7 +392,7 @@ function walletSheet(type, meta) {
       ${strict ? `<label class="field"><span>Confirm account password</span><div class="control">${icon('lock')}<input name="password" type="password" autocomplete="current-password" maxlength="128" required></div></label>` : ''}
       <div class="summary"><span>Fee (${+(fee * 100).toFixed(2)}%)</span><output data-withdraw-fee>0.00 USDT</output><span>You receive</span><output data-withdraw-net>0.00 USDT</output></div>
       <p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">Request withdrawal</button>
-      <p class="fine">${icon('info')}Withdrawals are reviewed before they are sent. Never share your password or seed phrase with anyone.</p></form>`;
+      <p class="fine">${icon('info')}${S.pay.automaticWithdrawals ? 'Withdrawals are processed automatically when funds and network resources are available.' : 'Withdrawals are reviewed before they are sent.'} Never share your password or seed phrase with anyone.</p></form>`;
   }
   return `${head}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="transfer" data-type="transfer"><div class="route"><span>${icon('wallet')}Spot</span>${icon('arrow')}<span>${icon('earn')}Earn</span></div>${amountField('transfer')}<p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">Transfer to Earn</button><p class="fine">${icon('info')}Funds in Earn generate your daily reward. Move them back only through a withdrawal review.</p></form>`;
 }

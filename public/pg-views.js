@@ -214,12 +214,13 @@ function activityList(limit = 0, filter = 'all') {
   if (!rows.length) return emptyState('receipt', 'Nothing here yet', 'Your activity will appear as soon as you use your account.');
   return `<ul class="acts">${rows.map(a => {
     const amt = activityAmount(a);
-    const status = a.type === 'withdraw' && a.status ? `<em class="st st-${esc(a.status)}">${esc(WITHDRAW_STATUS[a.status] || a.status)}</em>` : '';
+    const status = a.type === 'withdraw' && a.status ? `<em class="st st-${esc(a.status)}">${esc(withdrawStatus(a))}</em>` : '';
     return `<li class="act"><span class="act-ic ${a.type}">${icon(activityIconFor(a))}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))} ${status}</small></span><span class="act-amt ${amt.cls}">${S.hide ? '••••' : esc(amt.text)}<small>USDT</small></span></li>`;
   }).join('')}</ul>`;
 }
 
 const WITHDRAW_STATUS = { requested: 'Under review', approved: 'Approved', submitted: 'Awaiting confirmation', confirmed: 'Sent', rejected: 'Rejected', pending: 'Pending', failed: 'Failed' };
+const withdrawStatus = item => item.automatic && ['requested', 'approved'].includes(item.status) ? 'Processing' : (WITHDRAW_STATUS[item.status] || item.status);
 
 function homeView() {
   const u = S.user, pnl = unrealized();

@@ -59,19 +59,19 @@ class CollectionWorker {
   }
 
   async ensureGas(job) {
-    const existing = this.journal.funding(job.id);
+    const existing = await this.journal.funding(job.id);
     if (existing && !existing.confirmed) {
       const signed = JSON.parse(existing.payload);
       validateTransfer(signed, { from: this.gasWallet.address, to: job.address,
-        value: this.journal.reservedCost('gas', job.id) - 2_000_000n, kind: 'trx' });
+        value: (await this.journal.reservedCost('gas', job.id)) - 2_000_000n, kind: 'trx' });
       const transaction = await this.client.request('/walletsolidity/gettransactionbyid', { value: signed.txID });
       if (transaction.txID === signed.txID) {
         if (transaction.ret?.[0]?.contractRet !== 'SUCCESS') throw new Error('GAS_TRANSACTION_FAILED_REVIEW_REQUIRED');
-        this.journal.confirmFunding(job.id);
+        await this.journal.confirmFunding(job.id);
       } else {
         if (!this.gasEnabled) throw new Error('TRX_FEE_RESERVE_REQUIRED');
         if (signed.raw_data.expiration <= Date.now()) throw new Error('SIGNED_TRANSACTION_EXPIRED');
-        this.journal.reserve('gas', job.id, this.journal.reservedCost('gas', job.id), this.gasDailyLimit);
+        await this.journal.reserve('gas', job.id, await this.journal.reservedCost('gas', job.id), this.gasDailyLimit);
         await this.send(signed);
         return false;
       }
@@ -79,17 +79,17 @@ class CollectionWorker {
     const target = BigInt(this.feeLimit) + 1_000_000n;
     const balance = await trxBalance(this.client, job.address);
     if (balance >= target) return true;
-    if (existing?.confirmed || this.journal.funding(job.id)?.confirmed) throw new Error('INSUFFICIENT_GAS_AFTER_FUNDING');
+    if (existing?.confirmed || (await this.journal.funding(job.id))?.confirmed) throw new Error('INSUFFICIENT_GAS_AFTER_FUNDING');
     if (!this.gasEnabled) throw new Error('TRX_FEE_RESERVE_REQUIRED');
     const from = this.gasWallet.address;
     const topUp = target - balance;
     if (await trxBalance(this.client, from) < topUp + 2_000_000n) throw new Error('GAS_WALLET_REQUIRES_TRX');
-    this.journal.reserve('gas', job.id, topUp + 2_000_000n, this.gasDailyLimit);
+    await this.journal.reserve('gas', job.id, topUp + 2_000_000n, this.gasDailyLimit);
     const unsigned = await buildTrxTransfer(this.client, from, job.address, topUp);
     const signed = await signTransfer(unsigned, this.gasWallet.privateKey, { from, to: job.address, value: topUp, kind: 'trx' });
     // Persist before broadcast; retries reuse these exact bytes, never a second funding transfer.
-    this.journal.saveFunding(job.id, signed);
-    this.journal.reserve('gas', job.id, topUp + 2_000_000n, this.gasDailyLimit);
+    await this.journal.saveFunding(job.id, signed);
+    await this.journal.reserve('gas', job.id, topUp + 2_000_000n, this.gasDailyLimit);
     await this.send(signed);
     return false;
   }
@@ -103,21 +103,21 @@ class CollectionWorker {
       validateTransfer(signed, expectation);
       if (signed.txID !== job.txid) throw new Error('STORED_COLLECTION_TRANSACTION_MISMATCH');
       if (signed.raw_data.expiration <= Date.now()) throw new Error('SIGNED_TRANSACTION_EXPIRED');
-      this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
+      await this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
       await this.send(signed);
       return 'awaiting-confirmation';
     }
     if (job.status !== 'planned') throw new Error('UNEXPECTED_COLLECTION_STATE');
     if (await tokenBalance(this.client, job.address) < BigInt(job.amount_units)) throw new Error('USDT_BALANCE_NOT_YET_AVAILABLE');
     // Reserve the maximum possible token fee before funding or signing anything.
-    this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
+    await this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
     if (!(await this.ensureGas(job))) return 'awaiting-gas-confirmation';
     const child = this.branch.deriveChild(job.address_index);
     const unsigned = await buildTokenTransfer(this.client, job, this.feeLimit);
     const signed = await signTransfer(unsigned, child.privateKey.slice(2), expectation);
     const stored = await this.operator('collections/' + job.id + '/record', { transaction: signed });
     if (stored.collection?.txid !== signed.txID) throw new Error('COLLECTION_NOT_PERSISTED');
-    this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
+    await this.journal.reserve('collection-fee', job.id, BigInt(this.feeLimit), this.feeDailyLimit);
     await this.send(signed);
     return 'awaiting-confirmation';
   }

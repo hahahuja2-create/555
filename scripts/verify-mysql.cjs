@@ -10,7 +10,9 @@ const { spawn } = require('node:child_process');
 const { options, connect, migrate } = require('../database/mysql');
 const { MysqlPaymentStore } = require('../payments/mysql-store');
 const { OutgoingLedger } = require('../payments/outgoing');
-const { units, amount } = require('../payments/tron');
+const { units, amount, tronAddress } = require('../payments/tron');
+const { AutomationJournal } = require('../payments/automation-journal');
+const { OwnerSweeps } = require('../payments/owner-sweeps');
 const { vipPlans, tasks } = require('../platform-catalog');
 
 test('database URLs are validated and public connections cannot silently disable TLS', () => {
@@ -175,7 +177,7 @@ test('MySQL migrations, atomic accounting, uniqueness, writer lease, sessions an
     const ledger = new OutgoingLedger(store, destination);
     const key = crypto.randomUUID();
     const request = await ledger.request(state, account.id, { key, destination, gross: '10.000001' });
-    assert.equal(request.record.net_units, '9000001');
+    assert.equal(request.record.net_units, '9800001');
     assert.equal((await ledger.request(state, account.id, { key, destination, gross: '10.000001' })).changed, false);
     await assert.rejects(() => ledger.request(structuredClone(state), account.id, { key, destination, gross: '11' }), /CONFLICT/);
     await assert.rejects(() => ledger.request(state, account.id, { key: crypto.randomUUID(), destination, gross: '9.999999' }), /MINIMUM/);
@@ -187,7 +189,7 @@ test('MySQL migrations, atomic accounting, uniqueness, writer lease, sessions an
     assert.equal(await ledger.settleWithdrawal(state, submitted, [transfer]), false);
     const wallet = await store.sql.prepare('SELECT * FROM wallets WHERE user_id=?').get(account.id);
     assert.equal(wallet.reserved_units, '0');
-    assert.equal(wallet.withdrawn_units, '9000001');
+    assert.equal(wallet.withdrawn_units, '9800001');
     const userBalances = await store.sql.prepare('SELECT vip_balance,withdrawal_balance FROM users WHERE id=?').get(account.id);
     assert.equal(userBalances.vip_balance, '22.345679');
     assert.equal(userBalances.withdrawal_balance, '89.999999');
@@ -198,9 +200,30 @@ test('MySQL migrations, atomic accounting, uniqueness, writer lease, sessions an
     const token = crypto.randomBytes(32).toString('base64url');
     await store.createSession(token, account.id, Date.now() + 10000);
     assert.equal((await store.session(token, 10000)).userId, account.id);
+    const signerJournal = new AutomationJournal(store, fn => fn());
+    const fuelJob = crypto.randomUUID();
+    await signerJournal.reserve('gas', fuelJob, 7n, 10n);
+    await signerJournal.reserve('gas', fuelJob, 7n, 10n);
+    assert.equal(await signerJournal.reservedCost('gas', fuelJob), 7n);
+    await assert.rejects(signerJournal.reserve('gas', crypto.randomUUID(), 4n, 10n), /DAILY_SPENDING/);
+    const signedFunding = {txID:'a'.repeat(64),raw_data:{timestamp:123}};
+    await signerJournal.saveFunding(fuelJob, signedFunding);
+    await signerJournal.confirmFunding(fuelJob);
+    assert.equal(Number((await signerJournal.funding(fuelJob)).confirmed),1);
+    const syntheticOwner = tronAddress('22'.repeat(20));
+    const sweeps = new OwnerSweeps({store,ledger,exclusive:fn=>fn(),signer:{},client:{},source:destination,destination:syntheticOwner,
+      privateKey:'fixture-only',feeLimit:1_000_000,isEnabled:()=>true});
+    const sweep = await sweeps.requestInside({key:crypto.randomUUID(),amount:'1'},'fixture');
+    await assert.rejects(sweeps.requestInside({key:crypto.randomUUID(),amount:'1'},'fixture'), /IN_PROGRESS/);
+    assert.equal((await sweeps.cancelInside(sweep.id,'fixture')).status,'cancelled');
+    const autoTarget = tronAddress('33'.repeat(20));
+    const auto = (await ledger.request(state,account.id,{key:crypto.randomUUID(),destination:autoTarget,gross:'10',automatic:true})).record;
+    assert.equal(await ledger.automaticEligible(auto.id),true);
+    await assert.rejects(ledger.confirmManual(structuredClone(state),auto.id), /AUTOMATIC_PAYOUT_IN_PROGRESS/);
+    await ledger.decide(state,auto.id,'reject','automatic-payout');
     await store.close();
     store = await MysqlPaymentStore.open(env);
-    assert.equal((await store.state()).users[0].withdrawnTotal, 9.000001);
+    assert.equal((await store.state()).users[0].withdrawnTotal, 9.800001);
     assert.deepEqual(await store.sql.prepare('SELECT vip_balance,withdrawal_balance FROM users WHERE id=?').get(account.id), userBalances);
     assert.equal((await store.session(token, 10000)).userId, account.id);
     await store.revokeSession(token);

@@ -14,6 +14,7 @@ const { OutgoingLedger, SettlementWatcher } = require('../payments/outgoing');
 const { BRANCH_PATH, USDT_CONTRACT, TRANSFER_TOPIC, addressHex, tronAddress, deriveAddress, proofMessage, validateWallet, amount } = require('../payments/tron');
 const { validateTransfer, signTransfer } = require('../payments/transactions');
 const { CollectionWorker, SignerJournal } = require('../payments/collector');
+const { AutomaticCollections } = require('../payments/automatic-collections');
 
 const root = path.resolve(__dirname, '..');
 // Public test key material only. Never fund any test address in this file.
@@ -212,6 +213,20 @@ test('only a solidified failed payout can release a reservation; missing and suc
   await assert.rejects(() => ledger.releaseFailed(app, 'withdrawal', row.id, info, 1000), /NOT_PENDING/);
 });
 
+test('a confirmed failed automatic payout releases the reservation without a manual decision', async t => {
+  const {ledger,store,app}=await fixture(t);
+  const row=(await ledger.request(app,'a',{key:crypto.randomUUID(),destination,gross:'10',automatic:true})).record;
+  await ledger.decide(app,row.id,'approve','automatic-payout');
+  const txid='f'.repeat(64);await ledger.submitWithdrawal(app,row.id,txid);
+  let current=store.state();
+  const info=receipt(txid,treasury,destination,9_800_000);info.receipt.result='OUT_OF_ENERGY';
+  const watcher=new SettlementWatcher({ledger,client:{solidHeight:async()=>1000,receipt:async()=>info},exclusive:fn=>fn(),getState:()=>current,commitState:next=>{current=next}});
+  await watcher.poll();
+  assert.equal((await ledger.withdrawal(row.id)).status,'rejected');
+  assert.equal(current.users[0].withdrawBalance,100);
+  assert.equal(current.users[0].reservedBalance,0);
+});
+
 test('collection claims only verified deposits and does not credit them twice', async t => {
   const { ledger, store, app } = await fixture(t);
   const address = store.allocate('a', index => deriveAddress(xpub, index));
@@ -312,6 +327,50 @@ test('collector persists before broadcast, retries identical bytes and caps fuel
   assert.equal(sentAfterStop, false);
   const bad = { ...(await ledger.collections())[0], treasury: destination };
   await assert.rejects(worker.process(bad), /UNTRUSTED/);
+});
+
+test('cloud collector uses the existing deposit branch and persists its fuel and collection signatures', async t => {
+  const { ledger, store, app } = await fixture(t);
+  const allocated = store.allocate('a', index => deriveAddress(xpub, index));
+  store.credit(event('6'.repeat(64), treasury, allocated.address, 10_000_000), app, target => { target.users[0].lockedBalance = 10; });
+  const wallet = validateWallet(await config(), treasury);
+  const mnemonic = 'test test test test test test test test test test test junk';
+  const gas = HDNodeWallet.fromPhrase(mnemonic, '', "m/44'/195'/1'/0/0");
+  const fuel = tronAddress(gas.address.slice(2));
+  let fuelConfirmed = false; const broadcasts = [];
+  let queue = Promise.resolve();
+  const exclusive = op => { const next = queue.then(op); queue = next.catch(() => {}); return next; };
+  let worker;
+  const client = { async request(route, body) {
+    if (route === '/walletsolidity/triggerconstantcontract') return {result:{result:true},constant_result:['a'.repeat(64)]};
+    if (route === '/walletsolidity/getaccount') return {balance:body.address === addressHex(fuel) ? 100_000_000 : fuelConfirmed ? 2_000_000 : 0};
+    if (route === '/wallet/createtransaction') return unsigned({from:fuel,to:allocated.address,value:body.amount,kind:'trx'});
+    if (route === '/walletsolidity/gettransactionbyid') return fuelConfirmed ? {txID:body.value,ret:[{contractRet:'SUCCESS'}]} : {};
+    if (route === '/wallet/triggersmartcontract') return {result:{result:true},transaction:unsigned({from:allocated.address,to:treasury,value:'10000000'})};
+    if (route === '/wallet/broadcasttransaction') {
+      const job = (await ledger.collections())[0];
+      if (body.raw_data.contract[0].type === 'TransferContract') assert.equal((await worker.journal.funding(job.id)).txid, body.txID);
+      else assert.equal(job.txid, body.txID);
+      broadcasts.push(body.txID); return {result:true};
+    }
+    throw new Error('Unexpected fixture endpoint');
+  }};
+  const options = {treasury,mnemonic,fuelAddress:fuel,wallet,store,ledger,client,exclusive,
+    feeLimit:1_000_000,feeDailyLimit:'2000000',gasDailyLimit:'4000000',isEnabled:()=>true};
+  assert.throws(() => new AutomaticCollections({...options,fuelAddress:treasury}), /FUEL_ADDRESS_MISMATCH/);
+  worker = new AutomaticCollections(options);
+  assert.equal((await worker.cycle())[0].status,'awaiting-gas-confirmation');
+  const fundingId = broadcasts[0];
+  worker = new AutomaticCollections(options); // same shared database, fresh worker
+  assert.equal((await worker.cycle())[0].status,'awaiting-gas-confirmation');
+  assert.equal(broadcasts[1],fundingId);
+  fuelConfirmed = true;
+  assert.equal((await worker.cycle())[0].status,'awaiting-confirmation');
+  const job = (await ledger.collections())[0];
+  assert.equal(job.treasury,treasury);
+  assert.equal(app.users[0].lockedBalance,10);
+  worker.stop();
+  assert.equal(await worker.cycle(),undefined);
 });
 
 test('real withdrawal API requires password and operator authorization; mobile and desktop render', async t => {

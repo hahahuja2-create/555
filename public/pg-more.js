@@ -231,7 +231,7 @@ function aboutView() {
 
 /* ----------------------------------------------------------------- admin */
 
-const ADMIN_OPEN = ['requested', 'approved'];
+const ADMIN_OPEN = ['requested', 'approved', 'submitted'];
 const adminNum = value => `<span class="mono">${esc(usdt(value))}</span>`;
 function exactDepositAmount(value) {
   const match = /^(\d+)\.(\d{6})$/.exec(String(value ?? ''));
@@ -249,11 +249,39 @@ function adminView() {
   const open = withdrawals.filter(w => ADMIN_OPEN.includes(w.status));
   const total = (rows, field) => Math.round(rows.reduce((s, r) => s + num(r[field]), 0) * 1e6) / 1e6;
   const metrics = [['Confirmed deposits', depositInfo ? exactDepositAmount(depositInfo.totalAmount) : 'Unavailable', 'deposit', 'deposits', 'All-time USDT · TRC20'], ['Pending', String(open.length), 'clock', 'pending'], ['To send', usdt(total(open, 'netAmount')), 'withdraw', 'to-send'], ['Earn balances', usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'], ['Spot balances', usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', `Includes ${usdt(total(users, 'reservedBalance'))} reserved`], ['Accounts', String(users.length), 'users', 'users'], ['Paid out', usdt(total(withdrawals.filter(w => w.status === 'confirmed'), 'netAmount')), 'check', 'paid']];
-  const tabs = [['withdrawals', 'Withdrawals', open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length]];
+  const tabs = [['withdrawals', 'Withdrawals', open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length],
+    ...(S.admin.workingWallet ? [['working-wallet', 'Working wallet', '']] : [])];
   return `<div class="page admin">${head}
     <section class="metric-grid">${metrics.map(([l, v, g, key, note]) => `<article class="metric" data-metric="${key}"><span>${icon(g)}${l}</span><strong>${esc(v)}</strong>${note ? `<small>${esc(note)}</small>` : ''}</article>`).join('')}</section>
     <div class="tabs">${tabs.map(([k, l, n]) => `<button class="${S.adminTab === k ? 'is-on' : ''}" type="button" data-act="admin-tab" data-tab="${k}">${l}<sup>${n}</sup></button>`).join('')}</div>
-    ${S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : adminWithdrawals(withdrawals)}</div>`;
+    ${S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : S.adminTab === 'working-wallet' && S.admin.workingWallet ? adminWorkingWallet(S.admin.workingWallet) : adminWithdrawals(withdrawals)}</div>`;
+}
+
+function adminWorkingWallet(wallet) {
+  const pending = wallet.pending;
+  const issue = {TREASURY_USDT_INSUFFICIENT:'The working wallet does not have enough USDT.', TREASURY_TRX_RESERVE_REQUIRED:'The working wallet needs more TRX for network fees.',
+    WORKING_WALLET_BUSY:'Waiting for an outgoing withdrawal to confirm.', SIGNED_TRANSACTION_EXPIRED:'The signed transfer expired and needs review.',
+    OWNER_SWEEP_RECEIPT_MISMATCH:'The network receipt needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'The network or storage is temporarily unavailable.'}[wallet.issue];
+  const payoutIssue = {TREASURY_USDT_INSUFFICIENT:'Automatic withdrawals are waiting for USDT.', TREASURY_TRX_RESERVE_REQUIRED:'Automatic withdrawals are waiting for TRX.',
+    WORKING_WALLET_BUSY:'Automatic withdrawals are waiting for another outgoing transfer.', SIGNED_TRANSACTION_EXPIRED:'A signed withdrawal expired and needs review.',
+    PAYOUT_INTENT_EXPIRED_REVIEW_REQUIRED:'A withdrawal needs review before it can continue.', NETWORK_OR_STORAGE_UNAVAILABLE:'Withdrawal processing is temporarily unavailable.',
+    BROADCAST_NOT_ACKNOWLEDGED:'A withdrawal is awaiting a network response.'}[wallet.payoutIssue];
+  const collectionIssue = {GAS_WALLET_REQUIRES_TRX:'Deposit collection is waiting for TRX in the fuel wallet.', TRX_FEE_RESERVE_REQUIRED:'Deposit collection is waiting for TRX.',
+    DAILY_SPENDING_LIMIT_REACHED:'The daily collection fee budget has been reached.', USDT_BALANCE_NOT_YET_AVAILABLE:'A deposit is waiting for its confirmed balance.',
+    SIGNED_TRANSACTION_EXPIRED:'A signed collection needs review.', PAUSED_FOR_REVIEW:'Deposit collection needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'Deposit collection is temporarily unavailable.'}[wallet.collectionIssue];
+  return `<section class="card">${sectionHead('Working wallet')}
+    <dl class="facts"><div><dt>Balance</dt><dd>${wallet.balance == null ? 'Unavailable' : `${money(wallet.balance)} USDT`}</dd></div>
+      <div><dt>Working address</dt><dd><code>${esc(wallet.address)}</code></dd></div>
+      <div><dt>Send to your treasury</dt><dd><code>${esc(wallet.destination)}</code></dd></div></dl>
+    <p class="note">${icon('info')}Funds stay here until you request a transfer. Keep enough USDT and TRX available for customer withdrawals.</p>
+    ${payoutIssue ? `<p class="note">${icon('info')}${esc(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${esc(collectionIssue)}</p>` : ''}
+    ${pending && issue ? `<p class="note">${icon('info')}${esc(issue)}</p>` : ''}
+    ${!pending && wallet.recent ? `<p class="note">Last transfer: ${money(wallet.recent.amount)} USDT · ${esc(wallet.recent.status)}${/^[a-f0-9]{64}$/.test(wallet.recent.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${wallet.recent.txid}" target="_blank" rel="noopener noreferrer">View transaction</a>` : ''}</p>` : ''}
+    ${pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">View transaction</a>` : ''}</p>
+      ${pending.status === 'planned' ? `<form class="form" data-form="owner-sweep-cancel" data-id="${esc(pending.id)}"><label class="field"><span>Account password</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p><button class="btn btn-ghost" type="submit">Cancel pending transfer</button></form>` : ''}`
+      : `<form class="form" data-form="owner-sweep"><label class="field"><span>Amount to send</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
+        <label class="field"><span>Account password</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p>
+        <button class="btn btn-lime" type="submit">Send to my treasury</button></form>`}</section>`;
 }
 
 function adminDepositList(info) {
@@ -276,11 +304,11 @@ function adminActionBtn(row, action) {
 function adminWithdrawals(all) {
   const rows = S.adminFilter === 'pending' ? all.filter(w => ADMIN_OPEN.includes(w.status)) : all;
   const filter = [['pending', 'Pending'], ['all', 'All']].map(([k, l]) => `<button class="${S.adminFilter === k ? 'is-on' : ''}" type="button" data-act="admin-filter" data-filter="${k}">${l}</button>`).join('');
-  return `<div class="chips">${filter}</div><p class="note">${icon('info')}Send the “To send” amount from the treasury wallet, then press Mark sent. Each decision needs two clicks.</p>
+  return `<div class="chips">${filter}</div><p class="note">${icon('info')}${S.pay.automaticWithdrawals ? 'Automatic requests are sent from the working wallet; older manual requests still require review.' : 'Send the “To send” amount from the treasury wallet, then press Mark sent. Each decision needs two clicks.'}</p>
     ${rows.length ? `<ul class="admin-list">${rows.map(w => `<li class="admin-card" data-withdrawal="${esc(w.id)}"><div class="admin-row"><b>${esc(w.email || 'Deleted account')}</b><span class="st st-${esc(w.status)}">${esc(WITHDRAW_STATUS[w.status] || w.status)}</span></div><small>${esc(w.name || '')} · ${esc(dateText(w.createdAt))}</small>
       <div class="admin-kv"><span>Requested</span>${adminNum(w.amount)}<span>Fee</span>${adminNum(w.fee)}<span>To send</span><b class="mono">${esc(usdt(w.netAmount))}</b></div>
       <div class="admin-addr"><code>${esc(w.destination)}</code><button class="icon-btn" type="button" data-act="admin-copy" data-value="${esc(w.destination)}" aria-label="Copy address">${icon('copy')}</button><button class="icon-btn" type="button" data-act="admin-copy" data-value="${esc(String(w.netAmount))}" aria-label="Copy amount">${icon('coins')}</button></div>
-      ${ADMIN_OPEN.includes(w.status) ? `<div class="btn-row">${adminActionBtn(w, 'confirm')}${w.status === 'requested' ? adminActionBtn(w, 'reject') : ''}</div>` : /^[a-f0-9]{64}$/.test(w.txid || '') ? `<a class="link-btn" href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">View transaction ${icon('external')}</a>` : ''}</li>`).join('')}</ul>` : emptyState('list', 'No withdrawal requests')}`;
+      ${!w.automatic && ['requested','approved'].includes(w.status) ? `<div class="btn-row">${adminActionBtn(w, 'confirm')}${w.status === 'requested' ? adminActionBtn(w, 'reject') : ''}</div>` : /^[a-f0-9]{64}$/.test(w.txid || '') ? `<a class="link-btn" href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">View transaction ${icon('external')}</a>` : ''}</li>`).join('')}</ul>` : emptyState('list', 'No withdrawal requests')}`;
 }
 
 function adminUsers(users) {

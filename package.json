@@ -10,6 +10,8 @@
     "test:local-live": "node --test scripts/verify-local-live.cjs",
     "db:migrate": "node --env-file-if-exists=.env scripts/mysql-migrate.cjs",
     "test:mysql": "node --test scripts/verify-mysql.cjs",
+    "test:automation": "node --test scripts/verify-auto-payout-api.cjs scripts/verify-automatic-payouts.cjs scripts/verify-automation-journal.cjs scripts/verify-automation-cutover.cjs scripts/verify-owner-sweeps.cjs scripts/verify-working-wallet.cjs",
+    "check:automation": "node --check payments/automatic-payouts.js && node --check payments/automatic-collections.js && node --check payments/automation-journal.js && node --check payments/automation-cutover.js && node --check payments/owner-sweeps.js && node --check payments/working-wallet.js && node --check scripts/working-wallet-setup.cjs",
     "test:cutover": "node --test scripts/verify-deployment-cutover.cjs",
     "check:cutover": "node --check payments/deployment-cutover.js && node --check scripts/verify-deployment-cutover.cjs",
     "check:mysql": "node --check database/mysql.js && node --check payments/mysql-store.js && node --check platform-catalog.js && node --check scripts/mysql-migrate.cjs && node --check scripts/verify-mysql.cjs",

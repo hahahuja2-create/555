@@ -46,13 +46,13 @@ class TronLinkPayouts {
     return { transaction, feeLimitSun: intent.fee_limit };
   }
 
-  async record(id, transaction) {
+  async record(id, transaction, { actor = 'tronlink' } = {}) {
     // Always preserve a valid signature for an existing intent, even if admission was closed meanwhile.
     if (!this.isHealthy()) throw failure('STORAGE_UNAVAILABLE', 503);
     return this.exclusive(async () => {
       const next = structuredClone(this.getState());
       const row = await this.getLedger().recordSignedWithdrawal(next, id, transaction,
-        (tx, saved, feeLimit) => this.validate(tx, saved, feeLimit));
+        (tx, saved, feeLimit) => this.validate(tx, saved, feeLimit), actor);
       this.commitState(next);
       return { withdrawal: row };
     });

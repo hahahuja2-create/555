@@ -87,15 +87,17 @@ async function loadAdmin() {
   const userId = S.user.id;
   const id = ++adminRequest;
   try {
-    const [data, deposits] = await Promise.all([
+    const [data, deposits, workingWallet] = await Promise.all([
       api('/api/admin/overview', { timeout: 20000 }),
-      api(`/api/admin/deposits?offset=${S.adminDepositOffset}`, { timeout: 20000 }).catch(() => null)
+      api(`/api/admin/deposits?offset=${S.adminDepositOffset}`, { timeout: 20000 }).catch(() => null),
+      api('/api/admin/working-wallet', { timeout: 20000 }).catch(() => null)
     ]);
     if (id !== adminRequest || S.user?.id !== userId || !S.user?.isAdmin) return;
     data.depositInfo = deposits;
+    data.workingWallet = workingWallet;
     S.admin = data;
   } catch (error) { if (id === adminRequest) toast(errMsg(error), 'error'); return; }
-  if (S.view === 'admin' && !sheetEl && document.activeElement?.id !== 'admin-search') render();
+  if (S.view === 'admin' && !sheetEl && !isEditing()) render();
 }
 
 /* ------------------------------------------------------------ live prices */
@@ -374,6 +376,21 @@ document.addEventListener('submit', async event => {
   if (kind === 'auth') return submitAuth(form);
   if (kind === 'order') return requestQuote(form);
   if (kind === 'wallet') return submitWallet(form);
+  if (kind === 'owner-sweep' || kind === 'owner-sweep-cancel') {
+    if (S.busy) return;
+    const data = new FormData(form), msg = form.querySelector('.form-msg'), button = form.querySelector('button[type="submit"]');
+    const cancel = kind === 'owner-sweep-cancel';
+    const body = cancel ? {id:form.dataset.id,password:data.get('password')} : {amount:data.get('amount'),password:data.get('password'),requestKey:form.dataset.requestKey ||= crypto.randomUUID()};
+    S.busy = true; button.disabled = true; msg.textContent = '';
+    try {
+      await api(cancel ? '/api/admin/working-wallet/cancel' : '/api/admin/working-wallet/sweep', {method:'POST',body});
+      toast(cancel ? 'Transfer cancelled.' : 'Transfer requested. It will appear after network confirmation.', 'ok');
+      form.querySelector('input:focus')?.blur();
+      await loadAdmin();
+    } catch (error) { msg.textContent = errMsg(error); button.disabled = false; }
+    finally { S.busy = false; }
+    return;
+  }
   if (kind === 'alert') {
     const data = new FormData(form), target = num(String(data.get('price')).replace(',', '.')), msg = form.querySelector('#alert-msg');
     if (!(target > 0)) { msg.textContent = 'Enter a target price.'; return; }

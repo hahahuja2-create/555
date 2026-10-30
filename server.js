@@ -61,9 +61,14 @@ let paymentStore;
 let depositWatcher;
 let outgoingLedger;
 let settlementWatcher;
+let automaticPayouts;
+let automaticCollections;
+let ownerSweeps;
 let operatorToken;
 const OPERATOR_FILE = process.env.TASKMALL_OPERATOR_TOKEN_FILE || path.join(DATA_DIR, 'operator.token');
 const MANUAL_WITHDRAWALS = process.env.TRON_MANUAL_WITHDRAWALS_ENABLED === '1';
+const AUTOMATIC_WITHDRAWALS = process.env.TRON_AUTOMATIC_WITHDRAWALS_ENABLED === '1';
+const AUTOMATIC_COLLECTIONS = process.env.TRON_AUTOMATIC_COLLECTIONS_ENABLED === '1';
 // These accounts see the Admin page. Signup refuses a registered email, so the account must exist before deployment.
 const ADMIN_EMAILS = (process.env.TASKMALL_ADMIN_EMAILS ?? 'hahahuja2@gmail.com').split(',').map(email => email.trim().toLowerCase()).filter(Boolean);
 let operationQueue = Promise.resolve();
@@ -109,7 +114,7 @@ let storageHealthy = true;
 const operatorPortal = new OperatorPortal({ treasury: TREASURY, exclusive, json, readBody,
   getToken: () => operatorToken, getLedger: () => outgoingLedger, getClient: () => depositWatcher?.client,
   getState: () => db, commitState: next => { db = next; }, isHealthy: () => storageHealthy,
-  isSendingEnabled: () => storageHealthy && MANUAL_WITHDRAWALS && Boolean(depositWatcher?.ready()) });
+  isSendingEnabled: () => storageHealthy && (MANUAL_WITHDRAWALS || AUTOMATIC_WITHDRAWALS) && Boolean(depositWatcher?.ready()) });
 
 function planById(id) {
   return vipPlans.find((plan) => plan.id === id) || vipPlans[0];
@@ -357,6 +362,9 @@ async function loadDatabase() {
     }
     await paymentStore.save(db, 'initial-import-or-migration');
     outgoingLedger = new OutgoingLedger(paymentStore, TREASURY);
+    if (AUTOMATIC_WITHDRAWALS || AUTOMATIC_COLLECTIONS) {
+      await require('./payments/automation-cutover').assertAutomationCutover(paymentStore, TREASURY);
+    }
     if (process.env.TASKMALL_OPERATOR_ENABLED === '1') operatorToken = await loadOperatorToken(OPERATOR_FILE, true, process.env.TASKMALL_OPERATOR_TOKEN);
     if (TRON_DEPOSITS) {
       if (process.env.TRON_AUTO_WALLET === '1') {
@@ -388,6 +396,30 @@ async function loadDatabase() {
         getState: () => db, commitState: state => { db = state; }, onFatal: () => { storageHealthy = false; },
         interval: process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000 });
       settlementWatcher.start();
+      if (AUTOMATIC_WITHDRAWALS) {
+        const { AutomaticPayouts } = require('./payments/automatic-payouts');
+        automaticPayouts = new AutomaticPayouts({ treasury: TREASURY, privateKey: process.env.TRON_WORKING_WALLET_PRIVATE_KEY,
+          feeLimit: Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), payouts: operatorPortal.payouts, ledger: outgoingLedger,
+          exclusive, getState: () => db, commitState: state => { db = state; },
+          isEligible: row => outgoingLedger.automaticEligible(row.id), isEnabled: () => storageHealthy && Boolean(depositWatcher?.ready()) });
+        const { OwnerSweeps } = require('./payments/owner-sweeps');
+        ownerSweeps = new OwnerSweeps({store:paymentStore, ledger:outgoingLedger, exclusive, signer:automaticPayouts, client:depositWatcher.client,
+          source:TREASURY, destination:process.env.TRON_OWNER_TREASURY_ADDRESS, privateKey:process.env.TRON_WORKING_WALLET_PRIVATE_KEY,
+          feeLimit:Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
+        automaticPayouts.hasPendingSweep = async () => Boolean(await ownerSweeps.pendingInside());
+        automaticPayouts.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
+        ownerSweeps.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
+      }
+      if (AUTOMATIC_COLLECTIONS) {
+        const { loadPublicWallet } = require('./payments/wallet-config');
+        const { AutomaticCollections } = require('./payments/automatic-collections');
+        const wallet = await loadPublicWallet({walletFile:WALLET_FILE, walletJson:WALLET_JSON, treasury:TREASURY});
+        automaticCollections = new AutomaticCollections({treasury:TREASURY, mnemonic:process.env.TRON_AUTOMATION_DEPOSIT_MNEMONIC,
+          fuelAddress:process.env.TRON_FUEL_ADDRESS, wallet, store:paymentStore, ledger:outgoingLedger, client:depositWatcher.client, exclusive,
+          feeLimit:Number(process.env.TRON_COLLECTION_FEE_LIMIT_SUN), feeDailyLimit:process.env.TRON_COLLECTION_DAILY_FEE_LIMIT_SUN,
+          gasDailyLimit:process.env.TRON_GAS_DAILY_LIMIT_SUN, isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
+        automaticCollections.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
+      }
     }
     return;
   }
@@ -723,7 +755,8 @@ async function handleApi(req, res, url) {
   if (req.method === 'GET' && url.pathname === '/api/payment-config') {
     if(REVIEW_PAYMENT_ORIGIN&&!TRON_DEPOSITS)return json(res,200,{available:true,withdrawalsAvailable:true,mode:'production-redirect',origin:REVIEW_PAYMENT_ORIGIN,minimumWithdrawalAmount:MINIMUM_WITHDRAWAL_USDT,networks:[]});
     if (TRON_DEPOSITS) return json(res, 200, { available: storageHealthy && Boolean(depositWatcher?.ready()), mode: 'tron-watch-only',
-      withdrawalsAvailable: storageHealthy && MANUAL_WITHDRAWALS && withdrawalReviewer() && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
+      withdrawalsAvailable: storageHealthy && ((MANUAL_WITHDRAWALS && withdrawalReviewer()) || (AUTOMATIC_WITHDRAWALS && Boolean(automaticPayouts))) && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
+      automaticWithdrawals: AUTOMATIC_WITHDRAWALS,
       minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
       networks: storageHealthy && depositWatcher?.ready() ? [{ id: 'trc20', label: 'USDT TRC20' }] : [] });
     return json(res, 200, { available: TEST_WALLET, withdrawalsAvailable: TEST_WALLET, mode: TEST_WALLET ? 'test-wallet' : 'disabled', minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
@@ -750,9 +783,9 @@ async function handleApi(req, res, url) {
   if (req.method === 'GET' && url.pathname === '/api/wallet/withdrawals') {
     const user = await requireUser(req, res);
     if (!user) return;
-    return json(res, 200, { withdrawals: (await outgoingLedger?.withdrawals(user.id) || []).map(item => ({ id: item.id,
+    return json(res, 200, { withdrawals: await Promise.all((await outgoingLedger?.withdrawals(user.id) || []).map(async item => ({ id: item.id,
       destination: item.destination, amount: usdtAmount(item.gross_units), fee: usdtAmount(item.fee_units),
-      netAmount: usdtAmount(item.net_units), status: item.status, txid: item.txid, createdAt: new Date(item.created_at).toISOString() })) });
+      netAmount: usdtAmount(item.net_units), status: item.status, automatic: await outgoingLedger.automaticEligible(item.id), txid: item.txid, createdAt: new Date(item.created_at).toISOString() }))) });
   }
 
   if (url.pathname.startsWith('/api/admin/')) {
@@ -760,9 +793,39 @@ async function handleApi(req, res, url) {
     if (!user) return;
     if (!isAdmin(user)) return json(res, 403, { error: 'ADMIN_REQUIRED' });
     const users = new Map(db.users.map(item => [item.id, item]));
+    if (req.method === 'GET' && url.pathname === '/api/admin/working-wallet') {
+      if (!ownerSweeps) return json(res, 503, {error:'WORKING_WALLET_UNAVAILABLE'});
+      const pending = await ownerSweeps.pendingInside();
+      const recent = await ownerSweeps.latestInside();
+      return json(res, 200, {address:TREASURY, destination:ownerSweeps.destination,
+        balance:ownerSweeps.balanceUnits == null ? null : usdtAmount(ownerSweeps.balanceUnits), balanceAt:ownerSweeps.balanceAt || null,
+        issue:ownerSweeps.lastIssue || null,
+        payoutIssue:automaticPayouts?.lastIssue || null, collectionIssue:automaticCollections?.lastIssue || null,
+        pending:pending ? {id:pending.id,amount:usdtAmount(pending.amount_units),status:pending.status,txid:pending.txid} : null,
+        recent:recent ? {id:recent.id,amount:usdtAmount(recent.amount_units),status:recent.status,txid:recent.txid} : null});
+    }
+    if (req.method === 'POST' && url.pathname === '/api/admin/working-wallet/sweep') {
+      if (!ownerSweeps || !depositWatcher?.ready()) return json(res, 503, {error:'WORKING_WALLET_UNAVAILABLE'});
+      if (!allowRequest(req, 'owner-sweep', 5, 60_000)) return json(res, 429, {error:'TOO_MANY_REQUESTS'});
+      const body=await readBody(req);
+      if (!(await verifyPassword(body.password,user))) return json(res, 403, {error:'PASSWORD_CONFIRMATION_REQUIRED'});
+      const value=parseExactUsdt(body.amount,0,100_000_000);
+      if (!value) return json(res, 400, {error:'INVALID_AMOUNT'});
+      const record=await ownerSweeps.requestInside({key:body.requestKey,amount:value},user.id);
+      return json(res, 201, {sweep:{id:record.id,amount:usdtAmount(record.amount_units),status:record.status,txid:record.txid}});
+    }
+    if (req.method === 'POST' && url.pathname === '/api/admin/working-wallet/cancel') {
+      if (!ownerSweeps) return json(res, 503, {error:'WORKING_WALLET_UNAVAILABLE'});
+      if (!allowRequest(req, 'owner-sweep', 5, 60_000)) return json(res, 429, {error:'TOO_MANY_REQUESTS'});
+      const body=await readBody(req);
+      if (!(await verifyPassword(body.password,user))) return json(res, 403, {error:'PASSWORD_CONFIRMATION_REQUIRED'});
+      if (!/^[a-f0-9-]{36}$/.test(String(body.id || ''))) return json(res, 400, {error:'INVALID_REQUEST'});
+      const record=await ownerSweeps.cancelInside(body.id,user.id);
+      return json(res, 200, {sweep:{id:record.id,status:record.status}});
+    }
     if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
       const withdrawals = outgoingLedger ? await outgoingLedger.withdrawals() : [];
-      return json(res, 200, { users: db.users.map(adminUserRow), withdrawals: withdrawals.map(row => adminWithdrawalRow(row, users)) });
+      return json(res, 200, { users: db.users.map(adminUserRow), withdrawals: await Promise.all(withdrawals.map(async row => ({...adminWithdrawalRow(row, users), automatic:await outgoingLedger.automaticEligible(row.id)}))) });
     }
     if (req.method === 'GET' && url.pathname === '/api/admin/deposits') {
       const value = url.searchParams.get('offset') || '0';
@@ -919,13 +982,13 @@ async function handleApi(req, res, url) {
     if (!user) return;
     const body = await readBody(req);
     if (!TEST_WALLET) {
-      if (!MANUAL_WITHDRAWALS || !withdrawalReviewer() || !outgoingLedger || !depositWatcher?.ready()) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
+      if ((!AUTOMATIC_WITHDRAWALS && (!MANUAL_WITHDRAWALS || !withdrawalReviewer())) || (AUTOMATIC_WITHDRAWALS && !automaticPayouts) || !outgoingLedger || !depositWatcher?.ready()) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
       if (body.network !== 'trc20') return json(res, 400, { error: 'INVALID_NETWORK' });
       if (!(await verifyPassword(body.password, user))) return json(res, 403, { error: 'PASSWORD_CONFIRMATION_REQUIRED' });
       const value = parseExactUsdt(body.amount, 0, 100_000);
       if (!value) return json(res, 400, { error: 'INVALID_AMOUNT' });
       const next = structuredClone(db);
-      const result = await outgoingLedger.request(next, user.id, { key: body.requestKey, destination: String(body.wallet || '').trim(), gross: value });
+      const result = await outgoingLedger.request(next, user.id, { key: body.requestKey, destination: String(body.wallet || '').trim(), gross: value, automatic: AUTOMATIC_WITHDRAWALS });
       if (result.changed) db = next;
       return json(res, result.changed ? 201 : 200, { user: cleanUser(db.users.find(item => item.id === user.id)), activities: db.users.find(item => item.id === user.id).activities,
         withdrawal: { id: result.record.id, status: result.record.status } });
@@ -1189,6 +1252,9 @@ function shutdown() {
   markets.stop();
   depositWatcher?.stop();
   settlementWatcher?.stop();
+  automaticPayouts?.stop();
+  automaticCollections?.stop();
+  ownerSweeps?.stop();
   server.close(async () => { await exclusive(() => paymentStore?.close()); process.exit(0); });
   setTimeout(() => process.exit(1), 3000).unref();
 }
