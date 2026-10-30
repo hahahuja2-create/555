@@ -24,7 +24,7 @@ const S = {
   assetsTab: 'overview', historyFilter: 'all',
   trade: { symbol: store.read('pg_last_symbol', 'BTCUSDT'), side: 'BUY', input: '', range: '1D', tab: 'positions', history: null, chart: null, busy: false },
   chat: { messages: [], busy: false },
-  admin: null, adminTab: 'withdrawals', adminFilter: 'pending', adminSearch: '', adminArmed: null,
+  admin: null, adminTab: 'withdrawals', adminFilter: 'pending', adminSearch: '', adminArmed: null, adminDepositOffset: 0,
   wallet: { withdrawals: null, deposits: null }
 };
 

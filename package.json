@@ -19,6 +19,7 @@
     "test:railway-operator": "node --test scripts/verify-railway-operator.cjs",
     "payments:desk": "node --env-file-if-exists=.env scripts/operator-open.cjs",
     "test:admin": "node --test scripts/verify-admin.cjs",
+    "test:admin-deposits": "node --test scripts/verify-admin-deposits.cjs",
     "collections": "node --env-file-if-exists=.env scripts/collection-worker.cjs",
     "collections:prepare": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --copy-backup",
     "collections:prepare-local": "node --env-file-if-exists=.env scripts/collection-worker.cjs --setup --local-backup",

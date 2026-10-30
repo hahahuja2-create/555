@@ -84,10 +84,15 @@ async function loadWalletLists() {
 let adminRequest = 0;
 async function loadAdmin() {
   if (!S.user?.isAdmin) return;
+  const userId = S.user.id;
   const id = ++adminRequest;
   try {
-    const data = await api('/api/admin/overview', { timeout: 20000 });
-    if (id !== adminRequest) return;
+    const [data, deposits] = await Promise.all([
+      api('/api/admin/overview', { timeout: 20000 }),
+      api(`/api/admin/deposits?offset=${S.adminDepositOffset}`, { timeout: 20000 }).catch(() => null)
+    ]);
+    if (id !== adminRequest || S.user?.id !== userId || !S.user?.isAdmin) return;
+    data.depositInfo = deposits;
     S.admin = data;
   } catch (error) { if (id === adminRequest) toast(errMsg(error), 'error'); return; }
   if (S.view === 'admin' && !sheetEl && document.activeElement?.id !== 'admin-search') render();
@@ -321,6 +326,7 @@ const acts = {
   'export-history': exportHistory,
   'chat-suggest': el => sendChat(el.dataset.text),
   'admin-tab': el => { S.adminTab = el.dataset.tab; render(); },
+  'admin-deposit-page': el => { const offset = Number(el.dataset.offset); if (Number.isSafeInteger(offset) && offset >= 0) { S.adminDepositOffset = offset; loadAdmin(); } },
   'admin-filter': el => { S.adminFilter = el.dataset.filter; render(); },
   'admin-refresh': () => loadAdmin(),
   'admin-confirm': el => adminDecision('confirm', el.dataset.id),

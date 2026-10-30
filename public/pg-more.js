@@ -233,19 +233,39 @@ function aboutView() {
 
 const ADMIN_OPEN = ['requested', 'approved'];
 const adminNum = value => `<span class="mono">${esc(usdt(value))}</span>`;
+function exactDepositAmount(value) {
+  const match = /^(\d+)\.(\d{6})$/.exec(String(value ?? ''));
+  if (!match) return '—';
+  const whole = match[1].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const fraction = match[2].replace(/0+$/, '').padEnd(2, '0');
+  return `${whole}.${fraction} USDT`;
+}
 
 function adminView() {
-  const head = `<header class="page-head"><div><h1>Admin</h1><p>Withdrawal review and account overview</p></div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-refresh">${icon('retry')}Refresh</button></header>`;
+  const head = `<header class="page-head"><div><h1>Admin</h1><p>Deposits, withdrawal review and accounts</p></div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-refresh">${icon('retry')}Refresh</button></header>`;
   if (!S.admin) return `<div class="page admin">${head}${emptyState('retry', 'Loading admin data…')}</div>`;
   const { users, withdrawals } = S.admin;
+  const depositInfo = S.admin.depositInfo;
   const open = withdrawals.filter(w => ADMIN_OPEN.includes(w.status));
   const total = (rows, field) => Math.round(rows.reduce((s, r) => s + num(r[field]), 0) * 1e6) / 1e6;
-  const metrics = [['Pending', String(open.length), 'clock', 'pending'], ['To send', usdt(total(open, 'netAmount')), 'withdraw', 'to-send'], ['Earn balances', usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'], ['Spot balances', usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', `Includes ${usdt(total(users, 'reservedBalance'))} reserved`], ['Accounts', String(users.length), 'users', 'users'], ['Paid out', usdt(total(withdrawals.filter(w => w.status === 'confirmed'), 'netAmount')), 'check', 'paid']];
-  const tabs = [['withdrawals', 'Withdrawals', open.length], ['users', 'Users', users.length]];
+  const metrics = [['Confirmed deposits', depositInfo ? exactDepositAmount(depositInfo.totalAmount) : 'Unavailable', 'deposit', 'deposits', 'All-time USDT · TRC20'], ['Pending', String(open.length), 'clock', 'pending'], ['To send', usdt(total(open, 'netAmount')), 'withdraw', 'to-send'], ['Earn balances', usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'], ['Spot balances', usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', `Includes ${usdt(total(users, 'reservedBalance'))} reserved`], ['Accounts', String(users.length), 'users', 'users'], ['Paid out', usdt(total(withdrawals.filter(w => w.status === 'confirmed'), 'netAmount')), 'check', 'paid']];
+  const tabs = [['withdrawals', 'Withdrawals', open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length]];
   return `<div class="page admin">${head}
     <section class="metric-grid">${metrics.map(([l, v, g, key, note]) => `<article class="metric" data-metric="${key}"><span>${icon(g)}${l}</span><strong>${esc(v)}</strong>${note ? `<small>${esc(note)}</small>` : ''}</article>`).join('')}</section>
     <div class="tabs">${tabs.map(([k, l, n]) => `<button class="${S.adminTab === k ? 'is-on' : ''}" type="button" data-act="admin-tab" data-tab="${k}">${l}<sup>${n}</sup></button>`).join('')}</div>
-    ${S.adminTab === 'users' ? adminUsers(users) : adminWithdrawals(withdrawals)}</div>`;
+    ${S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : adminWithdrawals(withdrawals)}</div>`;
+}
+
+function adminDepositList(info) {
+  if (!info) return emptyState('retry', 'Deposit ledger temporarily unavailable', 'Refresh to try again.');
+  const rows = Array.isArray(info.deposits) ? info.deposits : [];
+  const first = info.count ? info.offset + 1 : 0, last = info.offset + rows.length;
+  return `<p class="note">${icon('info')}All-time confirmed USDT deposits recorded on TRON. This is not the current wallet balance. Internal transfers and manual balance adjustments are excluded.</p>
+    ${rows.length ? `<ul class="admin-list">${rows.map(d => `<li class="admin-card" data-deposit="${esc(d.txid)}:${esc(d.logIndex)}"><div class="admin-row"><b>${esc(d.email || 'Account unavailable')}</b><span class="st st-confirmed">Confirmed</span></div><small>${esc(d.name || '')} · ${esc(dateText(d.timestamp))}</small>
+      <div class="admin-kv"><span>Amount</span><b class="mono">${esc(exactDepositAmount(d.amount))}</b><span>Network</span><b>USDT · TRC20</b></div>
+      <div class="admin-addr"><code title="${esc(d.address)}">${esc(d.address)}</code><button class="icon-btn" type="button" data-act="admin-copy" data-value="${esc(d.address)}" aria-label="Copy deposit address">${icon('copy')}</button></div>
+      ${/^[a-f0-9]{64}$/.test(d.txid || '') ? `<a class="link-btn" href="https://tronscan.org/#/transaction/${d.txid}" target="_blank" rel="noopener noreferrer">View transaction ${icon('external')}</a>` : ''}</li>`).join('')}</ul>` : emptyState('deposit', 'No confirmed deposits')}
+    ${info.count ? `<div class="admin-pages"><span>${first}–${last} of ${info.count}</span><div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-deposit-page" data-offset="${Math.max(0, info.offset - info.limit)}" ${info.offset === 0 ? 'disabled' : ''}>Previous</button><button class="btn btn-ghost btn-sm" type="button" data-act="admin-deposit-page" data-offset="${info.offset + info.limit}" ${info.hasMore ? '' : 'disabled'}>Next</button></div></div>` : ''}`;
 }
 
 function adminActionBtn(row, action) {

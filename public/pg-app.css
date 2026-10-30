@@ -378,13 +378,14 @@
 
 /* -------------------------------------------------------------- admin */
 
-.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.page.admin { grid-template-columns: minmax(0, 1fr); }
+.metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .metric { display: grid; gap: 4px; padding: 12px; background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
 .metric span { display: flex; align-items: center; gap: 6px; color: var(--text-3); font: 600 10.5px var(--f-hud); letter-spacing: 0.08em; text-transform: uppercase; }
 .metric span .ic { width: 13px; height: 13px; color: var(--lime); }
 .metric strong { font: 800 20px/1.1 var(--f-display); word-break: break-word; }
-.admin-list { display: grid; gap: 8px; }
-.admin-card { --cut: 10px; display: grid; gap: 8px; padding: 12px; clip-path: var(--chamfer); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
+.admin-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.admin-card { --cut: 10px; display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 8px; padding: 12px; clip-path: var(--chamfer); background: var(--s2); box-shadow: inset 0 0 0 1px var(--line); }
 .admin-card small { color: var(--text-3); font-size: 11.5px; }
 .admin-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .admin-row b { overflow: hidden; text-overflow: ellipsis; font: 700 13.5px var(--f-hud); }
@@ -392,6 +393,8 @@
 .admin-kv > :nth-child(even) { justify-self: end; color: var(--text); }
 .admin-addr { display: flex; align-items: center; gap: 6px; }
 .admin-addr code { flex: 1; min-width: 0; padding: 8px 10px; overflow: hidden; background: var(--s3); font: 500 11.5px var(--f-hud); text-overflow: ellipsis; }
+.admin-pages { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--text-3); font-size: 12px; }
+.admin-pages > div { display: flex; gap: 6px; }
 
 /* --------------------------------------------------------------- auth */
 

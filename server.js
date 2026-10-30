@@ -291,6 +291,34 @@ function adminWithdrawalRow(row, users) {
   };
 }
 
+// Deposit values are stored as integer micro-USDT. Keep both totals and rows
+// exact even when the lifetime sum exceeds JavaScript's safe integer range.
+function depositAmount(value) {
+  const total = BigInt(value);
+  if (total < 0n) throw new Error('INVALID_DEPOSIT_AMOUNT');
+  return `${total / 1_000_000n}.${(total % 1_000_000n).toString().padStart(6, '0')}`;
+}
+
+async function adminDeposits(offset, users) {
+  if (!paymentStore) throw Object.assign(new Error('DEPOSIT_LEDGER_UNAVAILABLE'), { status: 503 });
+  let count, total;
+  if (paymentStore.dialect === 'mysql') {
+    const summary = await paymentStore.sql.prepare('SELECT COUNT(*) AS count, COALESCE(SUM(amount_units),0) AS total_units FROM deposits').get();
+    count = Number(summary.count); total = BigInt(summary.total_units);
+  } else {
+    const amounts = await paymentStore.sql.prepare('SELECT amount_units FROM deposits').all();
+    count = amounts.length; total = amounts.reduce((sum, row) => sum + BigInt(row.amount_units), 0n);
+  }
+  if (!Number.isSafeInteger(count) || count < 0) throw new Error('INVALID_DEPOSIT_COUNT');
+  const limit = 25;
+  const rows = await paymentStore.sql.prepare('SELECT txid,log_index,user_id,address,amount_units,block_number,timestamp FROM deposits ORDER BY timestamp DESC,txid DESC,log_index DESC LIMIT 25 OFFSET ?').all(offset);
+  return { available:true, totalAmount:depositAmount(total), count, offset, limit, hasMore:offset + rows.length < count,
+    deposits:rows.map(row => ({ txid:row.txid, logIndex:Number(row.log_index), userId:row.user_id,
+      name:users.get(row.user_id)?.name || null, email:users.get(row.user_id)?.email || null,
+      address:row.address, amount:depositAmount(row.amount_units), blockNumber:Number(row.block_number),
+      timestamp:new Date(Number(row.timestamp)).toISOString() })) };
+}
+
 async function loadDatabase() {
   await fsp.mkdir(DATA_DIR, { recursive: true });
   if (USE_SQLITE || USE_MYSQL) {
@@ -735,6 +763,11 @@ async function handleApi(req, res, url) {
     if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
       const withdrawals = outgoingLedger ? await outgoingLedger.withdrawals() : [];
       return json(res, 200, { users: db.users.map(adminUserRow), withdrawals: withdrawals.map(row => adminWithdrawalRow(row, users)) });
+    }
+    if (req.method === 'GET' && url.pathname === '/api/admin/deposits') {
+      const value = url.searchParams.get('offset') || '0';
+      if (!/^(0|[1-9][0-9]{0,8})$/.test(value)) return json(res, 400, { error: 'INVALID_OFFSET' });
+      return json(res, 200, await adminDeposits(Number(value), users));
     }
     const decision = url.pathname.match(/^\/api\/admin\/withdrawals\/([a-f0-9-]{36})\/(confirm|reject)$/);
     if (req.method === 'POST' && decision) {
