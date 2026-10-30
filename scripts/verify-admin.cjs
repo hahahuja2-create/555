@@ -170,6 +170,7 @@ test('admin sees every account and marks manual payouts paid; customers see unde
   for (const [name, viewport] of [['mobile', { width: 390, height: 844 }], ['desktop', { width: 1440, height: 900 }]]) {
     const { page, pageErrors } = await open(admin.cookie, viewport);
     await page.goto(url + '/#admin');
+    await page.locator('[data-act="admin-tab"][data-tab="withdrawals"]').click();
     await page.locator(`li[data-withdrawal="${third}"]`).waitFor();
     assert.equal(await page.locator('[data-metric="vip-balance"] strong').textContent(), '30.00 USDT', 'total VIP balance of all accounts');
     assert.equal(await page.locator('[data-metric="withdraw-balance"] strong').textContent(), '70.00 USDT', 'total withdrawal balance of all accounts');

@@ -87,14 +87,18 @@ async function loadAdmin() {
   const userId = S.user.id;
   const id = ++adminRequest;
   try {
-    const [data, deposits, workingWallet] = await Promise.all([
+    const [data, deposits, workingWallet, accounting, journal] = await Promise.all([
       api('/api/admin/overview', { timeout: 20000 }),
       api(`/api/admin/deposits?offset=${S.adminDepositOffset}`, { timeout: 20000 }).catch(() => null),
-      api('/api/admin/working-wallet', { timeout: 20000 }).catch(() => null)
+      api('/api/admin/working-wallet', { timeout: 20000 }).catch(() => null),
+      api('/api/admin/accounting', { timeout: 20000 }).catch(() => null),
+      api(`/api/admin/accounting/journal?offset=${S.adminJournalOffset}`, {timeout:20000}).catch(()=>null)
     ]);
     if (id !== adminRequest || S.user?.id !== userId || !S.user?.isAdmin) return;
     data.depositInfo = deposits;
     data.workingWallet = workingWallet;
+    data.accounting = accounting;
+    data.journal = journal;
     S.admin = data;
   } catch (error) { if (id === adminRequest) toast(errMsg(error), 'error'); return; }
   if (S.view === 'admin' && !sheetEl && !isEditing()) render();
@@ -335,6 +339,7 @@ const acts = {
   'chat-suggest': el => sendChat(el.dataset.text),
   'admin-tab': el => { S.adminTab = el.dataset.tab; render(); },
   'admin-deposit-page': el => { const offset = Number(el.dataset.offset); if (Number.isSafeInteger(offset) && offset >= 0) { S.adminDepositOffset = offset; loadAdmin(); } },
+  'admin-journal-page': el => { const offset = Number(el.dataset.offset); if (Number.isSafeInteger(offset) && offset >= 0) { S.adminJournalOffset = offset; loadAdmin(); } },
   'admin-filter': el => { S.adminFilter = el.dataset.filter; render(); },
   'admin-refresh': () => loadAdmin(),
   'admin-confirm': el => adminDecision('confirm', el.dataset.id),

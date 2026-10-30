@@ -240,21 +240,75 @@ function exactDepositAmount(value) {
   const fraction = match[2].replace(/0+$/, '').padEnd(2, '0');
   return `${whole}.${fraction} USDT`;
 }
+function sumExactAmounts(...values) {
+  if(values.some(value=>!/^\d+\.\d{6}$/.test(String(value))))return '—';
+  const total=values.reduce((sum,value)=>sum+BigInt(value.replace('.','')),0n);
+  return exactDepositAmount(`${total/1_000_000n}.${(total%1_000_000n).toString().padStart(6,'0')}`);
+}
 
 function adminView() {
-  const head = `<header class="page-head"><div><h1>Admin</h1><p>Deposits, withdrawal review and accounts</p></div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-refresh">${icon('retry')}Refresh</button></header>`;
+  const head = `<header class="page-head"><div><h1>Admin</h1><p>Accounting, wallet activity and accounts</p></div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-refresh">${icon('retry')}Refresh</button></header>`;
   if (!S.admin) return `<div class="page admin">${head}${emptyState('retry', 'Loading admin data…')}</div>`;
   const { users, withdrawals } = S.admin;
   const depositInfo = S.admin.depositInfo;
+  const report = S.admin.accounting;
   const open = withdrawals.filter(w => ADMIN_OPEN.includes(w.status));
   const total = (rows, field) => Math.round(rows.reduce((s, r) => s + num(r[field]), 0) * 1e6) / 1e6;
-  const metrics = [['Confirmed deposits', depositInfo ? exactDepositAmount(depositInfo.totalAmount) : 'Unavailable', 'deposit', 'deposits', 'All-time USDT · TRC20'], ['Pending', String(open.length), 'clock', 'pending'], ['To send', usdt(total(open, 'netAmount')), 'withdraw', 'to-send'], ['Earn balances', usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'], ['Spot balances', usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', `Includes ${usdt(total(users, 'reservedBalance'))} reserved`], ['Accounts', String(users.length), 'users', 'users'], ['Paid out', usdt(total(withdrawals.filter(w => w.status === 'confirmed'), 'netAmount')), 'check', 'paid']];
-  const tabs = [['withdrawals', 'Withdrawals', open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length],
+  const metrics = [['Confirmed deposits', depositInfo ? exactDepositAmount(depositInfo.totalAmount) : 'Unavailable', 'deposit', 'deposits', 'All-time USDT · TRC20'],
+    ['Pending', String(report?.withdrawals.pending.count ?? open.length), 'clock', 'pending'], ['Pending net', report ? exactDepositAmount(report.withdrawals.pending.net) : 'Unavailable', 'withdraw', 'to-send'],
+    ['Earn balances', report ? exactDepositAmount(report.balances.earn) : usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'],
+    ['Spot balances', report ? exactDepositAmount(report.balances.spot) : usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', `Reserved separately: ${report ? exactDepositAmount(report.balances.reserved) : usdt(total(users, 'reservedBalance'))}`],
+    ['Accounts', String(users.length), 'users', 'users'], ['Paid out', report ? sumExactAmounts(report.withdrawals.chainConfirmed.net,report.withdrawals.manualConfirmed.net) : 'Unavailable', 'check', 'paid']];
+  const tabs = [['accounting', 'Accounting', ''], ['withdrawals', 'Withdrawals', report?.withdrawals.pending.count ?? open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length],
     ...(S.admin.workingWallet ? [['working-wallet', 'Working wallet', '']] : [])];
   return `<div class="page admin">${head}
     <section class="metric-grid">${metrics.map(([l, v, g, key, note]) => `<article class="metric" data-metric="${key}"><span>${icon(g)}${l}</span><strong>${esc(v)}</strong>${note ? `<small>${esc(note)}</small>` : ''}</article>`).join('')}</section>
     <div class="tabs">${tabs.map(([k, l, n]) => `<button class="${S.adminTab === k ? 'is-on' : ''}" type="button" data-act="admin-tab" data-tab="${k}">${l}<sup>${n}</sup></button>`).join('')}</div>
-    ${S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : S.adminTab === 'working-wallet' && S.admin.workingWallet ? adminWorkingWallet(S.admin.workingWallet) : adminWithdrawals(withdrawals)}</div>`;
+    ${S.adminTab === 'accounting' ? adminAccounting(report,S.admin.workingWallet) : S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : S.adminTab === 'working-wallet' && S.admin.workingWallet ? adminWorkingWallet(S.admin.workingWallet) : adminWithdrawals(withdrawals)}</div>`;
+}
+
+function adminAccounting(report,wallet) {
+  if(!report)return emptyState('retry','Accounting temporarily unavailable','Refresh to try again.');
+  const value = amount => amount == null ? 'Needs reconciliation' : exactDepositAmount(amount);
+  const entry = (label,amount,extra='') => `<div><dt>${esc(label)}</dt><dd><b>${esc(amount)}</b>${extra ? `<small> · ${esc(extra)}</small>` : ''}</dd></div>`;
+  const section = (title,content) => `<section class="card">${sectionHead(title)}<dl class="facts">${content}</dl></section>`;
+  const w=report.withdrawals,c=report.collections,s=report.ownerSweeps,b=report.balances,e=report.earnings,d=report.deposits;
+  return `<div class="page accounting">
+    <p class="note">${icon('info')}Ledger totals are all-time. Balances are not deposits or profit; wallet values are separate on-chain balances. Synthetic positions are shown at cost, not market value.</p>
+    <div class="accounting-grid">
+    ${section('Customer balances',entry('Earn USDT',value(b.earn))+entry('Spot USDT',value(b.spot))+entry('Reserved withdrawals',value(b.reserved))+
+      entry('Total account USDT',value(b.totalUsdt))+entry('Synthetic positions at cost',value(b.positionCost),`${b.positionCount} positions`))}
+    ${section('Deposits and collection',entry('Confirmed wallet deposits',value(d.total),`${d.count} deposits`)+
+      entry('Collected to treasury',value(c.confirmed.gross),`${c.confirmed.count} transfers · all destinations`)+entry('Credited but not yet collected',value(d.uncollected),'ledger estimate')+
+      entry('Collection in progress',value(c.pending.gross),`${c.pending.count} transfers`))}
+    ${section('Withdrawals',entry('Pending requests — gross',value(w.pending.gross),`${w.pending.count} requests`)+entry('Pending requests — net',value(w.pending.net))+
+      entry('Confirmed on-chain — net',value(w.chainConfirmed.net),`${w.chainConfirmed.count} withdrawals`)+
+      entry('Manually marked paid — net',value(w.manualConfirmed.net),`${w.manualConfirmed.count} withdrawals`)+
+      entry('Recorded withdrawal fees',sumExactAmounts(w.chainConfirmed.fee,w.manualConfirmed.fee),'confirmed and manually marked'))}
+    ${section('Rewards and adjustments',entry('Earn claims',value(e.earnClaims))+entry('Referral rewards',value(e.referralRewards))+
+      entry('Total recorded earned',value(e.totalEarned))+entry('Recorded manual Earn credits',value(e.manualEarnCredits)))}
+    ${section('Working wallet',entry('Available USDT on-chain',wallet?.balance==null?'Unavailable':usdt(wallet.balance))+
+      entry('Working wallet TRX',wallet?.workingTrx==null?'Unavailable':`${usd(wallet.workingTrx)} TRX`)+
+      entry('Fuel wallet TRX',wallet?.fuelTrx==null?'Unavailable':`${usd(wallet.fuelTrx)} TRX`)+
+      entry('Confirmed transfers to owner',value(s.confirmed.gross),`${s.confirmed.count} transfers`)+
+      entry('Owner transfer in progress',value(s.pending.gross),`${s.pending.count} transfers`))}
+    </div>
+    ${adminJournal(S.admin.journal)}
+    <p class="fine">Manual balance credits are not blockchain deposits. Manually marked withdrawals have no verified transaction in this ledger. Network fees and personal-wallet holdings are not included as profit.</p>
+  </div>`;
+}
+
+function adminJournal(journal) {
+  if(!journal)return `<section class="card">${sectionHead('Account ledger')}${emptyState('retry','Ledger temporarily unavailable')}</section>`;
+  const title = reason => ({'confirmed-trc20-deposit':'Confirmed deposit','confirmed-trc20-payout':'Confirmed withdrawal',
+    'withdrawal-reservation':'Withdrawal reservation','withdrawal-rejected':'Withdrawal returned',
+    'verified-failed-payout-release':'Failed withdrawal returned','platform-operation':'Account update'}[reason]
+    || (reason.startsWith('bulk-spot-to-earn:')?'Spot to Earn transfer':reason.startsWith('admin-earn-set:')?'Manual Earn credit':'Account adjustment'));
+  const first=journal.count?journal.offset+1:0,last=journal.offset+journal.entries.length;
+  return `<section class="card accounting-journal">${sectionHead('Account ledger',`<span class="tag">${journal.count} entries</span>`)}
+    <p class="fine">Each line is a balance movement. Transfers have both a debit and a credit.</p>
+    ${journal.entries.length?`<ul class="acts">${journal.entries.map(row=>`<li class="act" data-journal="${esc(row.batch)}"><span class="act-ic transfer">${icon('receipt')}</span><span class="act-copy"><b>${esc(title(row.reason))}</b><small>${esc(row.account)} · ${esc(row.balance)} · ${esc(dateText(row.at))}</small></span><span class="act-amt ${row.direction==='credit'?'up':'down'}">${row.direction==='credit'?'+':'−'}${esc(exactDepositAmount(row.amount))}</span></li>`).join('')}</ul>`:emptyState('receipt','No ledger entries')}
+    ${journal.count?`<div class="admin-pages"><span>${first}–${last} of ${journal.count}</span><div><button class="btn btn-ghost btn-sm" type="button" data-act="admin-journal-page" data-offset="${Math.max(0,journal.offset-journal.limit)}" ${journal.offset===0?'disabled':''}>Previous</button><button class="btn btn-ghost btn-sm" type="button" data-act="admin-journal-page" data-offset="${journal.offset+journal.limit}" ${journal.hasMore?'':'disabled'}>Next</button></div></div>`:''}</section>`;
 }
 
 function adminWorkingWallet(wallet) {
@@ -308,10 +362,10 @@ function adminWithdrawals(all) {
   const rows = S.adminFilter === 'pending' ? all.filter(w => ADMIN_OPEN.includes(w.status)) : all;
   const filter = [['pending', 'Pending'], ['all', 'All']].map(([k, l]) => `<button class="${S.adminFilter === k ? 'is-on' : ''}" type="button" data-act="admin-filter" data-filter="${k}">${l}</button>`).join('');
   return `<div class="chips">${filter}</div><p class="note">${icon('info')}${S.pay.automaticWithdrawals ? 'Automatic requests are sent from the working wallet; older manual requests still require review.' : 'Send the “To send” amount from the treasury wallet, then press Mark sent. Each decision needs two clicks.'}</p>
-    ${rows.length ? `<ul class="admin-list">${rows.map(w => `<li class="admin-card" data-withdrawal="${esc(w.id)}"><div class="admin-row"><b>${esc(w.email || 'Deleted account')}</b><span class="st st-${esc(w.status)}">${esc(WITHDRAW_STATUS[w.status] || w.status)}</span></div><small>${esc(w.name || '')} · ${esc(dateText(w.createdAt))}</small>
+    ${rows.length ? `<ul class="admin-list">${rows.map(w => `<li class="admin-card" data-withdrawal="${esc(w.id)}"><div class="admin-row"><b>${esc(w.email || 'Deleted account')}</b><span class="st st-${esc(w.status)}">${esc(withdrawStatus(w))}</span></div><small>${esc(w.name || '')} · ${esc(dateText(w.createdAt))}</small>
       <div class="admin-kv"><span>Requested</span>${adminNum(w.amount)}<span>Fee</span>${adminNum(w.fee)}<span>To send</span><b class="mono">${esc(usdt(w.netAmount))}</b></div>
       <div class="admin-addr"><code>${esc(w.destination)}</code><button class="icon-btn" type="button" data-act="admin-copy" data-value="${esc(w.destination)}" aria-label="Copy address">${icon('copy')}</button><button class="icon-btn" type="button" data-act="admin-copy" data-value="${esc(String(w.netAmount))}" aria-label="Copy amount">${icon('coins')}</button></div>
-      ${!w.automatic && ['requested','approved'].includes(w.status) ? `<div class="btn-row">${adminActionBtn(w, 'confirm')}${w.status === 'requested' ? adminActionBtn(w, 'reject') : ''}</div>` : /^[a-f0-9]{64}$/.test(w.txid || '') ? `<a class="link-btn" href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">View transaction ${icon('external')}</a>` : ''}</li>`).join('')}</ul>` : emptyState('list', 'No withdrawal requests')}`;
+      ${!S.pay.automaticWithdrawals && !w.automatic && ['requested','approved'].includes(w.status) ? `<div class="btn-row">${adminActionBtn(w, 'confirm')}${w.status === 'requested' ? adminActionBtn(w, 'reject') : ''}</div>` : /^[a-f0-9]{64}$/.test(w.txid || '') ? `<a class="link-btn" href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">View transaction ${icon('external')}</a>` : ''}</li>`).join('')}</ul>` : emptyState('list', 'No withdrawal requests')}`;
 }
 
 function adminUsers(users) {

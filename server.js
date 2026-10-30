@@ -835,9 +835,18 @@ async function handleApi(req, res, url) {
       if (!/^(0|[1-9][0-9]{0,8})$/.test(value)) return json(res, 400, { error: 'INVALID_OFFSET' });
       return json(res, 200, await adminDeposits(Number(value), users));
     }
+    if (req.method === 'GET' && url.pathname === '/api/admin/accounting') {
+      return json(res, 200, await require('./payments/accounting').accountingReport(paymentStore,db));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/admin/accounting/journal') {
+      const offset=url.searchParams.get('offset')||'0';
+      if(!/^(0|[1-9][0-9]{0,8})$/.test(offset))return json(res,400,{error:'INVALID_OFFSET'});
+      return json(res,200,await require('./payments/accounting').accountingJournal(paymentStore,db.users,Number(offset)));
+    }
     const decision = url.pathname.match(/^\/api\/admin\/withdrawals\/([a-f0-9-]{36})\/(confirm|reject)$/);
     if (req.method === 'POST' && decision) {
       if (!outgoingLedger) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
+      if (AUTOMATIC_WITHDRAWALS) return json(res, 409, {error:'AUTOMATIC_WITHDRAWALS_ACTIVE'});
       const next = structuredClone(db);
       const result = decision[2] === 'confirm' ? await outgoingLedger.confirmManual(next, decision[1]) : await outgoingLedger.decide(next, decision[1], 'reject');
       db = next;

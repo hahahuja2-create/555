@@ -67,6 +67,11 @@ test('admin sees exact confirmed wallet deposits, excludes manual credits, and c
   const admin=await login('owner@example.invalid'), customer=await login('customer@example.invalid');
   assert.equal((await request('/api/admin/deposits')).status,401);
   assert.equal((await request('/api/admin/deposits',undefined,customer)).status,403);
+  assert.equal((await request('/api/admin/accounting')).status,401);
+  assert.equal((await request('/api/admin/accounting',undefined,customer)).status,403);
+  assert.equal((await request('/api/admin/accounting/journal')).status,401);
+  assert.equal((await request('/api/admin/accounting/journal',undefined,customer)).status,403);
+  assert.equal((await request('/api/admin/accounting/journal?offset=-1',undefined,admin)).status,400);
   assert.equal((await request('/api/admin/deposits?offset=-1',undefined,admin)).status,400);
   let summary=(await request('/api/admin/deposits',undefined,admin)).body;
   assert.equal(summary.count,0);assert.equal(summary.totalAmount,'0.000000');
@@ -81,6 +86,13 @@ test('admin sees exact confirmed wallet deposits, excludes manual credits, and c
     receipts:{[first]:firstReceipt,[second]:secondReceipt,[failed]:failedReceipt}}));
   for(let i=0;i<160;i++){summary=(await request('/api/admin/deposits',undefined,admin)).body;if(summary.count===27)break;await new Promise(resolve=>setTimeout(resolve,50));}
   assert.equal(summary.count,27);assert.equal(summary.totalAmount,'76.358048');assert.equal(summary.deposits.length,25);assert.equal(summary.hasMore,true);
+  const accounting=(await request('/api/admin/accounting',undefined,admin)).body;
+  assert.equal(accounting.deposits.total,'76.358048');assert.equal(accounting.deposits.count,27);
+  assert.equal(accounting.balances.earn,'2732.358048');assert.equal(accounting.balances.spot,'0.000000');
+  const journal=(await request('/api/admin/accounting/journal',undefined,admin)).body;
+  assert.equal(journal.entries.length,25);assert.equal(journal.hasMore,true);
+  assert.ok(journal.entries.every(entry=>['credit','debit'].includes(entry.direction)));
+  assert.ok((await request('/api/admin/accounting/journal?offset=25',undefined,admin)).body.entries.length>0);
   assert.ok(summary.deposits.every(row=>row.txid!==failed));assert.ok(summary.deposits.some(row=>row.email==='owner@example.invalid'));
   const page2=(await request('/api/admin/deposits?offset=25',undefined,admin)).body;
   assert.equal(page2.count,27);assert.equal(page2.totalAmount,'76.358048');assert.equal(page2.deposits.length,2);assert.equal(page2.hasMore,false);
@@ -93,6 +105,16 @@ test('admin sees exact confirmed wallet deposits, excludes manual credits, and c
     const page=await context.newPage();const pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));
     await page.goto(base+'/#admin');await page.locator('[data-metric="deposits"] strong').waitFor();
     assert.equal(await page.locator('[data-metric="deposits"] strong').textContent(),'76.358048 USDT');
+    assert.match(await page.locator('.accounting').innerText(),/76\.358048 USDT/);
+    assert.match(await page.locator('.accounting').innerText(),/Manually marked paid/);
+    assert.equal(await page.locator('[data-journal]').count(),25);
+    await page.screenshot({path:path.join(output,name+'-accounting.png'),fullPage:true});
+    if(name==='desktop'){
+      await page.locator('[data-act="admin-journal-page"][data-offset="25"]').click();
+      await page.waitForFunction(()=>document.querySelector('.accounting-journal .admin-pages span')?.textContent.startsWith('26'));
+      await page.locator('[data-act="admin-journal-page"][data-offset="0"]').click();
+      await page.waitForFunction(()=>document.querySelector('.accounting-journal .admin-pages span')?.textContent.startsWith('1'));
+    }
     await page.locator('[data-act="admin-tab"][data-tab="deposits"]').click();
     assert.equal(await page.locator('li[data-deposit]').count(),25);assert.match(await page.locator('.note').innerText(),/manual balance adjustments are excluded/i);
     const geometry=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,

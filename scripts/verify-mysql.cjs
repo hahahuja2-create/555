@@ -13,6 +13,7 @@ const { OutgoingLedger } = require('../payments/outgoing');
 const { units, amount, tronAddress } = require('../payments/tron');
 const { AutomationJournal } = require('../payments/automation-journal');
 const { OwnerSweeps } = require('../payments/owner-sweeps');
+const { accountingReport, accountingJournal } = require('../payments/accounting');
 const { vipPlans, tasks } = require('../platform-catalog');
 
 test('database URLs are validated and public connections cannot silently disable TLS', () => {
@@ -221,6 +222,15 @@ test('MySQL migrations, atomic accounting, uniqueness, writer lease, sessions an
     assert.equal(await ledger.automaticEligible(auto.id),true);
     await assert.rejects(ledger.confirmManual(structuredClone(state),auto.id), /AUTOMATIC_PAYOUT_IN_PROGRESS/);
     await ledger.decide(state,auto.id,'reject','automatic-payout');
+    const report=await accountingReport(store,state);
+    assert.equal(report.deposits.total,'10.000001');
+    assert.equal(report.balances.earn,'22.345679');
+    assert.equal(report.withdrawals.chainConfirmed.net,'9.800001');
+    assert.equal(report.withdrawals.manualConfirmed.net,'0.000000');
+    assert.equal(report.withdrawals.rejected.gross,'10.000000');
+    const journalReport=await accountingJournal(store,state.users);
+    assert.ok(journalReport.count>0);
+    assert.ok(journalReport.entries.some(entry=>entry.account===account.email));
     await store.close();
     store = await MysqlPaymentStore.open(env);
     assert.equal((await store.state()).users[0].withdrawnTotal, 9.800001);

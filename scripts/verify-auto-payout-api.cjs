@@ -64,6 +64,12 @@ test('automatic payout API reserves funds, signs without TronLink, and settles o
   const login=await request('/api/auth/login',{email:user.email,password});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie').split(';')[0];
   const response=await request('/api/wallet/withdraw',{amount:'10',network:'trc20',wallet:destination,password,requestKey:crypto.randomUUID()},cookie);
   assert.equal(response.status,201);assert.equal(response.body.user.reservedBalance,10);const id=response.body.withdrawal.id;
+  const adminLoginEarly=await request('/api/auth/login',{email:admin.email,password});assert.equal(adminLoginEarly.status,200);
+  const adminCookie=adminLoginEarly.headers.get('set-cookie').split(';')[0];
+  assert.equal((await request(`/api/admin/withdrawals/${id}/confirm`,{},adminCookie)).status,409);
+  assert.equal((await request(`/api/admin/withdrawals/${id}/reject`,{},adminCookie)).status,409);
+  const overview=await request('/api/admin/overview',undefined,adminCookie);
+  assert.equal(overview.body.withdrawals.find(row=>row.id===id).automatic,true);
   let fixture;
   for(let i=0;i<240;i++){fixture=JSON.parse(await fs.readFile(chain,'utf8'));if(fixture.broadcasts?.length)break;await new Promise(r=>setTimeout(r,50));}
   assert.ok(fixture.broadcasts?.length,'signed transfer was broadcast');
@@ -78,8 +84,6 @@ test('automatic payout API reserves funds, signs without TronLink, and settles o
   for(let i=0;i<240;i++){current=(await request('/api/wallet/withdrawals',undefined,cookie)).body.withdrawals.find(w=>w.id===id);if(current.status==='confirmed')break;await new Promise(r=>setTimeout(r,50));}
   assert.equal(current.status,'confirmed');assert.equal((await request('/api/me',undefined,cookie)).body.user.reservedBalance,0);
   assert.equal((await request('/api/admin/working-wallet',undefined,cookie)).status,403);
-  const adminLogin=await request('/api/auth/login',{email:admin.email,password});assert.equal(adminLogin.status,200);
-  const adminCookie=adminLogin.headers.get('set-cookie').split(';')[0];
   const wallet=await request('/api/admin/working-wallet',undefined,adminCookie);
   assert.equal(wallet.body.address,treasury);assert.equal(wallet.body.destination,deriveAddress(xpub,8));assert.equal(wallet.body.pending,null);
   const ownerKey=crypto.randomUUID();

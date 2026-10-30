@@ -112,6 +112,11 @@ const root = path.resolve(__dirname, '..');
       await page.locator('[data-form="owner-sweep"] [name=amount]').fill('2.5');
       assert.equal(await page.locator('[data-form="owner-sweep"] [name=amount]').inputValue(),'2.5');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),true);
+      const autoControls = await page.evaluate(() => {
+        S.pay.automaticWithdrawals=true;
+        return adminWithdrawals([{id:'fixture',email:'fixture@example.invalid',status:'requested',automatic:true,amount:10,fee:0.2,netAmount:9.8,destination:'fixture'}]);
+      });
+      assert.doesNotMatch(autoControls,/data-act="admin-(confirm|reject)"/);
       const display = await page.evaluate(() => {
         S.user = {...S.user, id: '05fd1537-af76-49d9-afb0-b11859451ed9', isAdmin: true, earnedTotal: 2.6136};
         S.referrals = {level1: 0, level2: 0}; S.earn = {...S.earn, referralEarned: 0}; S.hide = false;
