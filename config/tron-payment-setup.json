@@ -1,7 +1,7 @@
 {
   "network": "tron-mainnet",
   "asset": "USDT",
-  "treasuryAddress": "TZBZHkdrwv6xrGzRR9a1WqStf3oEmtjDvw",
+  "treasuryAddress": "TKUp2Adbs5X1pvbxv6hoBAtbxYaTyc1856",
   "depositAddressStrategy": "hd-public-key",
   "publicWalletFile": "config/tron-wallet-public.json",
   "withdrawalSigning": "tronlink-manual"
