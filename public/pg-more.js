@@ -200,7 +200,7 @@ function aboutView() {
 
     <section class="block">${sectionHead('What you can do')}<div class="pillars">${products.map(([g, t, d]) => `<article><span class="pillar-ic">${icon(g)}</span><h3>${t}</h3><p>${d}</p></article>`).join('')}</div></section>
 
-    <section class="card about-sec"><span class="eyebrow">Getting started</span><h2>How Portgainy works</h2>
+    <section class="card about-sec"><span class="eyebrow">Step by step</span><h2>How Portgainy works</h2>
       <ol class="how">${steps.map(([t, d], i) => `<li><span class="how-n">${i + 1}</span><div><b>${t}</b><p>${d}</p></div></li>`).join('')}</ol></section>
 
     <section class="block">${sectionHead('Your accounts')}<div class="acct-cards">${accounts.map(([t, sub, d, g]) => `<article class="tile"><span class="tile-ic ${t === 'Spot' ? 'is-cyan' : ''}">${icon(g)}</span><strong>${t}</strong><small>${sub}</small><p>${d}</p></article>`).join('')}</div></section>

@@ -299,17 +299,6 @@ function stats() {
   };
 }
 
-/* A short getting-started checklist built from real account state. */
-function checklist() {
-  const acts = S.activities || [], today = new Date().toISOString().slice(0, 10), st = stats();
-  return [
-    { id: 'fund', icon: 'deposit', title: `Reach ${earnMin()} USDT in Earn`, hint: earnActive() ? 'Earn is active' : `${usd(earnShortfall())} USDT to go`, done: earnActive(), act: 'wallet-deposit' },
-    { id: 'claim', icon: 'earn', title: 'Claim today’s reward', hint: 'Once per UTC day', done: acts.some(a => a.type === 'earn' && String(a.at).slice(0, 10) === today), act: 'goto', view: 'earn' },
-    { id: 'trade', icon: 'candles', title: 'Place your first trade', hint: 'Spot · USDT', done: st.trades > 0, act: 'goto', view: 'trade' },
-    { id: 'invite', icon: 'users', title: 'Invite a friend', hint: 'Earn 10% + 5%', done: st.invites > 0, act: 'goto', view: 'referrals' }
-  ];
-}
-
 function claimReady() {
   const e = S.earn;
   return Boolean(e?.enabled && e.nextReward > 0 && serverNow() >= e.nextClaimAt);

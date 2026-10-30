@@ -78,13 +78,6 @@
   .claim-copy small { font-size: 9.5px; }
   .claim-copy strong { font-size: 13px; line-height: 1.25; }
 
-  .missions { grid-auto-columns: 112px; gap: 6px; margin: 0 -10px; padding: 0 10px 2px; }
-  .mission { --cut: 8px; padding: 9px; gap: 3px; }
-  .mission-ic { width: 26px; height: 30px; }
-  .mission-ic .ic { width: 14px; height: 14px; }
-  .mission b { font-size: 11.5px; }
-  .mission small { font-size: 9.5px; }
-
   .alloc-bar { height: 7px; }
   .alloc-legend { gap: 4px 12px; margin-top: 8px; }
   .alloc-legend li { font-size: 11.5px; }

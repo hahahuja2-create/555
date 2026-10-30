@@ -93,7 +93,7 @@ function renderAuth() {
         <button class="${signup ? 'is-on' : ''}" type="button" role="tab" aria-selected="${signup}" data-act="auth-mode" data-mode="signup">Create account</button>
       </div>
       <h1>${signup ? 'Join Portgainy' : 'Welcome back'}</h1>
-      <p class="auth-lead">${signup ? 'Create your account in a minute and start your first mission.' : 'Sign in to continue to your workspace.'}</p>
+      <p class="auth-lead">${signup ? 'Create your account in a minute.' : 'Sign in to continue to your workspace.'}</p>
       <form class="form" id="auth-form" data-form="auth" novalidate>
         <label class="field"><span>Email</span><div class="control">${icon('mail')}<input name="email" type="email" autocomplete="email" maxlength="120" placeholder="you@example.com" required></div></label>
         <label class="field"><span>Password</span><div class="control">${icon('lock')}<input id="auth-password" name="password" type="password" autocomplete="${signup ? 'new-password' : 'current-password'}" minlength="8" maxlength="128" placeholder="At least 8 characters" required><button class="eye" type="button" data-act="toggle-password" data-target="auth-password" aria-label="Show password">${icon('eye')}</button></div></label>
@@ -151,12 +151,6 @@ function earnProgress() {
   const e = earnMin(), bal = num(S.user.lockedBalance), short = earnShortfall();
   if (!short) return `<div class="earn-meter is-active"><span>${icon('earn')}Earn active · ${Math.round(num(S.user.earnRate ?? 0.1) * 100)}% daily</span><b>${money(bal)} USDT</b></div>`;
   return `<button class="earn-meter" type="button" data-act="wallet-deposit"><span>${icon('earn')}Earn starts at ${e} USDT · <b>${usd(short)} USDT</b> to go</span><i class="bar"><b style="width:${Math.round(clamp(bal / e, 0, 1) * 100)}%"></b></i></button>`;
-}
-
-function checklistBlock() {
-  const list = checklist(), done = list.filter(m => m.done).length;
-  return `<section class="block">${sectionHead('Getting started', `<span class="tag">${done}/${list.length} done</span>`)}
-    <div class="missions">${list.map(m => `<button class="mission ${m.done ? 'is-done' : ''}" type="button" data-act="${m.act}" ${m.view ? `data-view="${m.view}"` : ''}><span class="mission-ic">${m.done ? icon('check') : icon(m.icon)}</span><b>${esc(m.title)}</b><small>${esc(m.hint)}</small></button>`).join('')}</div></section>`;
 }
 
 function allocationCard() {
@@ -234,7 +228,6 @@ function homeView() {
       <div class="quick">${[['wallet-deposit', 'deposit', 'Add Funds'], ['wallet-withdraw', 'withdraw', 'Send'], ['wallet-transfer', 'transfer', 'Transfer'], ['goto', 'earn', 'Earn', 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${label}</span></button>`).join('')}</div>
     </article>
     ${claimStrip()}
-    ${checklistBlock()}
     ${allocationCard()}
     </div><div class="col">
     <section class="card">

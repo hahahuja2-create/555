@@ -390,7 +390,7 @@ async function submitAuth(form) {
     S.user = result.user; S.view = 'home'; S.referralCode = '';
     const url = new URL(location.href); url.searchParams.delete('ref'); history.replaceState(null, '', `${url.pathname}${url.search}#home`);
     await loadAll(); render();
-    if (signup) toast('Account created — your first mission awaits.', 'ok', 'Welcome');
+    if (signup) toast('Account created. Welcome to Portgainy.', 'ok', 'Welcome');
   } catch (error) { msg.textContent = errMsg(error); button.disabled = false; } finally { S.busy = false; }
 }
 
