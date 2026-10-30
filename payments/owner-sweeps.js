@@ -13,6 +13,7 @@ class OwnerSweeps {
     if (source === destination) throw new Error('SWEEP_DESTINATION_EQUALS_SOURCE');
     Object.assign(this,{store,ledger,exclusive,signer,client,source,destination,fuelAddress,privateKey,feeLimit:boundedSun(feeLimit,'sweep fee limit'),isEnabled});
     this.sql=store.sql; this.transaction=(store.transactionAsync||store.transaction).bind(store); this.stopped=false;
+    this.hasPendingFuel=async()=>false;
     if (store.dialect !== 'mysql') this.sql.exec(`CREATE TABLE IF NOT EXISTS automation_sweeps (
       id TEXT PRIMARY KEY, request_key TEXT NOT NULL UNIQUE, destination TEXT NOT NULL, amount_units TEXT NOT NULL,
       status TEXT NOT NULL, txid TEXT UNIQUE, payload TEXT, fee_limit INTEGER NOT NULL, created_at INTEGER NOT NULL,
@@ -49,6 +50,7 @@ class OwnerSweeps {
     let job=await this.exclusive(async()=>{
       const row=await this.pendingInside(); if(!row)return;
       if((await this.ledger.pending()).some(item=>item.kind==='withdrawal')) throw new Error('WORKING_WALLET_BUSY');
+      if(row.status==='planned' && await this.hasPendingFuel()) throw new Error('WORKING_WALLET_BUSY');
       return row;
     });
     if(!job)return;

@@ -13,6 +13,7 @@ class AutomaticPayouts {
     if (typeof isEligible !== 'function' || typeof isEnabled !== 'function') throw new Error('AUTOMATIC_PAYOUT_POLICY_REQUIRED');
     Object.assign(this, { treasury, privateKey, feeLimit: boundedSun(feeLimit, 'payout fee limit'), payouts, ledger, exclusive, getState, commitState, isEligible, isEnabled, hasPendingSweep });
     this.queue = Promise.resolve();
+    this.hasPendingFuel = async () => false;
     this.stopped = false;
   }
 
@@ -60,6 +61,7 @@ class AutomaticPayouts {
       const pending = await this.ledger.pending();
       if (pending.some(item => item.kind === 'withdrawal' && item.id !== id)) throw new Error('WORKING_WALLET_BUSY');
       if (row.status !== 'submitted' && await this.hasPendingSweep()) throw new Error('WORKING_WALLET_BUSY');
+      if (row.status !== 'submitted' && await this.hasPendingFuel()) throw new Error('WORKING_WALLET_BUSY');
       if (row.status === 'requested') {
         const state = structuredClone(this.getState());
         const approved = await this.ledger.decide(state, id, 'approve', 'automatic-payout');

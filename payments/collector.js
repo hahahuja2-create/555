@@ -43,11 +43,14 @@ class SignerJournal {
 }
 
 class CollectionWorker {
-  constructor({ operator, client, wallet, treasury, branch, gasWallet, journal, feeLimit, feeDailyLimit, gasDailyLimit, gasEnabled = false, shouldStop = () => false }) {
+  constructor({ operator, client, wallet, treasury, branch, gasWallet, journal, feeLimit, feeDailyLimit, gasDailyLimit, gasEnabled = false, shouldStop = () => false, fundingGuard = async () => {}, gasSourceReserve = 0n }) {
     Object.assign(this, { operator, client, wallet, treasury, branch, gasWallet, journal, gasEnabled });
     addressHex(treasury);
     this.feeLimit = boundedSun(feeLimit, 'collection fee limit');
     this.shouldStop = shouldStop;
+    this.fundingGuard = fundingGuard;
+    this.gasSourceReserve = BigInt(gasSourceReserve);
+    if (this.gasSourceReserve < 0n) throw new Error('INVALID_GAS_SOURCE_RESERVE');
     this.feeDailyLimit = dailyLimit(feeDailyLimit, 'daily collection fee limit');
     this.gasDailyLimit = gasEnabled ? dailyLimit(gasDailyLimit, 'daily gas funding limit') : 0n;
     if (branch.neuter().extendedKey !== wallet.xpub || wallet.treasuryAddress !== treasury) throw new Error('Local signer does not match the public deposit wallet.');
@@ -59,6 +62,7 @@ class CollectionWorker {
   }
 
   async ensureGas(job) {
+    await this.fundingGuard(job);
     const existing = await this.journal.funding(job.id);
     if (existing && !existing.confirmed) {
       const signed = JSON.parse(existing.payload);
@@ -83,7 +87,7 @@ class CollectionWorker {
     if (!this.gasEnabled) throw new Error('TRX_FEE_RESERVE_REQUIRED');
     const from = this.gasWallet.address;
     const topUp = target - balance;
-    if (await trxBalance(this.client, from) < topUp + 2_000_000n) throw new Error('GAS_WALLET_REQUIRES_TRX');
+    if (await trxBalance(this.client, from) < topUp + 2_000_000n + this.gasSourceReserve) throw new Error('GAS_WALLET_REQUIRES_TRX');
     await this.journal.reserve('gas', job.id, topUp + 2_000_000n, this.gasDailyLimit);
     const unsigned = await buildTrxTransfer(this.client, from, job.address, topUp);
     const signed = await signTransfer(unsigned, this.gasWallet.privateKey, { from, to: job.address, value: topUp, kind: 'trx' });
@@ -133,7 +137,7 @@ class CollectionWorker {
       try { results.push({ id: job.id, address: job.address, status: await this.process(job) }); }
       catch (error) {
         const allowed = ['SIGNED_TRANSACTION_EXPIRED', 'TRX_FEE_RESERVE_REQUIRED', 'GAS_WALLET_REQUIRES_TRX',
-          'DAILY_SPENDING_LIMIT_REACHED', 'USDT_BALANCE_NOT_YET_AVAILABLE', 'INSUFFICIENT_GAS_AFTER_FUNDING'];
+          'DAILY_SPENDING_LIMIT_REACHED', 'USDT_BALANCE_NOT_YET_AVAILABLE', 'INSUFFICIENT_GAS_AFTER_FUNDING', 'WORKING_WALLET_BUSY'];
         results.push({ id: job.id, address: job.address, status: allowed.includes(error.message) ? error.message : 'PAUSED_FOR_REVIEW' });
       }
     }

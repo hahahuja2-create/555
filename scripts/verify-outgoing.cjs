@@ -373,6 +373,40 @@ test('cloud collector uses the existing deposit branch and persists its fuel and
   assert.equal(await worker.cycle(),undefined);
 });
 
+test('shared working wallet serializes and reserves fuel across funding and outgoing transfers', async t => {
+  const {store} = await fixture(t);
+  const mnemonic = 'test test test test test test test test test test test junk';
+  const workingKey = branch.deriveChild(9).privateKey, working = deriveAddress(xpub, 9);
+  const wallet = {xpub,treasuryAddress:working};
+  store.sql.exec('CREATE TABLE IF NOT EXISTS automation_sweeps (id TEXT PRIMARY KEY,status TEXT)');
+  let lock = Promise.resolve(), queue = Promise.resolve(), outgoing = false, confirmed = false, sourceBalance = 5_999_999, broadcasts = [];
+  const exclusive = fn => { const p=lock.then(fn); lock=p.catch(()=>{}); return p; };
+  const signer = {enqueue:fn=>{const p=queue.then(fn);queue=p.catch(()=>{});return p;}};
+  const ledger = {pending:async()=>outgoing?[{kind:'withdrawal'}]:[]};
+  const first = {id:crypto.randomUUID(),address:deriveAddress(xpub,0)}, second = {id:crypto.randomUUID(),address:deriveAddress(xpub,1)};
+  const client = {request:async(route,body)=>{
+    if(route==='/walletsolidity/getaccount') return {balance:body.address===addressHex(working)?sourceBalance:confirmed?2_000_000:0};
+    if(route==='/wallet/createtransaction') return unsigned({from:working,to:tronAddress(body.to_address),value:body.amount,kind:'trx'});
+    if(route==='/walletsolidity/gettransactionbyid')return confirmed?{txID:body.value,ret:[{contractRet:'SUCCESS'}]}:{};
+    if(route==='/wallet/broadcasttransaction'){broadcasts.push(body);return {result:true};}
+    throw Error('unexpected fixture request');
+  }};
+  const options={treasury:working,mnemonic,fuelAddress:working,wallet,store,ledger,client,exclusive,feeLimit:1_000_000,
+    feeDailyLimit:'2000000',gasDailyLimit:'8000000',isEnabled:()=>true,fuelMode:'working-wallet',workingPrivateKey:workingKey,signer,payoutFeeLimit:1_000_000};
+  assert.throws(()=>new AutomaticCollections({...options,workingPrivateKey:branch.deriveChild(8).privateKey}),/FUEL_ADDRESS_MISMATCH/);
+  let worker=new AutomaticCollections(options);
+  await assert.rejects(worker.worker.ensureGas(first),/GAS_WALLET_REQUIRES_TRX/);
+  sourceBalance=6_000_000; outgoing=true;
+  await assert.rejects(worker.worker.ensureGas(first),/WORKING_WALLET_BUSY/);
+  outgoing=false; assert.equal(await worker.worker.ensureGas(first),false);
+  assert.equal(broadcasts.length,1);
+  await assert.rejects(worker.worker.ensureGas(second),/WORKING_WALLET_BUSY/);
+  worker=new AutomaticCollections(options);
+  assert.equal(await worker.worker.ensureGas(first),false);
+  assert.equal(broadcasts[0].txID,broadcasts[1].txID);
+  confirmed=true; assert.equal(await worker.worker.ensureGas(first),true);
+});
+
 test('real withdrawal API requires password and operator authorization; mobile and desktop render', async t => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'taskmall-outgoing-'));
   const walletFile = path.join(directory, 'wallet.json');

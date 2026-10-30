@@ -62,6 +62,10 @@ test('automatic payouts authorize only eligible requests and persist exact signe
   await assert.rejects(f.ledger.confirmManual(structuredClone(f.state), row.id), /AUTOMATIC_PAYOUT_IN_PROGRESS/);
   await assert.rejects(f.ledger.decide(structuredClone(f.state), row.id, 'reject'), /AUTOMATIC_PAYOUT_IN_PROGRESS/);
   f.currentId = row.id; f.usdt = 0n;
+  worker.hasPendingFuel = async () => true;
+  await assert.rejects(worker.process(row.id), /WORKING_WALLET_BUSY/);
+  assert.equal((await f.ledger.withdrawal(row.id)).status, 'requested');
+  worker.hasPendingFuel = async () => false;
   await assert.rejects(worker.cycle(), /TREASURY_USDT_INSUFFICIENT/);
   assert.equal((await f.ledger.withdrawal(row.id)).status, 'approved');
   assert.equal(f.broadcasts.length, 0);

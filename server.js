@@ -408,6 +408,11 @@ async function loadDatabase() {
           fuelAddress:process.env.TRON_FUEL_ADDRESS || null,
           feeLimit:Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
         automaticPayouts.hasPendingSweep = async () => Boolean(await ownerSweeps.pendingInside());
+        if (process.env.TRON_COLLECTION_FUEL_MODE === 'working-wallet') {
+          const hasPendingFuel = async () => Boolean(await paymentStore.sql.prepare('SELECT job_id FROM automation_funding WHERE confirmed=0 LIMIT 1').get());
+          automaticPayouts.hasPendingFuel = hasPendingFuel;
+          ownerSweeps.hasPendingFuel = hasPendingFuel;
+        }
         automaticPayouts.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
         ownerSweeps.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
       }
@@ -418,7 +423,9 @@ async function loadDatabase() {
         automaticCollections = new AutomaticCollections({treasury:TREASURY, mnemonic:process.env.TRON_AUTOMATION_DEPOSIT_MNEMONIC,
           fuelAddress:process.env.TRON_FUEL_ADDRESS, wallet, store:paymentStore, ledger:outgoingLedger, client:depositWatcher.client, exclusive,
           feeLimit:Number(process.env.TRON_COLLECTION_FEE_LIMIT_SUN), feeDailyLimit:process.env.TRON_COLLECTION_DAILY_FEE_LIMIT_SUN,
-          gasDailyLimit:process.env.TRON_GAS_DAILY_LIMIT_SUN, isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
+          gasDailyLimit:process.env.TRON_GAS_DAILY_LIMIT_SUN, fuelMode:process.env.TRON_COLLECTION_FUEL_MODE || 'legacy',
+          workingPrivateKey:process.env.TRON_WORKING_WALLET_PRIVATE_KEY, signer:automaticPayouts,
+          payoutFeeLimit:Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
         automaticCollections.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
       }
     }

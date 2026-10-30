@@ -289,7 +289,7 @@ function adminAccounting(report,wallet) {
       entry('Total recorded earned',value(e.totalEarned))+entry('Recorded manual Earn credits',value(e.manualEarnCredits)))}
     ${section('Working wallet',entry('Available USDT on-chain',wallet?.balance==null?'Unavailable':usdt(wallet.balance))+
       entry('Working wallet TRX',wallet?.workingTrx==null?'Unavailable':`${usd(wallet.workingTrx)} TRX`)+
-      entry('Fuel wallet TRX',wallet?.fuelTrx==null?'Unavailable':`${usd(wallet.fuelTrx)} TRX`)+
+      (wallet?.fuelAddress && wallet.fuelAddress!==wallet.address ? entry('Fuel wallet TRX',wallet.fuelTrx==null?'Unavailable':`${usd(wallet.fuelTrx)} TRX`) : '')+
       entry('Confirmed transfers to owner',value(s.confirmed.gross),`${s.confirmed.count} transfers`)+
       entry('Owner transfer in progress',value(s.pending.gross),`${s.pending.count} transfers`))}
     </div>
@@ -320,15 +320,15 @@ function adminWorkingWallet(wallet) {
     WORKING_WALLET_BUSY:'Automatic withdrawals are waiting for another outgoing transfer.', SIGNED_TRANSACTION_EXPIRED:'A signed withdrawal expired and needs review.',
     PAYOUT_INTENT_EXPIRED_REVIEW_REQUIRED:'A withdrawal needs review before it can continue.', NETWORK_OR_STORAGE_UNAVAILABLE:'Withdrawal processing is temporarily unavailable.',
     BROADCAST_NOT_ACKNOWLEDGED:'A withdrawal is awaiting a network response.'}[wallet.payoutIssue];
-  const collectionIssue = {GAS_WALLET_REQUIRES_TRX:'Deposit collection is waiting for TRX in the fuel wallet.', TRX_FEE_RESERVE_REQUIRED:'Deposit collection is waiting for TRX.',
+  const collectionIssue = {GAS_WALLET_REQUIRES_TRX:'Deposit collection is waiting for more TRX in the funding wallet.', TRX_FEE_RESERVE_REQUIRED:'Deposit collection is waiting for TRX.', WORKING_WALLET_BUSY:'Deposit collection is waiting for another wallet transaction to confirm.',
     DAILY_SPENDING_LIMIT_REACHED:'The daily collection fee budget has been reached.', USDT_BALANCE_NOT_YET_AVAILABLE:'A deposit is waiting for its confirmed balance.',
     SIGNED_TRANSACTION_EXPIRED:'A signed collection needs review.', PAUSED_FOR_REVIEW:'Deposit collection needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'Deposit collection is temporarily unavailable.'}[wallet.collectionIssue];
   return `<section class="card">${sectionHead('Working wallet')}
     <dl class="facts"><div><dt>Balance</dt><dd>${wallet.balance == null ? 'Unavailable' : `${money(wallet.balance)} USDT`}</dd></div>
       <div><dt>Working wallet TRX</dt><dd>${wallet.workingTrx == null ? 'Unavailable' : `${money(wallet.workingTrx)} TRX`}</dd></div>
-      ${wallet.fuelAddress ? `<div><dt>Fuel wallet TRX</dt><dd>${wallet.fuelTrx == null ? 'Unavailable' : `${money(wallet.fuelTrx)} TRX`}</dd></div>` : ''}
+      ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>Fuel wallet TRX</dt><dd>${wallet.fuelTrx == null ? 'Unavailable' : `${money(wallet.fuelTrx)} TRX`}</dd></div>` : ''}
       <div><dt>Working address</dt><dd><code>${esc(wallet.address)}</code></dd></div>
-      ${wallet.fuelAddress ? `<div><dt>Fuel address</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
+      ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>Fuel address</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
       <div><dt>Send to your treasury</dt><dd><code>${esc(wallet.destination)}</code></dd></div></dl>
     <p class="note">${icon('info')}Funds stay here until you request a transfer. Keep enough USDT and TRX available for customer withdrawals.</p>
     ${payoutIssue ? `<p class="note">${icon('info')}${esc(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${esc(collectionIssue)}</p>` : ''}

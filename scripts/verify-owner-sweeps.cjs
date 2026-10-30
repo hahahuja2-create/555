@@ -26,6 +26,10 @@ test('only a manually requested sweep sends the fixed destination, with restart-
   await sweeps.cycle();assert.equal(sent.length,0);
   const key=crypto.randomUUID(),job=await exclusive(()=>sweeps.requestInside({key,amount:'12.5'},'admin'));
   assert.equal(job.status,'planned');
+  sweeps.hasPendingFuel=async()=>true;
+  await assert.rejects(sweeps.cycle(),/WORKING_WALLET_BUSY/);
+  assert.equal(sent.length,0);
+  sweeps.hasPendingFuel=async()=>false;
   assert.equal((await exclusive(()=>sweeps.requestInside({key,amount:'12.5'},'admin'))).id,job.id);
   await assert.rejects(exclusive(()=>sweeps.requestInside({key,amount:'13'},'admin')),/CONFLICT/);
   await assert.rejects(exclusive(()=>sweeps.requestInside({key:crypto.randomUUID(),amount:'1'},'admin')),/IN_PROGRESS/);
