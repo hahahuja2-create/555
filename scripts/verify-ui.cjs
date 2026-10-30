@@ -41,7 +41,33 @@ const root = path.resolve(__dirname, '..');
         const text = await page.locator('#content').innerText();
         if (/undefined|NaN|\[object/.test(text)) problems.push(`${name}/${view}: bad text`);
       }
-      await page.click('[data-act="wallet-transfer"]').catch(() => {});
+      const display = await page.evaluate(() => {
+        S.user = {...S.user, id: '05fd1537-af76-49d9-afb0-b11859451ed9', isAdmin: true, earnedTotal: 2.6136};
+        S.referrals = {level1: 0, level2: 0}; S.earn = {...S.earn, referralEarned: 0}; S.hide = false;
+        const before = JSON.stringify({user: S.user, referrals: S.referrals, earn: S.earn});
+        const home = homeView(), referrals = referralsView(), profile = profileView();
+        const unchanged = before === JSON.stringify({user: S.user, referrals: S.referrals, earn: S.earn});
+        S.user.earnedTotal += 10; S.referrals.level1 = 1; S.referrals.level2 = 2; S.earn.referralEarned = 3;
+        const future = [displayEarnedTotal(), displayReferralCount(1), displayReferralCount(2), displayReferralEarned()];
+        S.user.id = 'different-admin';
+        const other = [displayEarnedTotal(), displayReferralCount(1), displayReferralCount(2), displayReferralEarned(), manualAdminDisplay()];
+        S.user.id = '05fd1537-af76-49d9-afb0-b11859451ed9'; S.user.isAdmin = false;
+        const nonAdmin = manualAdminDisplay();
+        return {home, referrals, profile, unchanged, future, other, nonAdmin};
+      });
+      assert.match(display.home, /Earned all-time \(manual display\).*4,650\.00/);
+      assert.match(display.home, /Level 1 . 10%<\/small><b>5<\/b>/);
+      assert.match(display.home, /Level 2 . 5%<\/small><b>12<\/b>/);
+      assert.match(display.home, /420\.00/);
+      assert.match(display.referrals, /manual display adjustments/i);
+      assert.match(display.referrals, /5 <small>members/);
+      assert.match(display.referrals, /12 <small>members/);
+      assert.match(display.profile, /Total earned \(manual display\)/);
+      assert.equal(display.unchanged, true);
+      assert.deepEqual(display.future, [4660, 6, 14, 423]);
+      assert.deepEqual(display.other, [12.6136, 1, 2, 3, false]);
+      assert.equal(display.nonAdmin, false);
+      await page.click('[data-act="wallet-transfer"]', { timeout: 500 }).catch(() => {});
       await page.close();
     }
   } finally {

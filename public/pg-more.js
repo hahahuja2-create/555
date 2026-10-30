@@ -70,7 +70,7 @@ function promoCard(p) {
 /* ------------------------------------------------------------- referrals */
 
 function referralsView() {
-  const u = S.user, code = S.team?.inviteCode || u.inviteCode, link = inviteUrl(code), r = S.referrals || {};
+  const u = S.user, code = S.team?.inviteCode || u.inviteCode, link = inviteUrl(code);
   const members = S.team?.members || [];
   const income = S.activities.filter(a => a.type === 'referral');
   return `<div class="page referrals">
@@ -82,9 +82,10 @@ function referralsView() {
       <a class="invite-link" data-invite-link href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>
       <div class="btn-row"><button class="btn btn-lime" type="button" data-act="copy-invite-link">${icon('link')}Copy link</button><button class="btn btn-ghost" type="button" data-act="share-invite">${icon('share')}Share</button></div>
     </article>
-    <section class="tiles">${[[1, 10, r.level1 || 0, 'Directly invited friends'], [2, 5, r.level2 || 0, 'Friends invited by your friends']].map(([lv, rate, count, text]) => `<article class="tile level"><span class="eyebrow">Level ${lv}</span><strong class="big">${rate}<small>%</small></strong><p>${text}. You earn ${rate}% of every Earn reward they claim.</p><b class="count">${count} <small>members</small></b></article>`).join('')}</section>
+    <section class="tiles">${[[1, 10, displayReferralCount(1), 'Directly invited friends'], [2, 5, displayReferralCount(2), 'Friends invited by your friends']].map(([lv, rate, count, text]) => `<article class="tile level"><span class="eyebrow">Level ${lv}</span><strong class="big">${rate}<small>%</small></strong><p>${text}. You earn ${rate}% of every Earn reward they claim.</p><b class="count">${count} <small>members</small></b></article>`).join('')}</section>
+    ${manualAdminDisplay() ? `<div class="note">${icon('info')}Referral counts and income include manual display adjustments; actual referrals and rewards are unchanged.</div>` : ''}
     <div class="note">${icon('info')}Referral rewards credit your Spot balance and never reduce your friends’ own rewards.</div>
-    <section class="card">${sectionHead('Referral income', `<b class="up">${money(S.earn?.referralEarned || 0)} USDT</b>`)}${income.length ? `<ul class="acts">${income.slice(0, 12).map(a => `<li class="act"><span class="act-ic referral">${icon('users')}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))}</small></span><span class="act-amt up">${S.hide ? '••••' : `+${usd(a.amount)}`}<small>USDT</small></span></li>`).join('')}</ul>` : emptyState('users', 'No referral income yet', 'Rewards appear after your friends claim their Earn rewards.')}</section>
+    <section class="card">${sectionHead('Referral income', `<b class="up">${money(displayReferralEarned())} USDT</b>`)}${income.length ? `<ul class="acts">${income.slice(0, 12).map(a => `<li class="act"><span class="act-ic referral">${icon('users')}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))}</small></span><span class="act-amt up">${S.hide ? '••••' : `+${usd(a.amount)}`}<small>USDT</small></span></li>`).join('')}</ul>` : emptyState('users', 'No recorded referral income yet', 'Rewards appear after your friends claim their Earn rewards.')}</section>
     <section class="card">${sectionHead('Your team', `<span class="tag">${members.length} members</span>`)}${members.length ? `<ul class="acts">${members.map(m => `<li class="act"><span class="act-ic transfer">${icon('user')}</span><span class="act-copy"><b>${esc(m.name)}</b><small>Joined ${esc(dateText(m.createdAt, true))}</small></span></li>`).join('')}</ul>` : emptyState('user', 'No members yet', 'Share your link to bring friends in.')}</section>
   </div>`;
 }
@@ -105,7 +106,7 @@ function profileView() {
     </section>
     <section class="card">${sectionHead('Account')}
       <form class="form" data-form="profile" novalidate><label class="field"><span>Display name</span><div class="control">${icon('user')}<input name="name" type="text" value="${esc(u.name)}" minlength="2" maxlength="50" required></div></label><p class="form-msg" id="profile-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${icon('check')}Save name</button></form>
-      <dl class="facts"><div><dt>Email</dt><dd>${esc(u.email)}</dd></div><div><dt>Invite code</dt><dd>${esc(u.inviteCode)}</dd></div><div><dt>Member since</dt><dd>${esc(dateText(u.createdAt, true))}</dd></div><div><dt>Total earned</dt><dd>${money(u.earnedTotal)} USDT</dd></div><div><dt>Total withdrawn</dt><dd>${money(u.withdrawnTotal)} USDT</dd></div></dl>
+      <dl class="facts"><div><dt>Email</dt><dd>${esc(u.email)}</dd></div><div><dt>Invite code</dt><dd>${esc(u.inviteCode)}</dd></div><div><dt>Member since</dt><dd>${esc(dateText(u.createdAt, true))}</dd></div><div><dt>Total earned${manualAdminDisplay() ? ' (manual display)' : ''}</dt><dd>${money(displayEarnedTotal())} USDT</dd></div><div><dt>Total withdrawn</dt><dd>${money(u.withdrawnTotal)} USDT</dd></div></dl>
     </section>
     <section class="card links">${[['support', 'headset', 'Help & Support'], ['about', 'building', 'About Portgainy'], ['referrals', 'users', 'Referrals'], ...(u.isAdmin ? [['admin', 'shield', 'Admin console']] : [])].map(([v, g, l]) => `<button type="button" data-act="goto" data-view="${v}">${icon(g)}<span>${l}</span>${icon('chevron')}</button>`).join('')}</section>
     <button class="btn btn-danger btn-lg btn-block" type="button" data-act="logout">${icon('logout')}Sign out</button>

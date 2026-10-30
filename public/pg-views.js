@@ -154,10 +154,11 @@ function earnProgress() {
 }
 
 function referralCard() {
-  const code = S.team?.inviteCode || S.user.inviteCode, r = S.referrals || {};
+  const code = S.team?.inviteCode || S.user.inviteCode;
   return `<article class="card ref-card"><div class="sec-head"><h2>Referral program</h2><button class="more-link" type="button" data-act="goto" data-view="referrals">Details${icon('chevron')}</button></div>
     <div class="ref-top"><div><small>Your invite code</small><code>${esc(code)}</code></div><button class="icon-btn" type="button" data-act="copy-invite" aria-label="Copy code">${icon('copy')}</button></div>
-    <div class="ref-stats"><div><small>Level 1 · 10%</small><b>${r.level1 || 0}</b></div><div><small>Level 2 · 5%</small><b>${r.level2 || 0}</b></div><div><small>Earned</small><b class="up">${S.hide ? '••••' : usd(S.earn?.referralEarned || 0)}</b></div></div>
+    <div class="ref-stats"><div><small>Level 1 · 10%</small><b>${displayReferralCount(1)}</b></div><div><small>Level 2 · 5%</small><b>${displayReferralCount(2)}</b></div><div><small>Earned</small><b class="up">${S.hide ? '••••' : usd(displayReferralEarned())}</b></div></div>
+    ${manualAdminDisplay() ? '<p class="ref-note">Manual display adjustments included; actual referrals and rewards are unchanged.</p>' : ''}
     <p class="ref-note">Earn 10% of every reward your friends claim, and 5% from the friends they invite.</p>
     <div class="btn-row"><button class="btn btn-lime btn-sm" type="button" data-act="copy-invite-link">${icon('link')}Copy link</button><button class="btn btn-ghost btn-sm" type="button" data-act="share-invite">${icon('share')}Share</button></div></article>`;
 }
@@ -232,7 +233,7 @@ function homeView() {
       <div class="hero-top"><span class="hero-label">Est. total value<button class="eye-btn" type="button" data-act="toggle-hide" aria-label="${S.hide ? 'Show balances' : 'Hide balances'}">${icon(S.hide ? 'eyeOff' : 'eye')}</button></span></div>
       <div class="hero-num"><strong data-total>${S.hide ? '••••••' : usd(totalValue())}</strong><span>USDT</span></div>
       <div class="hero-sub"><span>≈ $<span data-total-usd>${S.hide ? '••••' : usd(totalValue())}</span></span>
-        ${hasCrypto ? `<span class="pnl ${tone(pnl.amount)}" data-pnl>${S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)} (${pct(pnl.percent)})`}<small>Unrealized PNL</small></span>` : `<span class="pnl-note">Earned all-time <b>${money(u.earnedTotal)}</b></span>`}</div>
+        ${hasCrypto ? `<span class="pnl ${tone(pnl.amount)}" data-pnl>${S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)} (${pct(pnl.percent)})`}<small>Unrealized PNL</small></span>` : ''}${!hasCrypto || manualAdminDisplay() ? `<span class="pnl-note">Earned all-time${manualAdminDisplay() ? ' (manual display)' : ''} <b>${money(displayEarnedTotal())}</b></span>` : ''}</div>
       ${earnProgress()}
       <div class="quick">${[['wallet-deposit', 'deposit', 'Add Funds'], ['wallet-withdraw', 'withdraw', 'Send'], ['wallet-transfer', 'transfer', 'Transfer'], ['goto', 'earn', 'Earn', 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${label}</span></button>`).join('')}</div>
     </article>

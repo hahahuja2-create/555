@@ -50,6 +50,12 @@ const usd = value => nf6.format(num(value));
 const usdt = value => `${usd(value)} USDT`;
 const money = value => mask(usd(value));
 const moneyUsdt = value => mask(usdt(value));
+
+// Administrator-only presentation offsets; real account and referral records remain unchanged.
+const manualAdminDisplay = () => S.user?.isAdmin && S.user.id === '05fd1537-af76-49d9-afb0-b11859451ed9';
+const displayEarnedTotal = () => manualAdminDisplay() ? 4650 + num(S.user.earnedTotal) - 2.6136 : num(S.user?.earnedTotal);
+const displayReferralCount = level => num(S.referrals?.[`level${level}`]) + (manualAdminDisplay() ? (level === 1 ? 5 : 12) : 0);
+const displayReferralEarned = () => num(S.earn?.referralEarned) + (manualAdminDisplay() ? 420 : 0);
 const qty = value => nf8.format(num(value));
 const compact = value => nfCompact.format(num(value));
 
