@@ -322,7 +322,7 @@ async function loadDatabase() {
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     for (const user of db.users) ensureUserShape(user);
     if(EARN_MODE)earn.migrate(db,vipPlans);
-    if(EARN_MODE)earn.topUp(db);
+    if(EARN_MODE)earn.revertTopUp(db);
     if(EARN_MODE){
       const history=db.earn.referralPromotion?[]:await paymentStore.sql.prepare('SELECT user_id,amount_units,timestamp,txid,log_index FROM deposits ORDER BY timestamp,txid,log_index').all();
       referralPromotion.initialize(db,history);
@@ -378,14 +378,14 @@ async function loadDatabase() {
     let changed = EARN_MODE && (saved.earn?.version!==2||saved.spot?.version!==2);
     for (const user of db.users) if (ensureUserShape(user)) changed = true;
     if(EARN_MODE&&earn.migrate(db,vipPlans).length)changed=true;
-    if(EARN_MODE&&earn.topUp(db).length)changed=true;
+    if(EARN_MODE&&earn.revertTopUp(db).length)changed=true;
     if(EARN_MODE&&referralPromotion.initialize(db))changed=true;
     if (changed) await saveDatabase();
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
     if(EARN_MODE)spot.initialize(db);
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
-    if(EARN_MODE)earn.topUp(db);
+    if(EARN_MODE)earn.revertTopUp(db);
     if(EARN_MODE)referralPromotion.initialize(db);
     await saveDatabase();
   }

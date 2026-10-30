@@ -85,21 +85,20 @@ function migrate(state,plans,now=Date.now()){
   }
   return report;
 }
-// One-time: every account that existed before the 200 USDT minimum is brought up to it. Later accounts are never topped up.
-function topUp(state,now=Date.now()){
-  state.earn||={};
-  if(state.earn.minimumTopUp?.version===1)return[];
-  const report=[],MINIMUM=minimum(state);
-  for(const user of state.users){
-    const before=units(user.lockedBalance);
-    if(before>=MINIMUM)continue;
-    const credit=MINIMUM-before;
-    user.lockedBalance=amount(MINIMUM);
-    user.earnMinimum={version:1,at:new Date(now).toISOString(),previous:amount(before),credited:amount(credit)};
-    (user.activities||=[]).unshift({id:crypto.randomUUID(),at:new Date(now).toISOString(),type:'topup',amount:amount(credit)});
-    report.push({userId:user.id,previous:amount(before),credited:amount(credit)});
+// The 200 USDT top-up was withdrawn: balances are real. If a top-up was ever applied, take back exactly the credited amount once.
+function revertTopUp(state){
+  const report=[];
+  for(const user of state.users||[]){
+    if(user.earnMinimum?.version!==1)continue;
+    const credited=units(user.earnMinimum.credited||0);
+    const current=units(user.lockedBalance);
+    user.lockedBalance=amount(current>credited?current-credited:0n);
+    user.activities=(user.activities||[]).filter(row=>row.type!=='topup');
+    delete user.earnMinimum;
+    report.push({userId:user.id,removed:amount(credited),balance:user.lockedBalance});
   }
-  state.earn.minimumTopUp={version:1,at:new Date(now).toISOString(),accounts:report.length,totalUnits:report.reduce((s,r)=>s+units(r.credited),0n).toString()};
+  if(state.earn?.minimumTopUp&&!state.earn.minimumTopUp.reverted)state.earn.minimumTopUp={...state.earn.minimumTopUp,reverted:true,revertedAt:new Date().toISOString()};
+  else if(report.length)state.earn={...state.earn,minimumTopUp:{version:1,reverted:true,revertedAt:new Date().toISOString()}};
   return report;
 }
-module.exports={DAY,topUp,pool,snapshot,claim,migrate,nextReset,claimSchedule};
+module.exports={DAY,revertTopUp,pool,snapshot,claim,migrate,nextReset,claimSchedule};
