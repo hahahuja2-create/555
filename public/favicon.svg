@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs><linearGradient id="ribbon" x1="8" y1="11" x2="40" y2="38" gradientUnits="userSpaceOnUse"><stop stop-color="#FFE5A0"/><stop offset=".48" stop-color="#F4C34E"/><stop offset="1" stop-color="#C9922B"/></linearGradient></defs>
+  <path d="M8 35V16.5c0-3.3 3.7-4.7 5.8-2.2L24 26l10.2-11.7c2.1-2.5 5.8-1.1 5.8 2.2V35" stroke="url(#ribbon)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 26v9" stroke="url(#ribbon)" stroke-width="6" stroke-linecap="round"/>
+</svg>

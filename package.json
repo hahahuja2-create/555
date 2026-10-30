@@ -1,0 +1,7 @@
+{
+  "name": "taskmall-maintenance-notice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": { "start": "node server.js", "test": "node --test verify.cjs" },
+  "engines": { "node": ">=22.13" }
+}
