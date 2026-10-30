@@ -1,12 +1,12 @@
-# TaskMall maintenance notice
+# TaskMall migration notice
 
-This branch restores the original TaskMall maintenance page, translations and
-assets until **31 October 2026 at 18:00 Asia/Tbilisi** (`2026-10-31T14:00:00Z`).
+This branch displays a multilingual notice that the platform has moved to
+https://portgainy.com, where users can sign in with their existing account.
 
 It runs only on the retired TaskMall Railway service. It never imports the
 financial backend, opens MySQL, or runs a deposit/collection worker. Portgainy
 on the `main` branch remains the only application managing the existing ledger.
 
-After the deadline, public pages lead to the working Portgainy platform while
-retired financial/operator APIs remain unavailable. `npm test` checks routing,
-the exact reopening boundary and preservation of the original notice assets.
+The notice includes a link to Portgainy and preserves valid referral codes in the
+link. Retired financial and operator APIs remain unavailable on TaskMall.
+`npm test` checks the notice and routing without connecting to a database.

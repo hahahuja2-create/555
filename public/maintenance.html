@@ -3,19 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#14161b" />
+    <meta name="theme-color" content="#101219" />
     <meta name="robots" content="noindex" />
-    <title>TaskMall | ტექნიკური სამუშაოები</title>
+    <title>TaskMall | ჩვენ გადავედით Portgainy‑ზე</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/georgian.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/maintenance.css?v=1" />
-    <script src="/maintenance.js?v=1" defer></script>
+    <link rel="stylesheet" href="/maintenance.css?v=move-1" />
+    <script src="/maintenance.js?v=move-1" defer></script>
   </head>
   <body>
-    <div class="maintenance-shell">
-      <header class="maintenance-header">
-        <div class="brand" aria-label="TaskMall"><img src="/favicon.svg" alt="" width="38" height="38" /><span>TaskMall</span></div>
+    <div class="shell">
+      <header class="header">
+        <div class="brand" aria-label="TaskMall"><img src="/favicon.svg" alt="" width="36" height="36" /><span>TaskMall</span></div>
         <div class="language-control">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg>
           <label class="visually-hidden" for="maintenance-language" data-copy="language">ენა</label>
@@ -27,21 +27,24 @@
         </div>
       </header>
       <main>
-        <section class="maintenance-card" aria-labelledby="maintenance-title">
-          <div class="service-icon" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="9" width="32" height="23" rx="4"/><path d="M17 40h14m-7-8v8M8 26h32m-22-9h4m4 0h4"/><circle cx="36" cy="35" r="8" fill="#212027"/><path d="m33 35 2 2 4-4"/></svg>
+        <section class="notice" aria-labelledby="notice-title">
+          <div class="brand-transition" aria-label="TaskMall to Portgainy">
+            <span class="brand-tile old-brand"><img src="/favicon.svg" alt="TaskMall" width="43" height="43" /></span>
+            <svg class="transition-arrow" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+            <span class="brand-tile new-brand"><img src="/portgainy-mark.svg" alt="Portgainy" width="47" height="47" /></span>
           </div>
-          <div class="status-label"><span aria-hidden="true"></span><span data-copy="status">დაგეგმილი ტექნიკური სამუშაოები</span></div>
-          <h1 id="maintenance-title" data-copy="title">პლატფორმა დროებით მიუწვდომელია</h1>
-          <p class="description" data-copy="description">პლატფორმაზე მიმდინარეობს დაგეგმილი ტექნიკური სამუშაოები სერვისის განახლებისა და სტაბილურობის გაუმჯობესებისთვის.</p>
-          <div class="resume-card">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-14 4h3m4 0h3"/></svg>
-            <div><p data-copy="resumeLabel">პლატფორმა მუშაობას განაახლებს</p><time datetime="2026-10-31T14:00:00Z" data-copy="date">31 ოქტომბერს, 18:00-ზე</time></div>
+          <div class="eyebrow"><span aria-hidden="true"></span><span data-copy="status">ახალი მისამართი</span></div>
+          <h1 id="notice-title" data-copy="title">ჩვენ Portgainy‑ზე გადავედით</h1>
+          <p class="description" data-copy="description">პლატფორმა მუშაობას ახალ საიტზე აგრძელებს. თქვენი ანგარიში და თანხები შენარჩუნებულია.</p>
+          <div class="account-note">
+            <span class="note-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.1c0 4.7 3.1 8.2 7.5 9.9 4.4-1.7 7.5-5.2 7.5-9.9V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <div><strong data-copy="accountTitle">თქვენი ანგარიში შენარჩუნებულია</strong><p data-copy="accountDetail">Portgainy‑ზე შესასვლელად გამოიყენეთ თქვენი არსებული ელფოსტა და პაროლი.</p></div>
           </div>
-          <p class="thanks" data-copy="thanks">გმადლობთ მოთმინებისა და გაგებისთვის.</p>
+          <a class="primary-link" href="https://portgainy.com/" id="destination-link"><span data-copy="action">გადასვლა Portgainy‑ზე</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="address" dir="ltr">portgainy.com</p>
         </section>
       </main>
-      <footer>© 2026 TaskMall</footer>
+      <footer>TaskMall <span aria-hidden="true">·</span> Portgainy</footer>
     </div>
   </body>
 </html>
