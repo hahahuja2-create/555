@@ -114,7 +114,7 @@ test('Claim credits Spot without pre-funding; actual payout stays manual until a
   const { ledger, store, app } = await fixture(t);
   const earn = require('../markets/earn'), now = Date.now(), user = app.users[0];
   Object.assign(user, { lockedBalance: 100, withdrawBalance: 0, earnedTotal: 0, createdAt: new Date(now - earn.DAY).toISOString() });
-  earn.pool(app, now - earn.DAY);
+  app.earn = { minimumUnits: '0' }; earn.pool(app, now - earn.DAY);
   const result = earn.claim(app, user.id, crypto.randomUUID(), now);
   store.save(app, 'earn-account-credit');
   assert.equal(result.receipt.status, 'credited');
@@ -409,7 +409,6 @@ test('real withdrawal API requires password and operator authorization; mobile a
   browser = await chromium.launch();
   const context = await browser.newContext();
   await context.addCookies([{ name: 'taskmall_session', value: cookie.split('=')[1], url }]);
-  await context.addInitScript(() => localStorage.setItem('taskmall_language', 'en'));
   const page = await context.newPage();
   const uiErrors = [];
   page.on('pageerror', error => uiErrors.push(error.message));
@@ -417,13 +416,13 @@ test('real withdrawal API requires password and operator authorization; mobile a
   await fs.mkdir(output, { recursive: true });
   for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 360, height: 740 }]]) {
     await page.setViewportSize(viewport);
-    await page.goto(url + '/#wallet');
-    await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
+    await page.goto(url + '/#assets');
+    await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
     await page.locator('[data-wallet-form="withdraw"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').getAttribute('min'), '10');
     assert.match(await page.locator('#withdrawal-minimum').textContent(), /10 USDT/);
     const liveAccount = (await request('/api/me', undefined, customer)).body.user;
-    await page.locator('[data-wallet-form="withdraw"] [data-action="wallet-max"]').click();
+    await page.locator('[data-wallet-form="withdraw"] [data-act="wallet-max"]').click();
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').inputValue(), String(liveAccount.withdrawBalance));
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').evaluate(input => input.checkValidity()), true);
     assert.match(await page.locator('[data-wallet-available]').textContent(), /90\.123456 USDT/);
@@ -439,11 +438,12 @@ test('real withdrawal API requires password and operator authorization; mobile a
     assert.equal(await page.locator('[name="password"]').count(), 1);
     await page.screenshot({ path: path.join(output, 'withdraw-' + name + '.png') });
     const layout = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth,
-      overflow: [...document.querySelectorAll('.wallet-dialog, .wallet-dialog *')].filter(el => el.getBoundingClientRect().right > innerWidth + 1).map(el => ({ tag: el.tagName, class: el.className, right: el.getBoundingClientRect().right })) }));
+      overflow: [...document.querySelectorAll('.sheet, .sheet *')].filter(el => el.getBoundingClientRect().right > innerWidth + 1).map(el => ({ tag: el.tagName, class: el.className, right: el.getBoundingClientRect().right })) }));
     assert.ok(layout.scroll <= layout.width, JSON.stringify(layout));
     const submitBox = await page.locator('[data-wallet-form="withdraw"] button[type="submit"]').boundingBox();
     assert.ok(submitBox && submitBox.y >= 0 && submitBox.y + submitBox.height <= viewport.height, 'Withdrawal submit button must fit the viewport');
     await page.screenshot({ path: path.join(output, 'withdraw-' + name + '.png') });
+    if (name === 'desktop') await page.keyboard.press('Escape');
   }
   await page.locator('[data-wallet-form="withdraw"] [name="wallet"]').fill(destination);
   await page.locator('[data-wallet-form="withdraw"] [name="password"]').fill(password);
@@ -453,11 +453,10 @@ test('real withdrawal API requires password and operator authorization; mobile a
   assert.equal(queued.filter(row => row.status === 'requested' && row.amount === 10 && row.netAmount === 9).length, 1);
   assert.equal((await request('/api/me', undefined, customer)).body.user.reservedBalance, 10);
   await page.reload();
-  await page.locator('.wallet-command-bar').waitFor();
-  await page.locator('[data-language-select]').selectOption('ka');
-  await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
+  await page.locator('.hero-card').waitFor();
+  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
-  assert.match(await page.locator('#withdrawal-minimum').textContent(), /გატანის მოთხოვნის მინიმუმი: 10 USDT/);
+  assert.match(await page.locator('#withdrawal-minimum').textContent(), /Minimum withdrawal request: 10 USDT/);
   await page.keyboard.press('Escape');
 
   const readyConfig = (await request('/api/payment-config')).body;
@@ -473,41 +472,41 @@ test('real withdrawal API requires password and operator authorization; mobile a
     return addressUnavailable ? route.fulfill({ status: 503, json: { error: 'DEPOSITS_UNAVAILABLE' } }) : route.continue();
   });
   await page.reload();
-  await page.locator('.wallet-command-bar').waitFor();
+  await page.locator('.hero-card').waitFor();
   paymentConfig = readyConfig;
-  await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
+  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   assert.equal(addressRequests, 0, 'Withdrawal checks do not depend on allocating a deposit address');
   await page.keyboard.press('Escape');
 
   metadataUnavailable = true;
-  await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
-  await page.locator('[data-action="retry-wallet"]').waitFor();
+  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+  await page.locator('[data-act="retry-wallet"]').waitFor();
   assert.equal(await page.locator('.modal-wallet-form').count(), 0, 'A failed fresh status check must not expose a cached form');
   metadataUnavailable = false;
-  await page.locator('[data-action="retry-wallet"]').click();
+  await page.locator('[data-act="retry-wallet"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   await page.keyboard.press('Escape');
 
   await page.reload();
-  await page.locator('.wallet-command-bar').waitFor();
+  await page.locator('.hero-card').waitFor();
   assert.equal(addressRequests, 1);
-  await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
+  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   await page.keyboard.press('Escape');
-  await page.locator('.wallet-command-bar [data-wallet-type="deposit"]').click();
-  await page.locator('[data-action="retry-wallet"]').waitFor();
+  await page.locator('.hero-card [data-act=\"wallet-deposit\"]').click();
+  await page.locator('[data-act="retry-wallet"]').waitFor();
   assert.equal(await page.locator('.deposit-qr').count(), 0);
   addressUnavailable = false;
-  await page.locator('[data-action="retry-wallet"]').click();
+  await page.locator('[data-act="retry-wallet"]').click();
   await page.locator('.deposit-qr').waitFor();
-  assert.equal(await page.locator('.native-address-row code').textContent(), (await request('/api/wallet/deposit-address', {}, customer)).body.address);
+  assert.equal(await page.locator('#dep-address').inputValue(), (await request('/api/wallet/deposit-address', {}, customer)).body.address);
   await page.keyboard.press('Escape');
 
   for (const config of [{ ...readyConfig, withdrawalsAvailable: false }, { ...readyConfig, withdrawalsAvailable: undefined }]) {
     paymentConfig = config;
-    await page.locator('.wallet-command-bar [data-wallet-type="withdraw"]').click();
-    await page.locator('[data-action="retry-wallet"]').waitFor();
+    await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+    await page.locator('[data-act="retry-wallet"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"]').count(), 0, 'Withdrawal admission needs an explicit ready flag');
     await page.keyboard.press('Escape');
   }

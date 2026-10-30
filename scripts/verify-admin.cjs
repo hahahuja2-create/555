@@ -150,7 +150,7 @@ test('admin sees every account and marks manual payouts paid; customers see unde
   const open = async (cookie, viewport) => {
     const context = await browser.newContext({ viewport });
     await context.addCookies([{ name: 'taskmall_session', value: cookie.split('=')[1], url }]);
-    await context.addInitScript(() => localStorage.setItem('taskmall_language', 'ka'));
+    
     const page = await context.newPage();
     const pageErrors = [];
     page.on('pageerror', error => pageErrors.push(error.message));
@@ -158,51 +158,53 @@ test('admin sees every account and marks manual payouts paid; customers see unde
   };
 
   const shopper = await open(customer.cookie, { width: 390, height: 844 });
-  await shopper.page.goto(url + '/#wallet');
-  await shopper.page.locator('.wallet-command-bar').waitFor();
+  await shopper.page.goto(url + '/#assets');
+  await shopper.page.locator('.hero-card').waitFor();
+  await shopper.page.locator('[data-act="assets-tab"][data-tab="history"]').click();
   assert.equal(await shopper.page.locator('[data-view="admin"]').count(), 0, 'customers never see the Admin page');
-  assert.match(await shopper.page.locator('.withdrawal-state').first().textContent(), /განხილვაში/);
+  assert.match(await shopper.page.locator('.withdrawal-state').first().textContent(), /Under review/);
   await shopper.page.goto(url + '/#admin');
-  await shopper.page.locator('.app-shell').waitFor();
+  await shopper.page.locator('.shell').waitFor();
   assert.equal(await shopper.page.locator('.admin-page').count(), 0);
 
   for (const [name, viewport] of [['mobile', { width: 390, height: 844 }], ['desktop', { width: 1440, height: 900 }]]) {
     const { page, pageErrors } = await open(admin.cookie, viewport);
     await page.goto(url + '/#admin');
-    await page.locator(`tr[data-withdrawal="${third}"]`).waitFor();
+    await page.locator(`li[data-withdrawal="${third}"]`).waitFor();
     assert.equal(await page.locator('[data-metric="vip-balance"] strong').textContent(), '30.00 USDT', 'total VIP balance of all accounts');
     assert.equal(await page.locator('[data-metric="withdraw-balance"] strong').textContent(), '70.00 USDT', 'total withdrawal balance of all accounts');
     assert.match(await page.locator('[data-metric="withdraw-balance"] small').textContent(), /20\.00 USDT/);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, name + ' page has no horizontal scrolling');
     await page.screenshot({ path: path.join(output, `withdrawals-${name}.png`), fullPage: true });
-    await page.locator('[data-action="admin-tab"][data-tab="users"]').click();
-    await page.locator('tr[data-user="customer-a"]').waitFor();
-    assert.equal(await page.locator('tr[data-user]').count(), 2);
+    await page.locator('[data-act="admin-tab"][data-tab="users"]').click();
+    await page.locator('li[data-user="customer-a"]').waitFor();
+    assert.equal(await page.locator('li[data-user]').count(), 2);
     await page.locator('#admin-search').fill('customer@');
-    assert.equal(await page.locator('tr[data-user]').count(), 1);
+    assert.equal(await page.locator('li[data-user]').count(), 1);
     assert.equal(await page.locator('#admin-search').evaluate(input => input === document.activeElement), true, 'typing keeps focus');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({ path: path.join(output, `users-${name}.png`), fullPage: true });
     assert.deepEqual(pageErrors, []);
     if (name === 'desktop') {
-      await page.locator('[data-action="admin-tab"][data-tab="withdrawals"]').click();
-      const confirm = page.locator(`tr[data-withdrawal="${third}"] [data-action="admin-confirm"]`);
+      await page.locator('[data-act="admin-tab"][data-tab="withdrawals"]').click();
+      const confirm = page.locator(`li[data-withdrawal="${third}"] [data-act="admin-confirm"]`);
       await confirm.click();
-      assert.match(await confirm.textContent(), /დააჭირე ისევ/);
+      assert.match(await confirm.textContent(), /Confirm sent\?/);
       assert.equal(await customerStatus(third), 'requested', 'the first click only arms the button');
       await confirm.click();
-      await page.locator('.toast.success').waitFor();
-      await page.locator(`tr[data-withdrawal="${third}"]`).waitFor({ state: 'detached' });
+      await page.locator('.toast.is-ok').waitFor();
+      await page.locator(`li[data-withdrawal="${third}"]`).waitFor({ state: 'detached' });
       assert.equal(await customerStatus(third), 'confirmed');
-      await page.locator('[data-action="admin-filter"][data-filter="all"]').click();
-      assert.match(await page.locator(`tr[data-withdrawal="${third}"] .admin-status`).textContent(), /დადასტურებულია/);
+      await page.locator('[data-act="admin-filter"][data-filter="all"]').click();
+      assert.match(await page.locator(`li[data-withdrawal="${third}"] .st`).textContent(), /Sent/);
       assert.deepEqual(pageErrors, []);
     }
   }
 
-  await shopper.page.goto(url + '/#wallet');
+  await shopper.page.goto(url + '/#assets');
   await shopper.page.reload();
+  await shopper.page.locator('[data-act="assets-tab"][data-tab="history"]').click();
   await shopper.page.locator('.withdrawal-state').first().waitFor();
-  assert.match(await shopper.page.locator('.withdrawal-state').first().textContent(), /დადასტურებულია/);
+  assert.match(await shopper.page.locator('.withdrawal-state').first().textContent(), /Sent/);
   assert.deepEqual(shopper.pageErrors, []);
 });
