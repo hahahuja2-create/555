@@ -19,7 +19,7 @@ function earnView() {
       <div class="earn-hero-copy">
         <span class="eyebrow">Daily reward rate</span>
         <h2>${rate}% of your Earn balance, every day</h2>
-        <p>Claim once per UTC day. Rewards are paid to your Spot balance and your principal stays in Earn.</p>
+        <p>Your first Claim is available once Earn reaches 200 USDT. After that, claim once per day when the countdown finishes. Rewards credit Spot and your principal stays in Earn.</p>
       </div>
       ${active ? '' : `<div class="earn-gate"><div class="earn-gate-top"><span>${icon('lock')}Earn starts at ${earnMin()} USDT</span><b>${usd(short)} USDT to go</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(num(u.lockedBalance) / earnMin(), 0, 1) * 100)}%"></b></i><p>Your Earn balance is ${money(u.lockedBalance)} USDT. Add ${usd(short)} USDT more to unlock daily rewards.</p><button class="btn btn-lime btn-block" type="button" data-act="wallet-deposit">${icon('deposit')}Add ${usd(short)} USDT</button></div>`}
       ${active ? `      <div class="claim-box ${ready ? 'is-ready' : ''}">
@@ -41,7 +41,7 @@ function earnView() {
       <div class="calc-out" data-rate="${rate}"><span><small>Daily</small><b data-calc="d">—</b></span><span><small>7 days</small><b data-calc="w">—</b></span><span><small>30 days</small><b data-calc="m">—</b></span></div>
       <p class="fine">${icon('info')}Estimate for an unchanged balance and one claim per day. The calculator uses the tier for the entered balance. Future rewards are not guaranteed.</p>
     </section>
-    <section class="rules">${[['clock', 'One claim per day', 'A new claim opens daily at 00:00 UTC. Missed days do not accumulate.'], ['wallet', 'Principal stays put', 'Claims do not reduce your Earn balance. Rewards credit Spot.'], ['users', 'Two referral levels', 'Level 1 earns 10% and level 2 earns 5% of each claimed reward.']].map(([g, t, d]) => `<article>${icon(g)}<div><b>${t}</b><p>${d}</p></div></article>`).join('')}</section>
+    <section class="rules">${[['clock', 'One claim per day', 'Your first Claim is available when you start Earn. Later claims open when the countdown finishes. Missed days do not accumulate.'], ['wallet', 'Principal stays put', 'Claims do not reduce your Earn balance. Rewards credit Spot.'], ['users', 'Two referral levels', 'Level 1 earns 10% and level 2 earns 5% of each claimed reward.']].map(([g, t, d]) => `<article>${icon(g)}<div><b>${t}</b><p>${d}</p></div></article>`).join('')}</section>
     <section class="card">${sectionHead('Earn activity', moreLink('Referrals', 'referrals'))}${history.length ? `<ul class="acts">${history.slice(0, 12).map(a => `<li class="act"><span class="act-ic ${a.type}">${icon(activityIconFor(a))}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))}</small></span><span class="act-amt up">${S.hide ? '••••' : `+${usd(a.amount)}`}<small>USDT</small></span></li>`).join('')}</ul>` : emptyState('earn', 'No Earn activity yet', 'Your claims and referral rewards will be listed here.')}</section>
   </div>`;
 }
@@ -118,7 +118,7 @@ function profileView() {
 
 const FAQ = [
   ['How do deposits work?', 'Send USDT on the TRON (TRC20) network to your personal deposit address. Once the transfer is confirmed on the blockchain it is credited to your Earn account automatically.'],
-  ['How do I claim my daily reward?', 'Open Earn and tap Claim when the timer reaches zero. A new claim opens every day at 00:00 UTC. Rewards credit your Spot balance and your Earn principal stays untouched.'],
+  ['How do I claim my daily reward?', 'Your first Claim is available as soon as Earn reaches 200 USDT. Open Earn and tap Claim. Later claims are available once per day when the countdown finishes. Rewards credit Spot and your Earn principal stays untouched.'],
   ['What are the withdrawal rules?', 'Withdrawals are requested from Spot and confirmed with your password. Automatic processing depends on available funds and network resources. A 2% fee applies and the minimum request is 10 USDT. Status updates appear under Assets → History.'],
   ['How does trading work?', 'Choose a market, enter an amount in USDT and review a 15-second quote. Prices follow live Binance quotes; positions are recorded by Portgainy and settled in USDT.'],
   ['How do referrals pay out?', 'Level 1 earns 10% and level 2 earns 5% of the Earn rewards your network claims. Referral rewards credit your Spot balance.'],
@@ -177,14 +177,14 @@ function aboutView() {
   const products = [
     ['chart', 'Live markets', 'Real-time prices for dozens of leading assets with 24-hour range, volume, favorites, category filters and a market-mood read-out.'],
     ['candles', 'Spot trading', 'Review a quote, confirm in one tap and track every position with live unrealized PNL. Orders settle in USDT.'],
-    ['earn', 'Earn', 'Keep USDT in your Earn account and claim a daily reward once per UTC day. Your principal always stays in place.'],
+    ['earn', 'Earn', 'Keep USDT in your Earn account and claim a daily reward. Your first Claim is available when you start Earn. Later claims open once per day. Your principal stays in place.'],
     ['users', 'Referrals', 'Invite friends and receive 10% of their claimed rewards at level 1 and 5% at level 2, credited to your Spot balance.'],
     ['wallet', 'USDT wallet', 'A unique TRON (TRC20) deposit address per account, password-confirmed withdrawals and a clear status trail.'],
     ['bell', 'Price alerts', 'Set above/below targets on any market and get notified the moment a price is reached while Portgainy is open.']
   ];
-  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to explore live markets.'], ['Fund Earn', `Deposit USDT (TRC20). Earn starts once your Earn balance reaches 200 USDT.`], ['Claim every day', 'Claim once per UTC day. Your daily rate is 8–13%, based on your Earn balance. Rewards credit Spot.'], ['Trade, transfer or withdraw', `Use Spot USDT to trade, move it back to Earn, or request a withdrawal (${fee}% fee, 10 USDT minimum).`]];
+  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to explore live markets.'], ['Fund Earn', `Deposit USDT (TRC20). Earn starts once your Earn balance reaches 200 USDT.`], ['Claim every day', 'Your first Claim is available when you start Earn; later claims open once per day. Your daily rate is 8–13%, based on your Earn balance. Rewards credit Spot.'], ['Trade, transfer or withdraw', `Use Spot USDT to trade, move it back to Earn, or request a withdrawal (${fee}% fee, 10 USDT minimum).`]];
   const accounts = [['Earn', 'Deposits and principal', 'Generates your daily reward. Principal is never reduced by claims.', 'earn'], ['Spot', 'Rewards, trading, withdrawals', 'Receives claims and referral rewards. Used for trades and withdrawal requests.', 'wallet'], ['Reserved', 'Pending withdrawals', 'Funds held while a withdrawal request is processed.', 'clock']];
-  const limits = [['Earn minimum', '200 USDT'], ['Daily reward rate', '8–13% of your Earn balance'], ['Claim cycle', 'Once per UTC day · resets 00:00 UTC'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Spot order size', '1 – 10,000 USDT per order'], ['Quote validity', '15 seconds'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
+  const limits = [['Earn minimum', '200 USDT'], ['Daily reward rate', '8–13% of your Earn balance'], ['Claim cycle', 'First claim when you start Earn; then once per day'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Spot order size', '1 – 10,000 USDT per order'], ['Quote validity', '15 seconds'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
   const safety = [['lock', 'Password-confirmed withdrawals', 'Confirm withdrawals with your account password. Automatic processing requires sufficient funds and network resources.'], ['qr', 'Unique deposit addresses', 'Each account receives its own TRON address. Deposits are credited only after blockchain confirmation.'], ['fingerprint', 'Idempotent operations', 'Claims, orders and withdrawals use request keys to protect retries against duplicate processing.'], ['shield', 'Protected sessions', 'Sessions use secure, same-site cookies and sensitive endpoints are rate-limited against abuse.'], ['key', 'No keys in the browser', 'The website never holds private keys or seed phrases and Portgainy staff will never ask for them.'], ['history', 'Full transaction trail', 'Every deposit, transfer, claim, trade and withdrawal is recorded and can be exported as CSV.']];
   return `<div class="page about">
     <article class="about-hero">
@@ -208,7 +208,7 @@ function aboutView() {
     <section class="block">${sectionHead('Your accounts')}<div class="acct-cards">${accounts.map(([t, sub, d, g]) => `<article class="tile"><span class="tile-ic ${t === 'Spot' ? 'is-cyan' : ''}">${icon(g)}</span><strong>${t}</strong><small>${sub}</small><p>${d}</p></article>`).join('')}</div></section>
 
     <section class="card about-sec"><span class="eyebrow">Earn</span><h2>A daily reward on your Earn balance</h2>
-      <p>Earn starts at 200 USDT. Your daily rate is 8–13%, based on your Earn balance at Claim. The claim window resets at 00:00 UTC. Missed days do not accumulate, and claims do not reduce your principal.</p>${earnTierTable()}
+      <p>Earn starts at 200 USDT. Your daily rate is 8–13%, based on your Earn balance at Claim. Your first Claim is available when you start Earn. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.</p>${earnTierTable()}
       <ul class="ticks"><li>${icon('check')}Rewards are credited to your Spot balance.</li><li>${icon('check')}Level 1 referrals earn you 10% and level 2 earns you 5% of each reward they claim, without reducing theirs.</li><li>${icon('check')}Accounts below 200 USDT see exactly how much is needed to start.</li></ul></section>
 
     <section class="card about-sec"><span class="eyebrow">Trading</span><h2>How orders are priced and settled</h2>

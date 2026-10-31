@@ -35,7 +35,7 @@ test('startup conversion preserves Spot/reserved balances and restores purchased
   child=spawn(process.execPath,['server.js'],{cwd:path.resolve(__dirname,'..'),windowsHide:true,stdio:'ignore',env:{...process.env,NODE_ENV:'test',HOST:'127.0.0.1',PORT:'4193',PUBLIC_ORIGIN:'',TASKMALL_DATA_DIR:directory,TASKMALL_EARN_ENABLED:'1',TASKMALL_SPOT_ENABLED:'1',TASKMALL_DESIGN_PREVIEW:'0',TASKMALL_SQLITE:'',MYSQL_URL:'',DATABASE_URL:'',TRON_DEPOSITS_ENABLED:'0',TASKMALL_OPERATOR_ENABLED:'0'}});
   const base='http://127.0.0.1:4193';let ready=false;for(let i=0;i<50;i++){try{if((await fetch(base+'/api/health')).ok){ready=true;break;}}catch{}await new Promise(resolve=>setTimeout(resolve,100));}assert.equal(ready,true);
   const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:user.email,password})});assert.equal(login.status,200);const account=(await login.json()).user;assert.equal(account.earningBalance,30.43);assert.equal(account.spotBalance,6.36);assert.equal(account.reservedBalance,2);
-  const cookie=login.headers.get('set-cookie').split(';')[0],reward=await(await fetch(base+'/api/earn',{headers:{Cookie:cookie}})).json();assert.equal(new Date(reward.nextClaimAt).getUTCHours(),0);assert.ok(reward.nextClaimAt>now);
+  const cookie=login.headers.get('set-cookie').split(';')[0],reward=await(await fetch(base+'/api/earn',{headers:{Cookie:cookie}})).json();assert.equal(new Date(reward.nextClaimAt).getUTCHours(),8);assert.ok(reward.nextClaimAt>now);
   await stop();const saved=JSON.parse(await fs.readFile(path.join(directory,'db.json'),'utf8'));assert.equal(saved.users[0].earnMigration.principalRestored,30);assert.equal(saved.spot.model,'synthetic');
  }
 });

@@ -54,7 +54,7 @@
     "test:notice": "node --test scripts/verify-notice.cjs",
     "test:api": "node --test scripts/verify-api.cjs",
     "test:maintenance": "node --test scripts/verify-maintenance.cjs",
-    "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs scripts/verify-earn-tiers.cjs",
+    "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs scripts/verify-earn-tiers.cjs scripts/verify-claim-schedule.cjs",
     "preview:design": "node scripts/design-preview.cjs",
     "test:spot": "node --test scripts/verify-spot.cjs",
     "test:assets": "node --test scripts/verify-assets.cjs"

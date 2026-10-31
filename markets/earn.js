@@ -6,15 +6,16 @@ const {TIERS,NOTICE_VERSION}=require('./earn-rates');
 const DAY=86_400_000;
 const minimum=state=>promotion.minimumUnits(state);
 const fail=(message,status=409)=>Object.assign(new Error(message),{status});
-const nextReset=time=>(Math.floor(time/DAY)+1)*DAY;
+const RESET_OFFSET=8*60*60_000;
+const nextReset=time=>(Math.floor((time-RESET_OFFSET)/DAY)+1)*DAY+RESET_OFFSET;
 function claimSchedule(state,user,now){
-  const registered=Date.parse(user.createdAt)||state.earn?.startedAt||now;
-  let nextClaimAt=nextReset(registered);
-  const legacyDate=/^\d{4}-\d{2}-\d{2}$/.test(user.lastCompletionDate||'')?Date.parse(user.lastCompletionDate+'T00:00:00Z'):0;
+  const legacyDate=/^\d{4}-\d{2}-\d{2}$/.test(user.lastCompletionDate||'')?Date.parse(user.lastCompletionDate+'T08:00:00Z'):0;
   const latestActivity=(user.activities||[]).filter(row=>row.type==='task'||row.type==='earn').reduce((latest,row)=>Math.max(latest,Date.parse(row.at)||0),0);
-  const lastPaid=Math.max(Number(user.earnLastClaimAt)||0,legacyDate||0,latestActivity);
-  if(lastPaid)nextClaimAt=Math.max(nextClaimAt,nextReset(lastPaid));
-  return{nextClaimAt,nextResetAt:nextReset(now),resetHourUtc:0,timeZone:'UTC'};
+  const latestReceipt=[user.earnLastReceipt,...Object.values(user.earnReceipts||{})].reduce((latest,row)=>Math.max(latest,Date.parse(row?.at)||0),0);
+  const lastPaid=Math.max(Number(user.earnLastClaimAt)||0,legacyDate||0,latestActivity,latestReceipt);
+  // A funded account with no prior personal reward may claim immediately.
+  // Subsequent claims belong to fixed daily windows, including across restarts.
+  return{nextClaimAt:lastPaid?nextReset(lastPaid):0,nextResetAt:nextReset(now)};
 }
 function pool(state,now=Date.now()){
   const previous=state.earn;
