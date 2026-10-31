@@ -227,6 +227,7 @@ function cleanUser(user) {
     spotBalance: balanceValue(user.withdrawBalance),
     reservedBalance: balanceValue(user.reservedBalance),
     earnedTotal: balanceValue(user.earnedTotal),
+    displayedEarnedTotal: require('./payments/manual-adjustment').displayedEarned(user),
     withdrawnTotal: balanceValue(user.withdrawnTotal),
     withdrawFeeTotal: balanceValue(user.withdrawFeeTotal),
     withdrawalFeeRate: WITHDRAWAL_FEE_RATE,
@@ -716,6 +717,31 @@ async function handleApi(req, res, url) {
   if (url.pathname.startsWith('/api/operator/')) {
     if (!authorized(req, operatorToken)) return json(res, 403, { error: 'OPERATOR_AUTH_REQUIRED' });
     if (!outgoingLedger || !storageHealthy) return json(res, 503, { error: 'STORAGE_UNAVAILABLE' });
+    if (req.method === 'POST' && url.pathname === '/api/operator/one-time-adjustment') {
+      const body=req.taskmallBody || {};
+      const fields=['userId','expectedEarn','expectedEarned','targetEarn','targetDisplayEarned','operationId'];
+      if (Object.keys(body).length !== fields.length || fields.some(key => typeof body[key] !== 'string')) return json(res,400,{error:'INVALID_ADJUSTMENT'});
+      const digest=crypto.createHash('sha256').update(JSON.stringify(fields.map(key=>body[key]))).digest('hex');
+      const allowed=process.env.NODE_ENV === 'test' ? process.env.TASKMALL_TEST_ADJUSTMENT_DIGEST : 'cc06adfec40fbfdc50c7fee18e1cf83b4923bf636bbc5470b00f0862985839ae';
+      if (!allowed || digest !== allowed) return json(res,403,{error:'ADJUSTMENT_NOT_AUTHORIZED'});
+      const transaction=(paymentStore.transactionAsync || paymentStore.transaction).bind(paymentStore);
+      const result=await transaction(async()=>{
+        const existing=await paymentStore.sql.prepare('SELECT action FROM payment_audit WHERE job_id=?').all(body.operationId);
+        if (existing.length) {
+          if (existing.length !== 1 || existing[0].action !== 'one-time-earn-display-adjustment') throw Error('ADJUSTMENT_ID_CONFLICT');
+          return {alreadyApplied:true};
+        }
+        const saved=await paymentStore.state(), persisted=saved?.users?.find(item=>item.id===body.userId), current=db.users.find(item=>item.id===body.userId);
+        if (!persisted || !current || units(persisted.lockedBalance||0)!==units(current.lockedBalance||0)
+          || units(persisted.earnedTotal||0)!==units(current.earnedTotal||0)) throw Error('ACCOUNT_STATE_MISMATCH');
+        const plan=require('./payments/manual-adjustment').prepare(db,{...body,at:new Date().toISOString()});
+        await paymentStore.saveInside(plan.state,'operator-earn-adjustment:'+body.operationId);
+        await outgoingLedger.audit('platform-owner','one-time-earn-display-adjustment',body.operationId);
+        return {alreadyApplied:false,state:plan.state,creditUnits:plan.creditUnits,offsetUnits:plan.offsetUnits};
+      });
+      if (result.state) db=result.state;
+      return json(res,200,{ok:true,alreadyApplied:result.alreadyApplied,creditUnits:result.creditUnits,offsetUnits:result.offsetUnits});
+    }
     if (req.method === 'POST' && url.pathname === '/api/operator/browser-session') {
       const ticket = operatorPortal.sessions.issue(req);
       return json(res, ticket ? 200 : 403, ticket ? { ticket } : { error: 'OPERATOR_AUTH_REQUIRED' });
