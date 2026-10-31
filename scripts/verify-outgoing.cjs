@@ -114,13 +114,13 @@ test('the 10 USDT minimum is enforced without reserving rejected amounts', async
 test('Claim credits Spot without pre-funding; actual payout stays manual until admin confirmation', async t => {
   const { ledger, store, app } = await fixture(t);
   const earn = require('../markets/earn'), now = Date.now(), user = app.users[0];
-  Object.assign(user, { lockedBalance: 100, withdrawBalance: 0, earnedTotal: 0, createdAt: new Date(now - earn.DAY).toISOString() });
+  Object.assign(user, { lockedBalance: 125, withdrawBalance: 0, earnedTotal: 0, createdAt: new Date(now - earn.DAY).toISOString() });
   app.earn = { minimumUnits: '0' }; earn.pool(app, now - earn.DAY);
   const result = earn.claim(app, user.id, crypto.randomUUID(), now);
   store.save(app, 'earn-account-credit');
   assert.equal(result.receipt.status, 'credited');
   assert.equal(user.withdrawBalance, 10);
-  assert.equal(user.lockedBalance, 100);
+  assert.equal(user.lockedBalance, 125);
   assert.equal(user.withdrawnTotal, 0);
   assert.equal((await ledger.withdrawals(user.id)).length, 0);
   const request = await ledger.request(app, user.id, { key: crypto.randomUUID(), destination, gross: '10' });
@@ -133,7 +133,7 @@ test('Claim credits Spot without pre-funding; actual payout stays manual until a
   assert.equal(user.reservedBalance, 0);
   assert.equal(user.withdrawnTotal, 9.8);
   assert.equal(user.withdrawFeeTotal, 0.2);
-  assert.equal(user.lockedBalance, 100);
+  assert.equal(user.lockedBalance, 125);
   const saved = structuredClone(app);
   assert.equal((await ledger.confirmManual(app, request.record.id)).changed, false);
   assert.deepEqual(app, saved);
@@ -510,6 +510,11 @@ test('real withdrawal API requires password and operator authorization; mobile a
   for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 360, height: 740 }]]) {
     await page.setViewportSize(viewport);
     await page.goto(url + '/#assets');
+    await page.waitForSelector('.shell');
+    if (await page.locator('[data-act="dismiss-earn-notice"]').count()) {
+      await page.locator('[data-act="dismiss-earn-notice"]').first().click();
+      await page.waitForFunction(()=>!S.earnNoticeActive);
+    }
     await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
     await page.locator('[data-wallet-form="withdraw"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').getAttribute('min'), '10');

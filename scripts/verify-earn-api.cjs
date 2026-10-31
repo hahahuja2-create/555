@@ -8,14 +8,20 @@ test('Earn API: concurrency, persistence, exact transfers and protected balances
  const base='http://127.0.0.1:4191';for(let i=0;i<60;i++){try{if((await fetch(base+'/api/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
  const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:a.email,password})});assert.equal(login.status,200);const cookie=login.headers.get('set-cookie').split(';')[0];
  const request=(url,body)=>fetch(base+url,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Cookie:cookie},body:body?JSON.stringify(body):undefined});
+ const noticeVersion=require('../markets/earn-rates').NOTICE_VERSION;
+ let account=(await(await request('/api/me')).json()).user;assert.equal(account.earnNoticeSeen,false);
+ assert.equal((await request('/api/earn/notice/seen',{version:'old'})).status,400);
+ assert.equal((await request('/api/earn/notice/seen',{version:noticeVersion})).status,200);
+ account=(await(await request('/api/me')).json()).user;assert.equal(account.earnNoticeSeen,true);assert.equal(account.lockedBalance,30.43);assert.equal(account.withdrawBalance,6.36);
  const config=await(await request('/api/spot/config')).json();assert.equal(config.mode,'synthetic');assert.equal(config.tradingEnabled,true);assert.equal((await request('/api/preview/session',{})).status,404);
  const eligible=await(await request('/api/earn')).json();assert.equal(eligible.canClaim,true);assert.equal(eligible.fundingRequired,false);assert.equal(eligible.payoutModel,'manual-withdrawal');
  const statuses=await Promise.all([request('/api/earn/claim',{requestKey:crypto.randomUUID()}),request('/api/earn/claim',{requestKey:crypto.randomUUID()})]);assert.deepEqual(statuses.map(r=>r.status).sort(),[200,409]);
- const data=await(await request('/api/earn')).json();assert.equal(data.earningBalance,30.43);assert.equal(data.withdrawalBalance,9.403);assert.equal(data.nextReward,3.043);assert.equal(data.canClaim,false);
- const transfer=await request('/api/wallet/transfer',{amount:'1.003'});assert.equal(transfer.status,200);const moved=await transfer.json();assert.equal(moved.user.lockedBalance,31.433);assert.equal(moved.user.withdrawBalance,8.4);
+ const data=await(await request('/api/earn')).json();assert.equal(data.earningBalance,30.43);assert.equal(data.withdrawalBalance,8.7944);assert.equal(data.nextReward,2.4344);assert.equal(data.canClaim,false);
+ const transfer=await request('/api/wallet/transfer',{amount:'1.003'});assert.equal(transfer.status,200);const moved=await transfer.json();assert.equal(moved.user.lockedBalance,31.433);assert.equal(moved.user.withdrawBalance,7.7914);
  const legacy=await request('/api/vips/vip1/buy',{});assert.equal(legacy.status,410);const tasks=await request('/api/tasks/free-daily-task/complete',{});assert.equal(tasks.status,410);
- const saved=JSON.parse(await fs.readFile(path.join(directory,'db.json'),'utf8'));assert.equal(saved.users.find(u=>u.id===b.id).withdrawBalance,6.6643);assert.equal(saved.users.find(u=>u.id===c.id).withdrawBalance,6.51215);assert.equal(saved.earn.availableUnits,'0');assert.equal(saved.earn.totalAccruedUnits,'3499450');assert.equal(saved.earn.version,2);
- const sourceUser=saved.users.find(u=>u.id===a.id);assert.equal(sourceUser.lockedBalance+sourceUser.withdrawBalance,39.833);assert.equal(sourceUser.earnClaimTotal,3.043);
+ const saved=JSON.parse(await fs.readFile(path.join(directory,'db.json'),'utf8'));assert.equal(saved.users.find(u=>u.id===b.id).withdrawBalance,6.60344);assert.equal(saved.users.find(u=>u.id===c.id).withdrawBalance,6.48172);assert.equal(saved.earn.availableUnits,'0');assert.equal(saved.earn.totalAccruedUnits,'2799560');assert.equal(saved.earn.version,2);
+ const sourceUser=saved.users.find(u=>u.id===a.id);assert.equal(sourceUser.lockedBalance+sourceUser.withdrawBalance,39.2244);assert.equal(sourceUser.earnClaimTotal,2.4344);
+ assert.equal(sourceUser.earnNotice.version,noticeVersion);assert.equal(saved.users.find(u=>u.id===b.id).earnNotice,undefined);
 });
 
 test('startup conversion preserves Spot/reserved balances and restores purchased principal only once',async t=>{

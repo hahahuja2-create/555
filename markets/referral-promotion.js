@@ -68,7 +68,7 @@ function snapshot(state, user, now = Date.now()) {
 }
 
 function rateBps(state, user, now = Date.now()) {
-  return 1000; // The 15% referral campaign was cancelled; every account earns 10%.
+  return require('./earn-rates').rateBps(units(user.lockedBalance));
 }
 
 const EARN_MINIMUM = 200_000_000n;

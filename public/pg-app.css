@@ -543,3 +543,16 @@
 .ref-note { color: var(--text-3); font-size: 12px; }
 .ref-card .btn-row { margin-top: 0; }
 @media (max-width: 1023px) { .home { grid-template-columns: minmax(0, 1fr); } }
+.earn-tiers { overflow-x:auto; margin:12px 0; }
+.earn-tiers table { width:100%; border-collapse:collapse; font:inherit; }
+.earn-tiers th,.earn-tiers td { padding:10px 12px; text-align:start; border-bottom:1px solid var(--line); }
+.earn-tiers th { color:var(--text-3); font-weight:600; }
+.earn-tiers td:last-child { text-align:end; font-weight:700; }
+.earn-tiers .is-current { color:var(--lime); background:rgba(200,247,81,.06); }
+.earn-notice { display:grid; gap:16px; padding:8px 0; }
+.earn-notice header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.earn-notice h2 { font:800 28px/1.15 var(--f-display); margin:0; outline:none; overflow-wrap:anywhere; }
+.earn-notice p { line-height:1.65; margin:0; }
+.system-notice section { display:grid; gap:8px; padding-block:12px; border-bottom:1px solid var(--line-2); }
+.system-notice h3 { font:700 17px/1.3 var(--f-hud); margin:0; }
+.system-notice p { font-size:13px; }

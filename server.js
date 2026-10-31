@@ -212,6 +212,7 @@ function cleanUser(user) {
     id: user.id,
     name: user.name,
     email: user.email,
+    earnNoticeSeen: user.earnNotice?.version === require('./markets/earn-rates').NOTICE_VERSION,
     points: user.points,
     streak: user.streak,
     completedCount: user.completedTaskIds.length,
@@ -1079,6 +1080,14 @@ async function handleApi(req, res, url) {
     return json(res, 200, { user: cleanUser(user), task: taskForClient(task, user), activities: user.activities });
   }
 
+  if (req.method === 'POST' && url.pathname === '/api/earn/notice/seen') {
+    const user = await requireUser(req, res); if (!user) return;
+    const body = await readBody(req);
+    if (body.version !== require('./markets/earn-rates').NOTICE_VERSION) return json(res,400,{error:'NOTICE_VERSION_MISMATCH'});
+    user.earnNotice = {version:body.version,seenAt:Date.now()};
+    await saveDatabase();
+    return json(res,200,{user:cleanUser(user)});
+  }
   if (req.method === 'PATCH' && url.pathname === '/api/profile') {
     const user = await requireUser(req, res);
     if (!user) return;

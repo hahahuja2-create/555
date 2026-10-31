@@ -210,6 +210,7 @@ let sheetEl = null;
 let sheetOnClose = null;
 
 function openSheet(html, { wide = false, onClose, label = 'Dialog' } = {}) {
+  if (S.earnNoticeActive) return sheetEl;
   closeSheet(true);
   sheetEl = document.createElement('div');
   sheetEl.className = `sheet-backdrop${wide ? ' is-wide' : ''}`;
@@ -227,6 +228,7 @@ function openSheet(html, { wide = false, onClose, label = 'Dialog' } = {}) {
 }
 
 function closeSheet(immediate = false) {
+  if (S.earnNoticeActive) return;
   if (!sheetEl) return;
   const el = sheetEl, callback = sheetOnClose;
   sheetEl = null; sheetOnClose = null;
@@ -296,6 +298,8 @@ function unrealized() {
 }
 
 const EARN_MIN_DEFAULT = 200;
+const EARN_TIERS = [[200,500,8],[500,1000,9],[1000,1700,10],[1700,2500,11],[2500,4000,12],[4000,null,13]];
+const earnRatePct = (balance = num(S.user?.lockedBalance)) => [...EARN_TIERS].reverse().find(t => balance >= t[0])?.[2] ?? 8;
 const earnMin = () => num(S.earn?.minimum, EARN_MIN_DEFAULT);
 const earnShortfall = () => Math.max(0, Math.round((earnMin() - num(S.user?.lockedBalance)) * 1e6) / 1e6);
 const earnActive = () => earnShortfall() === 0;

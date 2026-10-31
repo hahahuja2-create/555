@@ -281,6 +281,7 @@ setInterval(() => { if (S.view === 'admin' && S.user?.isAdmin && !document.hidde
 /* ------------------------------------------------------------------ events */
 
 const acts = {
+  'dismiss-earn-notice': dismissEarnNotice,
   goto: el => go(el.dataset.view),
   'open-trade': el => go('trade', el.dataset.symbol),
   'auth-home': () => { S.view = 'home'; history.replaceState(null, '', location.pathname + location.search); render(); },
@@ -423,7 +424,7 @@ async function submitAuth(form) {
     const result = await api(signup ? '/api/auth/signup' : '/api/auth/login', { method: 'POST', body: { name: nameFromEmail(email), email, password: data.get('password'), referral: data.get('referral') } });
     S.user = result.user; S.view = 'home'; S.referralCode = '';
     const url = new URL(location.href); url.searchParams.delete('ref'); history.replaceState(null, '', `${url.pathname}${url.search}#home`);
-    await loadAll(); render();
+    await loadAll(); render(); showEarnNotice();
     if (signup) toast('Account created. Welcome to Portgainy.', 'ok', 'Welcome');
   } catch (error) { msg.textContent = errMsg(error); button.disabled = false; } finally { S.busy = false; }
 }
@@ -450,9 +451,10 @@ async function init() {
   } catch { S.user = null; }
   S.loading = false;
   render();
+  showEarnNotice();
   if (S.user) {
       const intent = params.get('wallet');
-    if (['deposit', 'withdraw', 'transfer'].includes(intent)) openWallet(intent);
+    if (!S.earnNoticeActive && ['deposit', 'withdraw', 'transfer'].includes(intent)) openWallet(intent);
   }
 }
 

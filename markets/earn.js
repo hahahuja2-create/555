@@ -2,6 +2,7 @@
 const crypto=require('node:crypto');
 const {units,amount}=require('../payments/tron');
 const promotion=require('./referral-promotion');
+const {TIERS,NOTICE_VERSION}=require('./earn-rates');
 const DAY=86_400_000;
 const minimum=state=>promotion.minimumUnits(state);
 const fail=(message,status=409)=>Object.assign(new Error(message),{status});
@@ -30,7 +31,8 @@ function snapshot(state,user,now=Date.now(),enabled=false){
   const reward=promotion.rewardUnits(state,user,now);
   const schedule=claimSchedule(state,user,now),{nextClaimAt}=schedule;
   const MINIMUM=minimum(state),balance=units(user.lockedBalance),shortfall=balance<MINIMUM?MINIMUM-balance:0n;
-  return {enabled,minimum:amount(MINIMUM),shortfall:amount(shortfall),mode:'accrued',payoutModel:'manual-withdrawal',fundingRequired:false,rate:promotion.rateBps(state,user,now)/10000,promotion:promotion.snapshot(state,user,now),referralRates:[0.1,0.05],cycleHours:24,
+  return {enabled,minimum:amount(MINIMUM),shortfall:amount(shortfall),mode:'accrued',payoutModel:'manual-withdrawal',fundingRequired:false,rate:promotion.rateBps(state,user,now)/10000,promotion:null,referralRates:[0.1,0.05],cycleHours:24,
+    tiers:TIERS.map(t=>({minimum:t.minimum,maximum:t.maximum,rate:t.bps/10000})),noticeVersion:NOTICE_VERSION,
     earningBalance:amount(units(user.lockedBalance)),withdrawalBalance:amount(units(user.withdrawBalance)),spotBalance:amount(units(user.withdrawBalance)),
     nextReward:amount(reward),...schedule,serverTime:now,canClaim:enabled&&reward>0n&&now>=nextClaimAt,
     lastClaimAt:user.earnLastClaimAt||null,earned:amount(units(user.earnClaimTotal||0)),referralEarned:amount(units(user.earnReferralTotal||0)),

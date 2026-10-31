@@ -40,6 +40,10 @@ const root = path.resolve(__dirname, '..');
       await page.fill('input[name=confirm]', 'UiTestPassword2026');
       await page.click('button[type=submit]');
       await page.waitForSelector('.shell');
+      if (await page.locator('[data-act="dismiss-earn-notice"]').count()) {
+        await page.locator('[data-act="dismiss-earn-notice"]').first().click();
+        await page.waitForFunction(()=>!S.earnNoticeActive);
+      }
       if (await page.locator('[data-act="close-sheet"]').first().isVisible().catch(() => false)) await page.locator('.sheet [data-act="close-sheet"]').first().click();
       for (const view of ['home', 'markets', 'trade', 'earn', 'assets', 'referrals', 'profile', 'support', 'about']) {
         await page.evaluate(v => { location.hash = v; }, view);

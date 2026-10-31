@@ -82,7 +82,7 @@ function renderAuth() {
         <p class="auth-sub">One account for live crypto markets, daily Earn rewards and USDT wallets.</p>
       </div>
       <ul class="auth-stats">
-        <li><b>10%</b><span>Daily Earn rate</span></li>
+        <li><b>8–13%</b><span>Daily Earn rate</span></li>
         <li><b>24h</b><span>Claim cycle</span></li>
         <li><b>USDT</b><span>Account currency</span></li>
       </ul>
@@ -137,7 +137,7 @@ function claimStrip() {
   const e = S.earn;
   if (!e?.enabled) return '';
   const ready = claimReady();
-  const rate = Math.round((S.user.earnRate ?? e.rate ?? 0.1) * 100);
+  const rate = earnRatePct();
   if (!earnActive()) return `<article class="claim-strip is-locked"><span class="claim-gem">${icon('lock')}</span><span class="claim-copy"><small>Daily Earn reward · ${rate}%</small><strong>Add <b>${usd(earnShortfall())} USDT</b> to start Earn</strong><small>Earn starts at ${earnMin()} USDT</small></span><button class="btn btn-lime btn-sm" type="button" data-act="wallet-deposit">Deposit</button></article>`;
   return `<article class="claim-strip ${ready ? 'is-ready' : ''}">
     <span class="claim-gem">${icon('earn')}</span>
@@ -149,7 +149,7 @@ function claimStrip() {
 
 function earnProgress() {
   const e = earnMin(), bal = num(S.user.lockedBalance), short = earnShortfall();
-  if (!short) return `<div class="earn-meter is-active"><span>${icon('earn')}Earn active · ${Math.round(num(S.user.earnRate ?? 0.1) * 100)}% daily</span><b>${money(bal)} USDT</b></div>`;
+  if (!short) return `<div class="earn-meter is-active"><span>${icon('earn')}Earn active · ${earnRatePct()}% daily</span><b>${money(bal)} USDT</b></div>`;
   return `<button class="earn-meter" type="button" data-act="wallet-deposit"><span>${icon('earn')}Earn starts at ${e} USDT · <b>${usd(short)} USDT</b> to go</span><i class="bar"><b style="width:${Math.round(clamp(bal / e, 0, 1) * 100)}%"></b></i></button>`;
 }
 
