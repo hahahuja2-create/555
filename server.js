@@ -426,7 +426,7 @@ async function loadDatabase() {
           feeLimit:Number(process.env.TRON_COLLECTION_FEE_LIMIT_SUN), feeDailyLimit:process.env.TRON_COLLECTION_DAILY_FEE_LIMIT_SUN,
           gasDailyLimit:process.env.TRON_GAS_DAILY_LIMIT_SUN, fuelMode:process.env.TRON_COLLECTION_FUEL_MODE || 'legacy',
           workingPrivateKey:process.env.TRON_WORKING_WALLET_PRIVATE_KEY, signer:automaticPayouts,
-          payoutFeeLimit:Number(process.env.TRON_WORKING_PAYOUT_FEE_LIMIT_SUN), isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
+          isEnabled:()=>storageHealthy && Boolean(depositWatcher?.ready())});
         automaticCollections.start(process.env.NODE_ENV === 'test' ? Number(process.env.TRON_TEST_POLL_MS || 30_000) : 30_000);
       }
     }

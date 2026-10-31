@@ -6,7 +6,7 @@ const { CollectionWorker } = require('./collector');
 const { AutomationJournal } = require('./automation-journal');
 
 class AutomaticCollections {
-  constructor({ treasury, mnemonic, fuelAddress, wallet, store, ledger, client, exclusive, feeLimit, feeDailyLimit, gasDailyLimit, isEnabled, fuelMode = 'legacy', workingPrivateKey, signer, payoutFeeLimit }) {
+  constructor({ treasury, mnemonic, fuelAddress, wallet, store, ledger, client, exclusive, feeLimit, feeDailyLimit, gasDailyLimit, isEnabled, fuelMode = 'legacy', workingPrivateKey, signer }) {
     if (typeof mnemonic !== 'string' || typeof isEnabled !== 'function') throw new Error('COLLECTION_SIGNER_CONFIGURATION_REQUIRED');
     let branch, gasKey;
     try {
@@ -43,7 +43,6 @@ class AutomaticCollections {
     }) : async () => {};
     this.worker = new CollectionWorker({operator,client,wallet,treasury,branch,gasWallet,journal:this.journal,feeLimit,
       feeDailyLimit,gasDailyLimit,gasEnabled:true,fundingGuard,
-      gasSourceReserve: fuelMode === 'working-wallet' ? BigInt(require('./transactions').boundedSun(payoutFeeLimit, 'payout fee limit')) + 1_000_000n : 0n,
       shouldStop:()=>this.stopped || !this.isEnabled()});
   }
   async cycle() { if (!this.stopped && this.isEnabled()) return this.fuelMode === 'working-wallet' ? this.signer.enqueue(() => this.worker.cycle()) : this.worker.cycle(); }

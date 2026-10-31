@@ -373,13 +373,13 @@ test('cloud collector uses the existing deposit branch and persists its fuel and
   assert.equal(await worker.cycle(),undefined);
 });
 
-test('shared working wallet serializes and reserves fuel across funding and outgoing transfers', async t => {
+test('shared working wallet funds collections without reserving a payout balance and serializes outgoing transfers', async t => {
   const {store} = await fixture(t);
   const mnemonic = 'test test test test test test test test test test test junk';
   const workingKey = branch.deriveChild(9).privateKey, working = deriveAddress(xpub, 9);
   const wallet = {xpub,treasuryAddress:working};
   store.sql.exec('CREATE TABLE IF NOT EXISTS automation_sweeps (id TEXT PRIMARY KEY,status TEXT)');
-  let lock = Promise.resolve(), queue = Promise.resolve(), outgoing = false, confirmed = false, sourceBalance = 5_999_999, broadcasts = [];
+  let lock = Promise.resolve(), queue = Promise.resolve(), outgoing = false, confirmed = false, sourceBalance = 3_999_999, broadcasts = [];
   const exclusive = fn => { const p=lock.then(fn); lock=p.catch(()=>{}); return p; };
   const signer = {enqueue:fn=>{const p=queue.then(fn);queue=p.catch(()=>{});return p;}};
   const ledger = {pending:async()=>outgoing?[{kind:'withdrawal'}]:[]};
@@ -392,11 +392,11 @@ test('shared working wallet serializes and reserves fuel across funding and outg
     throw Error('unexpected fixture request');
   }};
   const options={treasury:working,mnemonic,fuelAddress:working,wallet,store,ledger,client,exclusive,feeLimit:1_000_000,
-    feeDailyLimit:'2000000',gasDailyLimit:'8000000',isEnabled:()=>true,fuelMode:'working-wallet',workingPrivateKey:workingKey,signer,payoutFeeLimit:1_000_000};
+    feeDailyLimit:'2000000',gasDailyLimit:'8000000',isEnabled:()=>true,fuelMode:'working-wallet',workingPrivateKey:workingKey,signer};
   assert.throws(()=>new AutomaticCollections({...options,workingPrivateKey:branch.deriveChild(8).privateKey}),/FUEL_ADDRESS_MISMATCH/);
   let worker=new AutomaticCollections(options);
   await assert.rejects(worker.worker.ensureGas(first),/GAS_WALLET_REQUIRES_TRX/);
-  sourceBalance=6_000_000; outgoing=true;
+  sourceBalance=4_000_000; outgoing=true;
   await assert.rejects(worker.worker.ensureGas(first),/WORKING_WALLET_BUSY/);
   outgoing=false; assert.equal(await worker.worker.ensureGas(first),false);
   assert.equal(broadcasts.length,1);
