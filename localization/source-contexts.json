@@ -1,0 +1,5040 @@
+{
+  "—": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "{account} active · {rate}% daily": {
+    "locations": [
+      "public/pg-more.js:102",
+      "public/pg-views.js:152"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:152",
+        "placeholders": {
+          "account": "Earn",
+          "rate": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-more.js:102",
+        "placeholders": {
+          "account": "Earn",
+          "rate": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{account} balance": {
+    "locations": [
+      "public/pg-notice.js:5"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:5",
+        "placeholders": {
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "{account} starts at {amount} {currency}": {
+    "locations": [
+      "public/pg-more.js:102",
+      "public/pg-more.js:24",
+      "public/pg-more.js:28",
+      "public/pg-views.js:141"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:141",
+        "placeholders": {
+          "account": "Earn",
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      },
+      {
+        "location": "public/pg-more.js:24",
+        "placeholders": {
+          "account": "Earn",
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      },
+      {
+        "location": "public/pg-more.js:28",
+        "placeholders": {
+          "account": "Earn",
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      },
+      {
+        "location": "public/pg-more.js:102",
+        "placeholders": {
+          "account": "Earn",
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "{account} starts at {minimum} {currency} · {strongStart}{amount} {currency}{strongEnd} to go": {
+    "locations": [
+      "public/pg-views.js:153"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:153",
+        "placeholders": {
+          "account": "Earn",
+          "minimum": "<runtime value>",
+          "currency": "USDT",
+          "amount": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{action} {asset}": {
+    "locations": [
+      "public/pg-views.js:193"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:193",
+        "placeholders": {
+          "action": "<runtime value>",
+          "asset": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{amount} {currency} ready": {
+    "locations": [
+      "public/pg-views.js:144"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:144",
+        "placeholders": {
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "{amount} {currency} to go": {
+    "locations": [
+      "public/pg-more.js:24"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:24",
+        "placeholders": {
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "{asset} falls below {price}": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": []
+  },
+  "{asset} price history": {
+    "locations": [
+      "public/pg-trade.js:40"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:40",
+        "placeholders": {
+          "asset": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{asset} rises above {price}": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": []
+  },
+  "{count} deposits": {
+    "locations": [
+      "public/pg-more.js:288"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:288",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} entries": {
+    "locations": [
+      "public/pg-more.js:315"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:315",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} falling": {
+    "locations": [
+      "public/pg-views.js:288"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:288",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} members": {
+    "locations": [
+      "public/pg-more.js:90"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:90",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} positions": {
+    "locations": [
+      "public/pg-more.js:287"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:287",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} requests": {
+    "locations": [
+      "public/pg-more.js:291"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:291",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} rising": {
+    "locations": [
+      "public/pg-views.js:288"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:288",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} transfers": {
+    "locations": [
+      "public/pg-more.js:290",
+      "public/pg-more.js:300",
+      "public/pg-more.js:301"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:290",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-more.js:300",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-more.js:301",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} transfers · all destinations": {
+    "locations": [
+      "public/pg-more.js:289"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:289",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count} withdrawals": {
+    "locations": [
+      "public/pg-more.js:292",
+      "public/pg-more.js:293"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:292",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-more.js:293",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count}d ago": {
+    "locations": [
+      "public/pg-core.js:101"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-core.js:101",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count}h ago": {
+    "locations": [
+      "public/pg-core.js:100"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-core.js:100",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{count}m ago": {
+    "locations": [
+      "public/pg-core.js:99"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-core.js:99",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{date} · to {address}": {
+    "locations": [
+      "public/pg-trade.js:296"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:296",
+        "placeholders": {
+          "date": "<runtime value>",
+          "address": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{duration} cycle": {
+    "locations": [
+      "public/pg-more.js:16"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:16",
+        "placeholders": {
+          "duration": "24h"
+        }
+      }
+    ]
+  },
+  "{earn} starts at {strongStart}{minimum}{strongEnd}. Your {earn} balance at {claim} determines the rate for the {strongStart}whole balance{strongEnd}. At an exact boundary, the higher tier applies.": {
+    "locations": [
+      "public/pg-notice.js:10"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:10",
+        "placeholders": {
+          "earn": "Earn",
+          "claim": "Claim",
+          "minimum": "200 USDT"
+        }
+      }
+    ]
+  },
+  "{first}–{last} of {total}": {
+    "locations": [
+      "public/pg-more.js:318",
+      "public/pg-more.js:360"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:318",
+        "placeholders": {
+          "first": "<runtime value>",
+          "last": "<runtime value>",
+          "total": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-more.js:360",
+        "placeholders": {
+          "first": "<runtime value>",
+          "last": "<runtime value>",
+          "total": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{name} · joined {date}": {
+    "locations": [
+      "public/pg-more.js:386"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:386",
+        "placeholders": {
+          "name": "<runtime value>",
+          "date": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{platform} brings together market information, daily platform rewards, referrals and {currency} accounts. Account balances and blockchain wallet balances are recorded separately. Reward rates and program terms can change; future rewards are not guaranteed.": {
+    "locations": [
+      "public/pg-notice.js:13"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:13",
+        "placeholders": {
+          "platform": "Portgainy",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "{rate}% of your {account} balance, every day": {
+    "locations": [
+      "public/pg-more.js:21"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:21",
+        "placeholders": {
+          "rate": "<runtime value>",
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "{seconds} seconds": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:80",
+        "placeholders": {
+          "seconds": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "{value0} · {value1}": {
+    "locations": [
+      "public/pg-more.js:357"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:357",
+        "placeholders": {
+          "value0": "USDT",
+          "value1": "TRC20"
+        }
+      }
+    ]
+  },
+  "{value0} brings together the tools people actually use every day: a live price board, a straightforward trading flow, a daily reward cycle and a wallet that explains itself. Everything is designed mobile-first, so the full experience fits in your pocket while still scaling up to a complete desktop workspace.": {
+    "locations": [
+      "public/pg-more.js:205"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:205",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "{value0} change": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:80",
+        "placeholders": {
+          "value0": "24h"
+        }
+      }
+    ]
+  },
+  "{value0} days": {
+    "locations": [
+      "public/pg-more.js:41"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:41",
+        "placeholders": {
+          "value0": "7"
+        }
+      },
+      {
+        "location": "public/pg-more.js:41",
+        "placeholders": {
+          "value0": "30"
+        }
+      }
+    ]
+  },
+  "{value0} High": {
+    "locations": [
+      "public/pg-trade.js:38"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:38",
+        "placeholders": {
+          "value0": "24h"
+        }
+      }
+    ]
+  },
+  "{value0} hour range": {
+    "locations": [
+      "public/pg-trade.js:41"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:41",
+        "placeholders": {
+          "value0": "24"
+        }
+      }
+    ]
+  },
+  "{value0} is a fast, game-inspired digital-asset workspace: live crypto markets, daily Earn rewards, a two-level referral program and a {value1} wallet, designed to be clear about where every balance lives.": {
+    "locations": [
+      "public/pg-more.js:199"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:199",
+        "placeholders": {
+          "value0": "Portgainy",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "{value0} Low": {
+    "locations": [
+      "public/pg-trade.js:38"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:38",
+        "placeholders": {
+          "value0": "24h"
+        }
+      }
+    ]
+  },
+  "{value0} Vol": {
+    "locations": [
+      "public/pg-trade.js:38"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:38",
+        "placeholders": {
+          "value0": "24h"
+        }
+      }
+    ]
+  },
+  "{value0} volume": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:80",
+        "placeholders": {
+          "value0": "24h"
+        }
+      }
+    ]
+  },
+  "1 – 10,000 USDT per order": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "15 seconds": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "200 USDT": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "8–13% of your Earn balance": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "A confirmed USDT deposit was credited.": {
+    "locations": [
+      "public/pg-main.js:275"
+    ],
+    "examples": []
+  },
+  "A daily reward on your Earn balance": {
+    "locations": [
+      "public/pg-more.js:215"
+    ],
+    "examples": []
+  },
+  "A deposit is waiting for its confirmed balance.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "A signed collection needs review.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "A signed withdrawal expired and needs review.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "A transfer is already in progress.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "A unique TRON (TRC20) deposit address per account, password-confirmed withdrawals and a clear status trail.": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "A withdrawal is awaiting a network response.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "A withdrawal needs review before it can continue.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "About": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:26",
+      "public/pg-views.js:67",
+      "public/pg-views.js:77"
+    ],
+    "examples": []
+  },
+  "About {platform}": {
+    "locations": [
+      "public/pg-notice.js:13"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:13",
+        "placeholders": {
+          "platform": "Portgainy"
+        }
+      }
+    ]
+  },
+  "About Portgainy": {
+    "locations": [
+      "public/pg-more.js:113"
+    ],
+    "examples": []
+  },
+  "Account": {
+    "locations": [
+      "public/pg-more.js:109",
+      "public/pg-views.js:91"
+    ],
+    "examples": []
+  },
+  "Account activity": {
+    "locations": [
+      "public/pg-trade.js:471",
+      "public/pg-views.js:198"
+    ],
+    "examples": []
+  },
+  "Account adjustment": {
+    "locations": [
+      "public/pg-more.js:313"
+    ],
+    "examples": []
+  },
+  "Account created. Welcome to Portgainy.": {
+    "locations": [
+      "public/pg-main.js:449"
+    ],
+    "examples": []
+  },
+  "Account currency": {
+    "locations": [
+      "public/pg-views.js:87"
+    ],
+    "examples": []
+  },
+  "Account ledger": {
+    "locations": [
+      "public/pg-more.js:309",
+      "public/pg-more.js:315"
+    ],
+    "examples": []
+  },
+  "Account password": {
+    "locations": [
+      "public/pg-more.js:345",
+      "public/pg-more.js:347"
+    ],
+    "examples": []
+  },
+  "Account update": {
+    "locations": [
+      "public/pg-more.js:312"
+    ],
+    "examples": []
+  },
+  "Accounting": {
+    "locations": [
+      "public/pg-more.js:269"
+    ],
+    "examples": []
+  },
+  "Accounting temporarily unavailable": {
+    "locations": [
+      "public/pg-more.js:278"
+    ],
+    "examples": []
+  },
+  "Accounting, wallet activity and accounts": {
+    "locations": [
+      "public/pg-more.js:257"
+    ],
+    "examples": []
+  },
+  "Accounts": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Accounts below {value0} {value1} see exactly how much is needed to start.": {
+    "locations": [
+      "public/pg-more.js:217"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:217",
+        "placeholders": {
+          "value0": "200",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "Active referrals": {
+    "locations": [
+      "public/pg-more.js:66"
+    ],
+    "examples": []
+  },
+  "Add {amount} {currency}": {
+    "locations": [
+      "public/pg-more.js:24"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:24",
+        "placeholders": {
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "Add {strongStart}{amount} {currency}{strongEnd} to start {account}": {
+    "locations": [
+      "public/pg-views.js:141"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:141",
+        "placeholders": {
+          "amount": "<runtime value>",
+          "currency": "USDT",
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "Add funds": {
+    "locations": [
+      "public/pg-trade.js:335"
+    ],
+    "examples": []
+  },
+  "Add Funds": {
+    "locations": [
+      "public/pg-trade.js:270",
+      "public/pg-views.js:238"
+    ],
+    "examples": []
+  },
+  "Add to Earn": {
+    "locations": [
+      "public/pg-trade.js:384"
+    ],
+    "examples": []
+  },
+  "Admin": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-more.js:257"
+    ],
+    "examples": []
+  },
+  "Admin console": {
+    "locations": [
+      "public/pg-more.js:113"
+    ],
+    "examples": []
+  },
+  "AI & compute": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Alert": {
+    "locations": [
+      "public/pg-core.js:217"
+    ],
+    "examples": []
+  },
+  "Alerts": {
+    "locations": [
+      "public/pg-trade.js:63"
+    ],
+    "examples": []
+  },
+  "Alerts are stored on this device and trigger while {value0} is open.": {
+    "locations": [
+      "public/pg-trade.js:220"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:220",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Alerts fire while {value0} is open.": {
+    "locations": [
+      "public/pg-trade.js:77"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:77",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "All": {
+    "locations": [
+      "public/pg-more.js:370",
+      "public/pg-trade.js:258",
+      "public/pg-views.js:245",
+      "public/pg-views.js:292"
+    ],
+    "examples": []
+  },
+  "All-time confirmed {value0} deposits recorded on {value1}. This is not the current wallet balance. Internal transfers and manual balance adjustments are excluded.": {
+    "locations": [
+      "public/pg-more.js:355"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:355",
+        "placeholders": {
+          "value0": "USDT",
+          "value1": "TRON"
+        }
+      }
+    ]
+  },
+  "All-time USDT · TRC20": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Allocation": {
+    "locations": [
+      "public/pg-views.js:177"
+    ],
+    "examples": []
+  },
+  "Amount": {
+    "locations": [
+      "public/pg-more.js:357",
+      "public/pg-trade.js:356",
+      "public/pg-trade.js:384"
+    ],
+    "examples": []
+  },
+  "Amount to send": {
+    "locations": [
+      "public/pg-more.js:346"
+    ],
+    "examples": []
+  },
+  "An account with this email already exists.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Answers, guides and the Portgainy assistant.": {
+    "locations": [
+      "public/pg-more.js:137"
+    ],
+    "examples": []
+  },
+  "Approved": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Ask a question…": {
+    "locations": [
+      "public/pg-more.js:142"
+    ],
+    "examples": []
+  },
+  "Asset": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Assets": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-trade.js:265",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:22"
+    ],
+    "examples": []
+  },
+  "At least {value0} characters": {
+    "locations": [
+      "public/pg-views.js:99"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:99",
+        "placeholders": {
+          "value0": "8"
+        }
+      }
+    ]
+  },
+  "Automated help · cannot move funds": {
+    "locations": [
+      "public/pg-more.js:139"
+    ],
+    "examples": []
+  },
+  "Automatic requests are sent from the working wallet; older manual requests still require review.": {
+    "locations": [
+      "public/pg-more.js:371"
+    ],
+    "examples": []
+  },
+  "Automatic withdrawals are waiting for another outgoing transfer.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "Automatic withdrawals are waiting for TRX.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "Automatic withdrawals are waiting for USDT.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "Available": {
+    "locations": [
+      "public/pg-trade.js:45"
+    ],
+    "examples": []
+  },
+  "Available Spot balance": {
+    "locations": [
+      "public/pg-trade.js:355"
+    ],
+    "examples": []
+  },
+  "Available to trade or withdraw": {
+    "locations": [
+      "public/pg-trade.js:249"
+    ],
+    "examples": []
+  },
+  "Available USDT on-chain": {
+    "locations": [
+      "public/pg-more.js:297"
+    ],
+    "examples": []
+  },
+  "Avg {percent}": {
+    "locations": [
+      "public/pg-views.js:288"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:288",
+        "placeholders": {
+          "percent": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Awaiting confirmation": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Balance": {
+    "locations": [
+      "public/pg-more.js:334",
+      "public/pg-more.js:40",
+      "public/pg-trade.js:247"
+    ],
+    "examples": []
+  },
+  "Bought": {
+    "locations": [
+      "public/pg-views.js:193"
+    ],
+    "examples": []
+  },
+  "Bought {asset}": {
+    "locations": [
+      "public/pg-trade.js:73"
+    ],
+    "examples": []
+  },
+  "Browse the help center or ask the {value0} assistant any time.": {
+    "locations": [
+      "public/pg-more.js:235"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:235",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Built for clarity and speed": {
+    "locations": [
+      "public/pg-more.js:204"
+    ],
+    "examples": []
+  },
+  "Buy": {
+    "locations": [
+      "public/pg-trade.js:44"
+    ],
+    "examples": []
+  },
+  "Buy {asset}": {
+    "locations": [
+      "public/pg-trade.js:160",
+      "public/pg-trade.js:52"
+    ],
+    "examples": []
+  },
+  "Buy a coin with your Spot balance and it will show up here.": {
+    "locations": [
+      "public/pg-trade.js:85"
+    ],
+    "examples": []
+  },
+  "By continuing you agree to use {value0} responsibly. Crypto prices move quickly; never trade more than you can afford to lose.": {
+    "locations": [
+      "public/pg-views.js:105"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:105",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Cancel": {
+    "locations": [
+      "public/pg-trade.js:165"
+    ],
+    "examples": []
+  },
+  "Cancel pending transfer": {
+    "locations": [
+      "public/pg-more.js:345"
+    ],
+    "examples": []
+  },
+  "Categories": {
+    "locations": [
+      "public/pg-views.js:292"
+    ],
+    "examples": []
+  },
+  "Category": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Cautious": {
+    "locations": [
+      "public/pg-views.js:282"
+    ],
+    "examples": []
+  },
+  "Check order": {
+    "locations": [
+      "public/pg-trade.js:165",
+      "public/pg-trade.js:193"
+    ],
+    "examples": []
+  },
+  "Checking payment availability…": {
+    "locations": [
+      "public/pg-trade.js:336"
+    ],
+    "examples": []
+  },
+  "Choose a market, enter an amount in {currency} and review a {seconds}-second quote. Prices follow live {provider} quotes; positions are recorded by {platform} and settled in {currency}.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:120",
+        "placeholders": {
+          "currency": "USDT",
+          "seconds": "15",
+          "provider": "Binance",
+          "platform": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Choose a supported network.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Choose market": {
+    "locations": [
+      "public/pg-trade.js:198",
+      "public/pg-trade.js:20"
+    ],
+    "examples": []
+  },
+  "Claim": {
+    "locations": [
+      "public/pg-views.js:145"
+    ],
+    "examples": []
+  },
+  "Claim cycle": {
+    "locations": [
+      "public/pg-more.js:192",
+      "public/pg-views.js:86"
+    ],
+    "examples": []
+  },
+  "Claim every day": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": []
+  },
+  "Claim reward": {
+    "locations": [
+      "public/pg-more.js:28"
+    ],
+    "examples": []
+  },
+  "Claims": {
+    "locations": [
+      "public/pg-more.js:104"
+    ],
+    "examples": []
+  },
+  "Claims do not reduce your Earn balance. Rewards credit Spot.": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": []
+  },
+  "Claims, orders and withdrawals use request keys to protect retries against duplicate processing.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Close": {
+    "locations": [
+      "public/pg-core.js:256"
+    ],
+    "examples": []
+  },
+  "Close platform update": {
+    "locations": [
+      "public/pg-notice.js:8"
+    ],
+    "examples": []
+  },
+  "Collected to treasury": {
+    "locations": [
+      "public/pg-more.js:289"
+    ],
+    "examples": []
+  },
+  "Collection in progress": {
+    "locations": [
+      "public/pg-more.js:290"
+    ],
+    "examples": []
+  },
+  "Community": {
+    "locations": [
+      "public/pg-views.js:45"
+    ],
+    "examples": []
+  },
+  "Confirm": {
+    "locations": [
+      "public/pg-trade.js:165"
+    ],
+    "examples": []
+  },
+  "Confirm account password": {
+    "locations": [
+      "public/pg-trade.js:392"
+    ],
+    "examples": []
+  },
+  "Confirm order": {
+    "locations": [
+      "public/pg-trade.js:160"
+    ],
+    "examples": []
+  },
+  "Confirm password": {
+    "locations": [
+      "public/pg-views.js:100"
+    ],
+    "examples": []
+  },
+  "Confirm sent?": {
+    "locations": [
+      "public/pg-more.js:365"
+    ],
+    "examples": []
+  },
+  "Confirm withdrawals with your account password. Automatic processing requires sufficient funds and network resources.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Confirmed": {
+    "locations": [
+      "public/pg-more.js:356"
+    ],
+    "examples": []
+  },
+  "confirmed and manually marked": {
+    "locations": [
+      "public/pg-more.js:294"
+    ],
+    "examples": []
+  },
+  "Confirmed deposit": {
+    "locations": [
+      "public/pg-more.js:310"
+    ],
+    "examples": []
+  },
+  "Confirmed deposits": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Confirmed on-chain — net": {
+    "locations": [
+      "public/pg-more.js:292"
+    ],
+    "examples": []
+  },
+  "Confirmed transfers to owner": {
+    "locations": [
+      "public/pg-more.js:300"
+    ],
+    "examples": []
+  },
+  "Confirmed wallet deposits": {
+    "locations": [
+      "public/pg-more.js:288"
+    ],
+    "examples": []
+  },
+  "Confirmed withdrawal": {
+    "locations": [
+      "public/pg-more.js:310"
+    ],
+    "examples": []
+  },
+  "Connecting": {
+    "locations": [
+      "public/pg-views.js:30"
+    ],
+    "examples": []
+  },
+  "Continue securely": {
+    "locations": [
+      "public/pg-trade.js:368"
+    ],
+    "examples": []
+  },
+  "Copied": {
+    "locations": [
+      "public/pg-main.js:349"
+    ],
+    "examples": []
+  },
+  "COPY": {
+    "locations": [
+      "public/pg-trade.js:378",
+      "public/pg-trade.js:383"
+    ],
+    "examples": []
+  },
+  "Copy address": {
+    "locations": [
+      "public/pg-more.js:374"
+    ],
+    "examples": []
+  },
+  "Copy amount": {
+    "locations": [
+      "public/pg-more.js:374"
+    ],
+    "examples": []
+  },
+  "Copy code": {
+    "locations": [
+      "public/pg-more.js:83",
+      "public/pg-views.js:159"
+    ],
+    "examples": []
+  },
+  "Copy deposit address": {
+    "locations": [
+      "public/pg-more.js:358"
+    ],
+    "examples": []
+  },
+  "Copy link": {
+    "locations": [
+      "public/pg-more.js:85",
+      "public/pg-views.js:162"
+    ],
+    "examples": []
+  },
+  "Could not claim. Refresh and try again.": {
+    "locations": [
+      "public/pg-main.js:196"
+    ],
+    "examples": []
+  },
+  "Create account": {
+    "locations": [
+      "public/pg-views.js:103",
+      "public/pg-views.js:93"
+    ],
+    "examples": []
+  },
+  "Create alert": {
+    "locations": [
+      "public/pg-trade.js:219"
+    ],
+    "examples": []
+  },
+  "Create your account": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": []
+  },
+  "Create your account in a minute.": {
+    "locations": [
+      "public/pg-views.js:96"
+    ],
+    "examples": []
+  },
+  "Credited but not yet collected": {
+    "locations": [
+      "public/pg-more.js:289"
+    ],
+    "examples": []
+  },
+  "Crypto": {
+    "locations": [
+      "public/pg-views.js:170"
+    ],
+    "examples": []
+  },
+  "Crypto markets, buying and selling": {
+    "locations": [
+      "public/pg-notice.js:11"
+    ],
+    "examples": []
+  },
+  "Crypto positions": {
+    "locations": [
+      "public/pg-trade.js:252"
+    ],
+    "examples": []
+  },
+  "Crypto prices are volatile and trading can result in losses, including the loss of your entire position. Reward rates and program terms can change and are not guaranteed. Past results do not indicate future performance. Nothing on {value0} is investment, legal or tax advice. Only use funds you can afford to lose and keep your credentials private.": {
+    "locations": [
+      "public/pg-more.js:233"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:233",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "CSV": {
+    "locations": [
+      "public/pg-trade.js:259"
+    ],
+    "examples": []
+  },
+  "Customer balances": {
+    "locations": [
+      "public/pg-more.js:286"
+    ],
+    "examples": []
+  },
+  "Daily": {
+    "locations": [
+      "public/pg-more.js:41"
+    ],
+    "examples": []
+  },
+  "Daily {account} reward · {rate}%": {
+    "locations": [
+      "public/pg-views.js:141",
+      "public/pg-views.js:144"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:141",
+        "placeholders": {
+          "account": "Earn",
+          "rate": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-views.js:144",
+        "placeholders": {
+          "account": "Earn",
+          "rate": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Daily {account} rewards: {range}": {
+    "locations": [
+      "public/pg-notice.js:10"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:10",
+        "placeholders": {
+          "account": "Earn",
+          "range": "8–13%"
+        }
+      }
+    ]
+  },
+  "Daily Earn claim": {
+    "locations": [
+      "public/pg-views.js:188"
+    ],
+    "examples": []
+  },
+  "Daily Earn rate": {
+    "locations": [
+      "public/pg-more.js:181",
+      "public/pg-views.js:85"
+    ],
+    "examples": []
+  },
+  "Daily rate": {
+    "locations": [
+      "public/pg-notice.js:5"
+    ],
+    "examples": []
+  },
+  "Daily reward rate": {
+    "locations": [
+      "public/pg-more.js:192",
+      "public/pg-more.js:20"
+    ],
+    "examples": []
+  },
+  "Daily reward tiers": {
+    "locations": [
+      "public/pg-more.js:37"
+    ],
+    "examples": []
+  },
+  "Daily rewards": {
+    "locations": [
+      "public/pg-trade.js:254"
+    ],
+    "examples": []
+  },
+  "Data sources and availability": {
+    "locations": [
+      "public/pg-more.js:228"
+    ],
+    "examples": []
+  },
+  "DeFi": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Delayed": {
+    "locations": [
+      "public/pg-views.js:30"
+    ],
+    "examples": []
+  },
+  "Deposit": {
+    "locations": [
+      "public/pg-more.js:33",
+      "public/pg-trade.js:255",
+      "public/pg-trade.js:281",
+      "public/pg-views.js:141",
+      "public/pg-views.js:146",
+      "public/pg-views.js:55"
+    ],
+    "examples": []
+  },
+  "Deposit {currency} ({network}). {account} starts once your {account} balance reaches {minimum} {currency}.": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:190",
+        "placeholders": {
+          "currency": "USDT",
+          "network": "TRC20",
+          "account": "Earn",
+          "minimum": "200"
+        }
+      }
+    ]
+  },
+  "Deposit {currency} through {strongStart}{network}{strongEnd} to your personal address. Confirmed deposits credit {earn}. Referral rewards credit {spot}: level {firstLevel} receives {levelOne} and level {secondLevel} receives {levelTwo} of claimed {earn} rewards. Withdraw from {spot} with your account password: {strongStart}{minimum} minimum, {fee} fee{strongEnd}.": {
+    "locations": [
+      "public/pg-notice.js:12"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:12",
+        "placeholders": {
+          "currency": "USDT",
+          "network": "TRON (TRC20)",
+          "earn": "Earn",
+          "spot": "Spot",
+          "firstLevel": "1",
+          "secondLevel": "2",
+          "levelOne": "10%",
+          "levelTwo": "5%",
+          "minimum": "10 USDT",
+          "fee": "2%"
+        }
+      }
+    ]
+  },
+  "Deposit added to Earn": {
+    "locations": [
+      "public/pg-trade.js:428"
+    ],
+    "examples": []
+  },
+  "Deposit address": {
+    "locations": [
+      "public/pg-trade.js:378",
+      "public/pg-trade.js:383"
+    ],
+    "examples": []
+  },
+  "Deposit collection is temporarily unavailable.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "Deposit collection is waiting for another wallet transaction to confirm.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "Deposit collection is waiting for more TRX in the funding wallet.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "Deposit collection is waiting for TRX.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "Deposit collection needs review.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "Deposit ledger temporarily unavailable": {
+    "locations": [
+      "public/pg-more.js:352"
+    ],
+    "examples": []
+  },
+  "Deposit network": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Deposit QR code": {
+    "locations": [
+      "public/pg-trade.js:377"
+    ],
+    "examples": []
+  },
+  "Deposit received": {
+    "locations": [
+      "public/pg-main.js:275"
+    ],
+    "examples": []
+  },
+  "Deposit to Earn": {
+    "locations": [
+      "public/pg-views.js:190"
+    ],
+    "examples": []
+  },
+  "Deposit to start earning": {
+    "locations": [
+      "public/pg-views.js:144"
+    ],
+    "examples": []
+  },
+  "Deposit USDT to your Earn account": {
+    "locations": [
+      "public/pg-trade.js:335"
+    ],
+    "examples": []
+  },
+  "Deposits": {
+    "locations": [
+      "public/pg-more.js:269",
+      "public/pg-trade.js:258"
+    ],
+    "examples": []
+  },
+  "Deposits and collection": {
+    "locations": [
+      "public/pg-more.js:288"
+    ],
+    "examples": []
+  },
+  "Deposits and principal": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "Deposits and withdrawals are available.": {
+    "locations": [
+      "public/pg-more.js:180"
+    ],
+    "examples": []
+  },
+  "Deposits and withdrawals are temporarily unavailable.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Deposits are available. Withdrawals are currently paused.": {
+    "locations": [
+      "public/pg-more.js:180"
+    ],
+    "examples": []
+  },
+  "Deposits are temporarily unavailable.": {
+    "locations": [
+      "public/pg-trade.js:371",
+      "public/pg-trade.js:374"
+    ],
+    "examples": []
+  },
+  "Deposits are temporarily unavailable. Please try again later.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Deposits credit your {account} account.": {
+    "locations": [
+      "public/pg-trade.js:379"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:379",
+        "placeholders": {
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "Deposits, referrals and withdrawals": {
+    "locations": [
+      "public/pg-notice.js:12"
+    ],
+    "examples": []
+  },
+  "Details": {
+    "locations": [
+      "public/pg-views.js:158",
+      "public/pg-views.js:177"
+    ],
+    "examples": []
+  },
+  "Directly invited friends": {
+    "locations": [
+      "public/pg-more.js:87"
+    ],
+    "examples": []
+  },
+  "Display name": {
+    "locations": [
+      "public/pg-more.js:110"
+    ],
+    "examples": []
+  },
+  "Done": {
+    "locations": [
+      "public/pg-trade.js:446"
+    ],
+    "examples": []
+  },
+  "Each account receives its own TRON address. Deposits are credited only after blockchain confirmation.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Each line is a balance movement. Transfers have both a debit and a credit.": {
+    "locations": [
+      "public/pg-more.js:316"
+    ],
+    "examples": []
+  },
+  "Earn": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-more.js:182",
+      "public/pg-more.js:191",
+      "public/pg-trade.js:244",
+      "public/pg-trade.js:270",
+      "public/pg-trade.js:281",
+      "public/pg-trade.js:287",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:22",
+      "public/pg-views.js:238"
+    ],
+    "examples": []
+  },
+  "Earn {value0} of every reward your friends claim, and {value1} from the friends they invite.": {
+    "locations": [
+      "public/pg-views.js:161"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:161",
+        "placeholders": {
+          "value0": "10%",
+          "value1": "5%"
+        }
+      }
+    ]
+  },
+  "Earn account": {
+    "locations": [
+      "public/pg-trade.js:254",
+      "public/pg-trade.js:281"
+    ],
+    "examples": []
+  },
+  "Earn activity": {
+    "locations": [
+      "public/pg-more.js:45"
+    ],
+    "examples": []
+  },
+  "Earn balance": {
+    "locations": [
+      "public/pg-more.js:33",
+      "public/pg-more.js:39"
+    ],
+    "examples": []
+  },
+  "Earn balances": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Earn claims": {
+    "locations": [
+      "public/pg-more.js:295"
+    ],
+    "examples": []
+  },
+  "Earn minimum": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Earn minimum top-up": {
+    "locations": [
+      "public/pg-views.js:195"
+    ],
+    "examples": []
+  },
+  "Earn starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your Earn balance at Claim. Your first Claim is available when you start Earn. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.": {
+    "locations": [
+      "public/pg-more.js:216"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:216",
+        "placeholders": {
+          "value0": "200",
+          "value1": "USDT",
+          "value2": "8",
+          "value3": "13%"
+        }
+      }
+    ]
+  },
+  "Earn starts at 200 USDT. Add funds to your Earn balance to start claiming.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Earn USDT": {
+    "locations": [
+      "public/pg-more.js:286",
+      "public/pg-views.js:169"
+    ],
+    "examples": []
+  },
+  "Earned": {
+    "locations": [
+      "public/pg-more.js:386",
+      "public/pg-views.js:160"
+    ],
+    "examples": []
+  },
+  "Earned all-time": {
+    "locations": [
+      "public/pg-views.js:236"
+    ],
+    "examples": []
+  },
+  "Email": {
+    "locations": [
+      "public/pg-more.js:111",
+      "public/pg-views.js:98"
+    ],
+    "examples": []
+  },
+  "Enter a valid email address.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Enter a valid USDT amount.": {
+    "locations": [
+      "public/pg-core.js:156",
+      "public/pg-trade.js:430"
+    ],
+    "examples": []
+  },
+  "Enter a valid USDT wallet address.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Enter an external wallet address, not a Portgainy deposit address.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Enter the quantity you want to sell.": {
+    "locations": [
+      "public/pg-trade.js:144"
+    ],
+    "examples": []
+  },
+  "Enter the USDT amount you want to spend.": {
+    "locations": [
+      "public/pg-trade.js:144"
+    ],
+    "examples": []
+  },
+  "Est. total value": {
+    "locations": [
+      "public/pg-trade.js:267",
+      "public/pg-views.js:233"
+    ],
+    "examples": []
+  },
+  "Estimate": {
+    "locations": [
+      "public/pg-more.js:38"
+    ],
+    "examples": []
+  },
+  "Estimate for an unchanged balance and one claim per day. The calculator uses the tier for the entered balance. Future rewards are not guaranteed.": {
+    "locations": [
+      "public/pg-more.js:42"
+    ],
+    "examples": []
+  },
+  "Every deposit, transfer, claim, trade and withdrawal is recorded and can be exported as CSV.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Explore markets": {
+    "locations": [
+      "public/pg-more.js:200"
+    ],
+    "examples": []
+  },
+  "Failed": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Failed withdrawal returned": {
+    "locations": [
+      "public/pg-more.js:312"
+    ],
+    "examples": []
+  },
+  "Falls below": {
+    "locations": [
+      "public/pg-trade.js:215"
+    ],
+    "examples": []
+  },
+  "Favorite": {
+    "locations": [
+      "public/pg-trade.js:31",
+      "public/pg-views.js:118"
+    ],
+    "examples": []
+  },
+  "Favorites": {
+    "locations": [
+      "public/pg-views.js:228",
+      "public/pg-views.js:274"
+    ],
+    "examples": []
+  },
+  "Fearful": {
+    "locations": [
+      "public/pg-views.js:282"
+    ],
+    "examples": []
+  },
+  "Fee": {
+    "locations": [
+      "public/pg-more.js:373",
+      "public/pg-trade.js:162"
+    ],
+    "examples": []
+  },
+  "Fee ({rate}%)": {
+    "locations": [
+      "public/pg-trade.js:393"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:393",
+        "placeholders": {
+          "rate": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Fees, limits and rules": {
+    "locations": [
+      "public/pg-more.js:225"
+    ],
+    "examples": []
+  },
+  "Filled orders will be listed here.": {
+    "locations": [
+      "public/pg-trade.js:72"
+    ],
+    "examples": []
+  },
+  "First claim when you start Earn; then once per day": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "for {amount} {currency}": {
+    "locations": [
+      "public/pg-trade.js:161"
+    ],
+    "examples": []
+  },
+  "For your security, this action opens on our verified payments site.": {
+    "locations": [
+      "public/pg-trade.js:368"
+    ],
+    "examples": []
+  },
+  "Friends invited by your friends": {
+    "locations": [
+      "public/pg-more.js:87"
+    ],
+    "examples": []
+  },
+  "Fuel address": {
+    "locations": [
+      "public/pg-more.js:338"
+    ],
+    "examples": []
+  },
+  "Fuel wallet {value0}": {
+    "locations": [
+      "public/pg-more.js:336"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:336",
+        "placeholders": {
+          "value0": "TRX"
+        }
+      }
+    ]
+  },
+  "Fuel wallet TRX": {
+    "locations": [
+      "public/pg-more.js:299"
+    ],
+    "examples": []
+  },
+  "Full transaction trail": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Fund Earn": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": []
+  },
+  "Funds held while a withdrawal request is processed.": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "Funds in Earn generate your daily reward. Move them back only through a withdrawal review.": {
+    "locations": [
+      "public/pg-trade.js:397"
+    ],
+    "examples": []
+  },
+  "Funds stay here until you request a transfer. Keep enough {value0} and {value1} available for customer withdrawals.": {
+    "locations": [
+      "public/pg-more.js:340"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:340",
+        "placeholders": {
+          "value0": "USDT",
+          "value1": "TRX"
+        }
+      }
+    ]
+  },
+  "Gainers": {
+    "locations": [
+      "public/pg-views.js:228",
+      "public/pg-views.js:274"
+    ],
+    "examples": []
+  },
+  "Gaming": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Generates your daily reward. Principal is never reduced by claims.": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "Get notified when a market reaches your target.": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": []
+  },
+  "Get started": {
+    "locations": [
+      "public/pg-more.js:200"
+    ],
+    "examples": []
+  },
+  "Got it": {
+    "locations": [
+      "public/pg-notice.js:14"
+    ],
+    "examples": []
+  },
+  "Greedy": {
+    "locations": [
+      "public/pg-views.js:282"
+    ],
+    "examples": []
+  },
+  "Help & Support": {
+    "locations": [
+      "public/pg-more.js:113"
+    ],
+    "examples": []
+  },
+  "Here is how your accounts, daily rewards and trading work.": {
+    "locations": [
+      "public/pg-notice.js:9"
+    ],
+    "examples": []
+  },
+  "Hi! I’m the Portgainy assistant. Ask about deposits, withdrawals, Earn, referrals or crypto prices. I can’t change balances or give personal investment advice.": {
+    "locations": [
+      "public/pg-more.js:154"
+    ],
+    "examples": []
+  },
+  "Hide balances": {
+    "locations": [
+      "public/pg-more.js:106",
+      "public/pg-views.js:233"
+    ],
+    "examples": []
+  },
+  "History": {
+    "locations": [
+      "public/pg-trade.js:244",
+      "public/pg-views.js:249"
+    ],
+    "examples": []
+  },
+  "Home": {
+    "locations": [
+      "public/pg-main.js:21",
+      "public/pg-main.js:5",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:22"
+    ],
+    "examples": []
+  },
+  "Hot": {
+    "locations": [
+      "public/pg-views.js:228",
+      "public/pg-views.js:274"
+    ],
+    "examples": []
+  },
+  "How {value0} works": {
+    "locations": [
+      "public/pg-more.js:210"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:210",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "How do deposits work?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "How do I claim my daily reward?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "How do I deposit?": {
+    "locations": [
+      "public/pg-more.js:141"
+    ],
+    "examples": []
+  },
+  "How do I stay safe?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "How do I withdraw?": {
+    "locations": [
+      "public/pg-more.js:141"
+    ],
+    "examples": []
+  },
+  "How do referrals pay out?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "How does Earn work?": {
+    "locations": [
+      "public/pg-more.js:141"
+    ],
+    "examples": []
+  },
+  "How does trading work?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "How orders are priced and settled": {
+    "locations": [
+      "public/pg-more.js:219"
+    ],
+    "examples": []
+  },
+  "Idempotent operations": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "in one place.": {
+    "locations": [
+      "public/pg-more.js:198"
+    ],
+    "examples": []
+  },
+  "Info": {
+    "locations": [
+      "public/pg-trade.js:63"
+    ],
+    "examples": []
+  },
+  "Infrastructure": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Invite code": {
+    "locations": [
+      "public/pg-more.js:111",
+      "public/pg-views.js:101"
+    ],
+    "examples": []
+  },
+  "Invite code copied": {
+    "locations": [
+      "public/pg-main.js:325"
+    ],
+    "examples": []
+  },
+  "Invite code was not found.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Invite friends and receive {firstRate}% of their claimed rewards at level {firstLevel} and {secondRate}% at level {secondLevel}, credited to your {account} balance.": {
+    "locations": [
+      "public/pg-more.js:186"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:186",
+        "placeholders": {
+          "firstRate": "10",
+          "firstLevel": "1",
+          "secondRate": "5",
+          "secondLevel": "2",
+          "account": "Spot"
+        }
+      }
+    ]
+  },
+  "Invite link copied": {
+    "locations": [
+      "public/pg-main.js:326",
+      "public/pg-main.js:330"
+    ],
+    "examples": []
+  },
+  "Invites": {
+    "locations": [
+      "public/pg-more.js:104"
+    ],
+    "examples": []
+  },
+  "Join Portgainy": {
+    "locations": [
+      "public/pg-views.js:95"
+    ],
+    "examples": []
+  },
+  "Joined {date}": {
+    "locations": [
+      "public/pg-more.js:90"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:90",
+        "placeholders": {
+          "date": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "just now": {
+    "locations": [
+      "public/pg-core.js:98"
+    ],
+    "examples": []
+  },
+  "Keep USDT in your Earn account and claim a daily reward. Your first Claim is available when you start Earn. Later claims open once per day. Your principal stays in place.": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Language": {
+    "locations": [
+      "public/pg-more.js:107"
+    ],
+    "examples": []
+  },
+  "Last price": {
+    "locations": [
+      "public/pg-views.js:293"
+    ],
+    "examples": []
+  },
+  "Layer 1": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Layer 2": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "ledger estimate": {
+    "locations": [
+      "public/pg-more.js:289"
+    ],
+    "examples": []
+  },
+  "Ledger temporarily unavailable": {
+    "locations": [
+      "public/pg-more.js:309"
+    ],
+    "examples": []
+  },
+  "Ledger totals are all-time. Balances are not deposits or profit; wallet values are separate on-chain balances. Synthetic positions are shown at cost, not market value.": {
+    "locations": [
+      "public/pg-more.js:284"
+    ],
+    "examples": []
+  },
+  "Level {firstLevel} earns {firstRate}% and level {secondLevel} earns {secondRate}% of the {earn} rewards your network claims. Referral rewards credit your {spot} balance.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:120",
+        "placeholders": {
+          "firstLevel": "1",
+          "firstRate": "10",
+          "secondLevel": "2",
+          "secondRate": "5",
+          "earn": "Earn",
+          "spot": "Spot"
+        }
+      }
+    ]
+  },
+  "Level {level}": {
+    "locations": [
+      "public/pg-more.js:87"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:87",
+        "placeholders": {
+          "level": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Level {levelOne} earns {firstRate}% and level {levelTwo} earns {secondRate}% of each claimed reward.": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:44",
+        "placeholders": {
+          "levelOne": "1",
+          "firstRate": "10",
+          "levelTwo": "2",
+          "secondRate": "5"
+        }
+      }
+    ]
+  },
+  "Level {value0} · {value1}": {
+    "locations": [
+      "public/pg-views.js:160"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:160",
+        "placeholders": {
+          "value0": "1",
+          "value1": "10%"
+        }
+      },
+      {
+        "location": "public/pg-views.js:160",
+        "placeholders": {
+          "value0": "2",
+          "value1": "5%"
+        }
+      }
+    ]
+  },
+  "Level {value0} referrals earn you {value1} and level {value2} earns you {value3} of each reward they claim, without reducing theirs.": {
+    "locations": [
+      "public/pg-more.js:217"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:217",
+        "placeholders": {
+          "value0": "1",
+          "value1": "10%",
+          "value2": "2",
+          "value3": "5%"
+        }
+      }
+    ]
+  },
+  "Level 1: 10% · Level 2: 5%": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Level up.": {
+    "locations": [
+      "public/pg-views.js:81"
+    ],
+    "examples": []
+  },
+  "Liquidity for this asset is currently insufficient. No funds were deducted.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Live": {
+    "locations": [
+      "public/pg-views.js:30"
+    ],
+    "examples": []
+  },
+  "Live markets": {
+    "locations": [
+      "public/pg-more.js:181",
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Live prices · {count} assets": {
+    "locations": [
+      "public/pg-views.js:284"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:284",
+        "placeholders": {
+          "count": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Live prices could not be loaded. Your balances are not affected.": {
+    "locations": [
+      "public/pg-views.js:133"
+    ],
+    "examples": []
+  },
+  "Live pricing is temporarily unavailable.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Loading admin data…": {
+    "locations": [
+      "public/pg-more.js:258"
+    ],
+    "examples": []
+  },
+  "Loading price history…": {
+    "locations": [
+      "public/pg-trade.js:40"
+    ],
+    "examples": []
+  },
+  "Locked": {
+    "locations": [
+      "public/pg-more.js:27"
+    ],
+    "examples": []
+  },
+  "Losers": {
+    "locations": [
+      "public/pg-views.js:228",
+      "public/pg-views.js:274"
+    ],
+    "examples": []
+  },
+  "Main": {
+    "locations": [
+      "public/pg-views.js:43"
+    ],
+    "examples": []
+  },
+  "Manual balance credits are not blockchain deposits. Manually marked withdrawals have no verified transaction in this ledger. Network fees and personal-wallet holdings are not included as profit.": {
+    "locations": [
+      "public/pg-more.js:304"
+    ],
+    "examples": []
+  },
+  "Manual Earn credit": {
+    "locations": [
+      "public/pg-more.js:313"
+    ],
+    "examples": []
+  },
+  "Manually marked paid — net": {
+    "locations": [
+      "public/pg-more.js:293"
+    ],
+    "examples": []
+  },
+  "Mark sent": {
+    "locations": [
+      "public/pg-more.js:365"
+    ],
+    "examples": []
+  },
+  "Market feed unavailable": {
+    "locations": [
+      "public/pg-views.js:133"
+    ],
+    "examples": []
+  },
+  "Market mood": {
+    "locations": [
+      "public/pg-views.js:286"
+    ],
+    "examples": []
+  },
+  "Market prices and {value0}-hour statistics are provided by Binance. If the price feed is interrupted, {value1} marks the connection as delayed and pauses new quotes. Your balances and history are unaffected by price-feed interruptions.": {
+    "locations": [
+      "public/pg-more.js:229"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:229",
+        "placeholders": {
+          "value0": "24",
+          "value1": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Markets": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-trade.js:454",
+      "public/pg-trade.js:462",
+      "public/pg-views.js:22",
+      "public/pg-views.js:284"
+    ],
+    "examples": []
+  },
+  "Markets, rewards and {value0},": {
+    "locations": [
+      "public/pg-more.js:198"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:198",
+        "placeholders": {
+          "value0": "USDT"
+        }
+      }
+    ]
+  },
+  "Mask amounts across the app": {
+    "locations": [
+      "public/pg-more.js:106"
+    ],
+    "examples": []
+  },
+  "Max": {
+    "locations": [
+      "public/pg-trade.js:49"
+    ],
+    "examples": []
+  },
+  "MAX": {
+    "locations": [
+      "public/pg-trade.js:356"
+    ],
+    "examples": []
+  },
+  "Member since": {
+    "locations": [
+      "public/pg-more.js:111"
+    ],
+    "examples": []
+  },
+  "members": {
+    "locations": [
+      "public/pg-more.js:87"
+    ],
+    "examples": []
+  },
+  "Membership purchase · {name} (legacy)": {
+    "locations": [
+      "public/pg-views.js:197"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:197",
+        "placeholders": {
+          "name": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Membership purchase (legacy)": {
+    "locations": [
+      "public/pg-views.js:197"
+    ],
+    "examples": []
+  },
+  "Meme": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Message": {
+    "locations": [
+      "public/pg-more.js:142"
+    ],
+    "examples": []
+  },
+  "Minimum withdrawal request: {amount} {currency}.": {
+    "locations": [
+      "public/pg-trade.js:356"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:356",
+        "placeholders": {
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "Move": {
+    "locations": [
+      "public/pg-more.js:33"
+    ],
+    "examples": []
+  },
+  "Move from Spot": {
+    "locations": [
+      "public/pg-trade.js:255"
+    ],
+    "examples": []
+  },
+  "Move USDT from Spot to Earn": {
+    "locations": [
+      "public/pg-trade.js:335"
+    ],
+    "examples": []
+  },
+  "Name": {
+    "locations": [
+      "public/pg-views.js:293"
+    ],
+    "examples": []
+  },
+  "Name must be between 2 and 50 characters.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Name updated": {
+    "locations": [
+      "public/pg-main.js:431"
+    ],
+    "examples": []
+  },
+  "Needs reconciliation": {
+    "locations": [
+      "public/pg-more.js:279"
+    ],
+    "examples": []
+  },
+  "net": {
+    "locations": [
+      "public/pg-trade.js:296"
+    ],
+    "examples": []
+  },
+  "Network": {
+    "locations": [
+      "public/pg-more.js:357",
+      "public/pg-trade.js:361"
+    ],
+    "examples": []
+  },
+  "Never share your password or seed phrase with anyone.": {
+    "locations": [
+      "public/pg-trade.js:395"
+    ],
+    "examples": []
+  },
+  "New alert": {
+    "locations": [
+      "public/pg-trade.js:77"
+    ],
+    "examples": []
+  },
+  "Next": {
+    "locations": [
+      "public/pg-more.js:318",
+      "public/pg-more.js:360"
+    ],
+    "examples": []
+  },
+  "Next claim in {timerStart}{time}{timerEnd}": {
+    "locations": [
+      "public/pg-views.js:144"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:144",
+        "placeholders": {
+          "time": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Next reward": {
+    "locations": [
+      "public/pg-more.js:26"
+    ],
+    "examples": []
+  },
+  "No articles found": {
+    "locations": [
+      "public/pg-more.js:150"
+    ],
+    "examples": []
+  },
+  "No assets found": {
+    "locations": [
+      "public/pg-views.js:294",
+      "public/pg-views.js:305"
+    ],
+    "examples": []
+  },
+  "No confirmed deposits": {
+    "locations": [
+      "public/pg-more.js:359"
+    ],
+    "examples": []
+  },
+  "No Earn activity yet": {
+    "locations": [
+      "public/pg-more.js:45"
+    ],
+    "examples": []
+  },
+  "No favorites yet": {
+    "locations": [
+      "public/pg-views.js:246"
+    ],
+    "examples": []
+  },
+  "No keys in the browser": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "No ledger entries": {
+    "locations": [
+      "public/pg-more.js:317"
+    ],
+    "examples": []
+  },
+  "No match": {
+    "locations": [
+      "public/pg-trade.js:202"
+    ],
+    "examples": []
+  },
+  "No members yet": {
+    "locations": [
+      "public/pg-more.js:90"
+    ],
+    "examples": []
+  },
+  "No open positions": {
+    "locations": [
+      "public/pg-trade.js:85"
+    ],
+    "examples": []
+  },
+  "No orders yet": {
+    "locations": [
+      "public/pg-trade.js:72"
+    ],
+    "examples": []
+  },
+  "No price alerts": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": []
+  },
+  "No recorded referral income yet": {
+    "locations": [
+      "public/pg-more.js:89"
+    ],
+    "examples": []
+  },
+  "No response received. Tap “Check order” to confirm the same order safely.": {
+    "locations": [
+      "public/pg-trade.js:192"
+    ],
+    "examples": []
+  },
+  "No results": {
+    "locations": [
+      "public/pg-trade.js:462"
+    ],
+    "examples": []
+  },
+  "No reward available": {
+    "locations": [
+      "public/pg-more.js:28"
+    ],
+    "examples": []
+  },
+  "No users found": {
+    "locations": [
+      "public/pg-more.js:386"
+    ],
+    "examples": []
+  },
+  "No withdrawal requests": {
+    "locations": [
+      "public/pg-more.js:375"
+    ],
+    "examples": []
+  },
+  "No withdrawals": {
+    "locations": [
+      "public/pg-trade.js:295"
+    ],
+    "examples": []
+  },
+  "Not enough of this asset.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Not enough Spot balance.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Nothing here yet": {
+    "locations": [
+      "public/pg-views.js:214"
+    ],
+    "examples": []
+  },
+  "Notice": {
+    "locations": [
+      "public/pg-core.js:217"
+    ],
+    "examples": []
+  },
+  "Notifications": {
+    "locations": [
+      "public/pg-trade.js:471",
+      "public/pg-views.js:53"
+    ],
+    "examples": []
+  },
+  "One account for live crypto markets, daily Earn rewards and {value0} wallets.": {
+    "locations": [
+      "public/pg-views.js:82"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:82",
+        "placeholders": {
+          "value0": "USDT"
+        }
+      }
+    ]
+  },
+  "One claim per day": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": []
+  },
+  "Open Earn": {
+    "locations": [
+      "public/pg-more.js:200",
+      "public/pg-trade.js:255"
+    ],
+    "examples": []
+  },
+  "Opens in": {
+    "locations": [
+      "public/pg-more.js:27"
+    ],
+    "examples": []
+  },
+  "Optimistic": {
+    "locations": [
+      "public/pg-views.js:282"
+    ],
+    "examples": []
+  },
+  "optional": {
+    "locations": [
+      "public/pg-views.js:101"
+    ],
+    "examples": []
+  },
+  "Oracle": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Order filled": {
+    "locations": [
+      "public/pg-trade.js:189"
+    ],
+    "examples": []
+  },
+  "Order size": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Orders": {
+    "locations": [
+      "public/pg-trade.js:63"
+    ],
+    "examples": []
+  },
+  "Other": {
+    "locations": [
+      "markets/binance.js:other"
+    ],
+    "examples": []
+  },
+  "Overview": {
+    "locations": [
+      "public/pg-trade.js:244"
+    ],
+    "examples": []
+  },
+  "Owner transfer in progress": {
+    "locations": [
+      "public/pg-more.js:301"
+    ],
+    "examples": []
+  },
+  "Pages": {
+    "locations": [
+      "public/pg-trade.js:462"
+    ],
+    "examples": []
+  },
+  "Paid out": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Pair not available": {
+    "locations": [
+      "public/pg-trade.js:20"
+    ],
+    "examples": []
+  },
+  "Password": {
+    "locations": [
+      "public/pg-views.js:99"
+    ],
+    "examples": []
+  },
+  "Password-confirmed withdrawals": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Payment status is loading or temporarily unavailable.": {
+    "locations": [
+      "public/pg-more.js:180"
+    ],
+    "examples": []
+  },
+  "Payments": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Pending": {
+    "locations": [
+      "public/pg-more.js:264",
+      "public/pg-more.js:370",
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Pending net": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Pending requests — gross": {
+    "locations": [
+      "public/pg-more.js:291"
+    ],
+    "examples": []
+  },
+  "Pending requests — net": {
+    "locations": [
+      "public/pg-more.js:291"
+    ],
+    "examples": []
+  },
+  "Pending withdrawals": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "per day": {
+    "locations": [
+      "public/pg-more.js:18"
+    ],
+    "examples": []
+  },
+  "Pick another market to continue.": {
+    "locations": [
+      "public/pg-trade.js:20"
+    ],
+    "examples": []
+  },
+  "Platform update": {
+    "locations": [
+      "public/pg-notice.js:18",
+      "public/pg-notice.js:8"
+    ],
+    "examples": []
+  },
+  "Please read": {
+    "locations": [
+      "public/pg-more.js:232"
+    ],
+    "examples": []
+  },
+  "Portgainy Assistant": {
+    "locations": [
+      "public/pg-more.js:139"
+    ],
+    "examples": []
+  },
+  "Portgainy will never ask for your password, seed phrase or private keys.": {
+    "locations": [
+      "public/pg-more.js:146"
+    ],
+    "examples": []
+  },
+  "Positions": {
+    "locations": [
+      "public/pg-trade.js:63"
+    ],
+    "examples": []
+  },
+  "Positions are recorded by {value0} as price-linked holdings. They are not on-chain coins, they cannot be withdrawn as crypto, and no coin custody is implied. Your Spot balance and positions are shown separately, with unrealized PNL updated live.": {
+    "locations": [
+      "public/pg-more.js:221"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:221",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Preferences": {
+    "locations": [
+      "public/pg-more.js:105"
+    ],
+    "examples": []
+  },
+  "Preparing…": {
+    "locations": [
+      "public/pg-trade.js:336"
+    ],
+    "examples": []
+  },
+  "Previous": {
+    "locations": [
+      "public/pg-more.js:318",
+      "public/pg-more.js:360"
+    ],
+    "examples": []
+  },
+  "Price": {
+    "locations": [
+      "public/pg-trade.js:162"
+    ],
+    "examples": []
+  },
+  "Price alert": {
+    "locations": [
+      "public/pg-trade.js:213",
+      "public/pg-trade.js:236",
+      "public/pg-trade.js:32"
+    ],
+    "examples": []
+  },
+  "Price alert created": {
+    "locations": [
+      "public/pg-main.js:426"
+    ],
+    "examples": []
+  },
+  "Price alerts": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Prices by {provider} · Positions are settled in {currency}": {
+    "locations": [
+      "public/pg-views.js:58"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:58",
+        "placeholders": {
+          "provider": "Binance",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "Prices come from Binance public market data. When you place an order you receive a quote that is valid for {value0} seconds; if the market moves materially, a fresh quote is required. Orders are unleveraged, cannot be sold short and settle in {value1}.": {
+    "locations": [
+      "public/pg-more.js:220"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:220",
+        "placeholders": {
+          "value0": "15",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "Prices follow live Binance quotes; positions are recorded by {value0} and settled in {value1}. No coin custody is implied.": {
+    "locations": [
+      "public/pg-trade.js:54"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:54",
+        "placeholders": {
+          "value0": "Portgainy",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "Primary": {
+    "locations": [
+      "public/pg-views.js:60"
+    ],
+    "examples": []
+  },
+  "Principal for daily rewards": {
+    "locations": [
+      "public/pg-trade.js:254"
+    ],
+    "examples": []
+  },
+  "Principal stays put": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": []
+  },
+  "Processing": {
+    "locations": [
+      "public/pg-views.js:223"
+    ],
+    "examples": []
+  },
+  "Profile": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:50"
+    ],
+    "examples": []
+  },
+  "Protected sessions": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Quantity": {
+    "locations": [
+      "public/pg-trade.js:47"
+    ],
+    "examples": []
+  },
+  "Questions?": {
+    "locations": [
+      "public/pg-more.js:235"
+    ],
+    "examples": []
+  },
+  "Quote": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Quote expired — close and review again": {
+    "locations": [
+      "public/pg-trade.js:175"
+    ],
+    "examples": []
+  },
+  "Quote expired. Review a new order.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Quote valid for {strongStart}{seconds}s{strongEnd}": {
+    "locations": [
+      "public/pg-trade.js:175"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:175",
+        "placeholders": {
+          "seconds": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Quote validity": {
+    "locations": [
+      "public/pg-more.js:181",
+      "public/pg-more.js:192",
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Ready": {
+    "locations": [
+      "public/pg-main.js:247",
+      "public/pg-more.js:27"
+    ],
+    "examples": []
+  },
+  "Real-time prices for dozens of leading assets with 24-hour range, volume, favorites, category filters and a market-mood read-out.": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "receive {amount} {currency}": {
+    "locations": [
+      "public/pg-trade.js:161"
+    ],
+    "examples": []
+  },
+  "Receives claims and referral rewards. Used for trades and withdrawal requests.": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "Recent activity": {
+    "locations": [
+      "public/pg-views.js:249"
+    ],
+    "examples": []
+  },
+  "Recorded manual Earn credits": {
+    "locations": [
+      "public/pg-more.js:296"
+    ],
+    "examples": []
+  },
+  "Recorded withdrawal fees": {
+    "locations": [
+      "public/pg-more.js:294"
+    ],
+    "examples": []
+  },
+  "Reference": {
+    "locations": [
+      "public/pg-more.js:225"
+    ],
+    "examples": []
+  },
+  "Referral income": {
+    "locations": [
+      "public/pg-more.js:89"
+    ],
+    "examples": []
+  },
+  "Referral offer": {
+    "locations": [
+      "public/pg-main.js:220"
+    ],
+    "examples": []
+  },
+  "Referral program": {
+    "locations": [
+      "public/pg-views.js:158"
+    ],
+    "examples": []
+  },
+  "Referral reward · Level {level}": {
+    "locations": [
+      "public/pg-views.js:189"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:189",
+        "placeholders": {
+          "level": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Referral rewards": {
+    "locations": [
+      "public/pg-more.js:192",
+      "public/pg-more.js:295"
+    ],
+    "examples": []
+  },
+  "Referral rewards credit your Spot balance and never reduce your friends’ own rewards.": {
+    "locations": [
+      "public/pg-more.js:88"
+    ],
+    "examples": []
+  },
+  "Referrals": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-more.js:113",
+      "public/pg-more.js:182",
+      "public/pg-more.js:45",
+      "public/pg-more.js:79",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:26"
+    ],
+    "examples": []
+  },
+  "Refresh": {
+    "locations": [
+      "public/pg-more.js:257"
+    ],
+    "examples": []
+  },
+  "Refresh to try again.": {
+    "locations": [
+      "public/pg-more.js:278",
+      "public/pg-more.js:352"
+    ],
+    "examples": []
+  },
+  "Reject": {
+    "locations": [
+      "public/pg-more.js:365"
+    ],
+    "examples": []
+  },
+  "Reject now?": {
+    "locations": [
+      "public/pg-more.js:365"
+    ],
+    "examples": []
+  },
+  "Rejected": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Remove alert": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": []
+  },
+  "Repeat password": {
+    "locations": [
+      "public/pg-views.js:100"
+    ],
+    "examples": []
+  },
+  "Request sent": {
+    "locations": [
+      "public/pg-trade.js:446"
+    ],
+    "examples": []
+  },
+  "Request withdrawal": {
+    "locations": [
+      "public/pg-trade.js:394"
+    ],
+    "examples": []
+  },
+  "Requested": {
+    "locations": [
+      "public/pg-more.js:373"
+    ],
+    "examples": []
+  },
+  "Reserved": {
+    "locations": [
+      "public/pg-more.js:191",
+      "public/pg-more.js:386",
+      "public/pg-views.js:171"
+    ],
+    "examples": []
+  },
+  "Reserved for pending withdrawals:": {
+    "locations": [
+      "public/pg-trade.js:251"
+    ],
+    "examples": []
+  },
+  "Reserved separately: {amount}": {
+    "locations": [
+      "public/pg-more.js:267"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:267",
+        "placeholders": {
+          "amount": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Reserved withdrawals": {
+    "locations": [
+      "public/pg-more.js:286"
+    ],
+    "examples": []
+  },
+  "Review a quote, confirm in one tap and track every position with live unrealized PNL. Orders settle in USDT.": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Review your order": {
+    "locations": [
+      "public/pg-trade.js:160"
+    ],
+    "examples": []
+  },
+  "Reward calculator": {
+    "locations": [
+      "public/pg-more.js:38"
+    ],
+    "examples": []
+  },
+  "Reward claimed": {
+    "locations": [
+      "public/pg-main.js:192"
+    ],
+    "examples": []
+  },
+  "Rewards": {
+    "locations": [
+      "public/pg-trade.js:258"
+    ],
+    "examples": []
+  },
+  "Rewards and adjustments": {
+    "locations": [
+      "public/pg-more.js:295"
+    ],
+    "examples": []
+  },
+  "Rewards appear after your friends claim their Earn rewards.": {
+    "locations": [
+      "public/pg-more.js:89"
+    ],
+    "examples": []
+  },
+  "Rewards are credited to your Spot balance.": {
+    "locations": [
+      "public/pg-more.js:217"
+    ],
+    "examples": []
+  },
+  "Rewards, trading, withdrawals": {
+    "locations": [
+      "public/pg-more.js:191"
+    ],
+    "examples": []
+  },
+  "Rises above": {
+    "locations": [
+      "public/pg-trade.js:215"
+    ],
+    "examples": []
+  },
+  "Risk notice": {
+    "locations": [
+      "public/pg-more.js:232"
+    ],
+    "examples": []
+  },
+  "Save name": {
+    "locations": [
+      "public/pg-more.js:110"
+    ],
+    "examples": []
+  },
+  "Search": {
+    "locations": [
+      "public/pg-trade.js:457"
+    ],
+    "examples": []
+  },
+  "Search coin": {
+    "locations": [
+      "public/pg-trade.js:198"
+    ],
+    "examples": []
+  },
+  "Search coin or name": {
+    "locations": [
+      "public/pg-views.js:290"
+    ],
+    "examples": []
+  },
+  "Search coins and pages": {
+    "locations": [
+      "public/pg-views.js:51"
+    ],
+    "examples": []
+  },
+  "Search coins, pages…": {
+    "locations": [
+      "public/pg-trade.js:457"
+    ],
+    "examples": []
+  },
+  "Search help": {
+    "locations": [
+      "public/pg-more.js:144"
+    ],
+    "examples": []
+  },
+  "Search help articles": {
+    "locations": [
+      "public/pg-more.js:144"
+    ],
+    "examples": []
+  },
+  "Search markets": {
+    "locations": [
+      "public/pg-views.js:290"
+    ],
+    "examples": []
+  },
+  "Search users": {
+    "locations": [
+      "public/pg-more.js:379"
+    ],
+    "examples": []
+  },
+  "Security & safeguards": {
+    "locations": [
+      "public/pg-more.js:223"
+    ],
+    "examples": []
+  },
+  "Sell": {
+    "locations": [
+      "public/pg-trade.js:44"
+    ],
+    "examples": []
+  },
+  "Sell {asset}": {
+    "locations": [
+      "public/pg-trade.js:160",
+      "public/pg-trade.js:52"
+    ],
+    "examples": []
+  },
+  "Send": {
+    "locations": [
+      "public/pg-more.js:142",
+      "public/pg-more.js:34",
+      "public/pg-trade.js:270",
+      "public/pg-views.js:238"
+    ],
+    "examples": []
+  },
+  "Send {currency} on the {network} network to your personal deposit address. Once the transfer is confirmed on the blockchain it is credited to your {earn} account automatically.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:120",
+        "placeholders": {
+          "currency": "USDT",
+          "network": "TRON (TRC20)",
+          "earn": "Earn"
+        }
+      }
+    ]
+  },
+  "Send only {currency} on the {network} network.": {
+    "locations": [
+      "public/pg-trade.js:379"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:379",
+        "placeholders": {
+          "currency": "USDT",
+          "network": "TRON (TRC20)"
+        }
+      }
+    ]
+  },
+  "Send the “To send” amount from the treasury wallet, then press Mark sent. Each decision needs two clicks.": {
+    "locations": [
+      "public/pg-more.js:371"
+    ],
+    "examples": []
+  },
+  "Send to my treasury": {
+    "locations": [
+      "public/pg-more.js:348"
+    ],
+    "examples": []
+  },
+  "Send to your treasury": {
+    "locations": [
+      "public/pg-more.js:339"
+    ],
+    "examples": []
+  },
+  "Send USDT": {
+    "locations": [
+      "public/pg-trade.js:335"
+    ],
+    "examples": []
+  },
+  "Sent": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Sessions use secure, same-site cookies and sensitive endpoints are rate-limited against abuse.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Set {time}": {
+    "locations": [
+      "public/pg-trade.js:78"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:78",
+        "placeholders": {
+          "time": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Set above/below targets on any market and get notified the moment a price is reached while Portgainy is open.": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Share": {
+    "locations": [
+      "public/pg-more.js:85",
+      "public/pg-views.js:162"
+    ],
+    "examples": []
+  },
+  "Share {value0}. Grow your network.": {
+    "locations": [
+      "public/pg-more.js:79"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:79",
+        "placeholders": {
+          "value0": "Portgainy"
+        }
+      }
+    ]
+  },
+  "Share your link to bring friends in.": {
+    "locations": [
+      "public/pg-more.js:90"
+    ],
+    "examples": []
+  },
+  "Show balances": {
+    "locations": [
+      "public/pg-views.js:233"
+    ],
+    "examples": []
+  },
+  "Show password": {
+    "locations": [
+      "public/pg-views.js:100",
+      "public/pg-views.js:99"
+    ],
+    "examples": []
+  },
+  "Sign in": {
+    "locations": [
+      "public/pg-views.js:103",
+      "public/pg-views.js:67",
+      "public/pg-views.js:92"
+    ],
+    "examples": []
+  },
+  "Sign in to continue to your workspace.": {
+    "locations": [
+      "public/pg-views.js:96"
+    ],
+    "examples": []
+  },
+  "Sign out": {
+    "locations": [
+      "public/pg-more.js:114"
+    ],
+    "examples": []
+  },
+  "Sign up with an email and password. No documents are needed to explore live markets.": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": []
+  },
+  "Sold": {
+    "locations": [
+      "public/pg-views.js:193"
+    ],
+    "examples": []
+  },
+  "Sold {asset}": {
+    "locations": [
+      "public/pg-trade.js:73"
+    ],
+    "examples": []
+  },
+  "Something went wrong. Please try again.": {
+    "locations": [
+      "public/pg-core.js:190"
+    ],
+    "examples": []
+  },
+  "Spot": {
+    "locations": [
+      "public/pg-more.js:191",
+      "public/pg-trade.js:244"
+    ],
+    "examples": []
+  },
+  "Spot · {value0}": {
+    "locations": [
+      "public/pg-trade.js:20"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:20",
+        "placeholders": {
+          "value0": "USDT"
+        }
+      }
+    ]
+  },
+  "Spot · Earn · Crypto": {
+    "locations": [
+      "public/pg-trade.js:265"
+    ],
+    "examples": []
+  },
+  "Spot · USDT": {
+    "locations": [
+      "public/pg-trade.js:198"
+    ],
+    "examples": []
+  },
+  "Spot account": {
+    "locations": [
+      "public/pg-trade.js:249",
+      "public/pg-trade.js:280"
+    ],
+    "examples": []
+  },
+  "Spot balance": {
+    "locations": [
+      "public/pg-more.js:34"
+    ],
+    "examples": []
+  },
+  "Spot balances": {
+    "locations": [
+      "public/pg-more.js:264"
+    ],
+    "examples": []
+  },
+  "Spot order size": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Spot to Earn transfer": {
+    "locations": [
+      "public/pg-more.js:313"
+    ],
+    "examples": []
+  },
+  "Spot trading": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "Spot USDT": {
+    "locations": [
+      "public/pg-more.js:286",
+      "public/pg-views.js:168"
+    ],
+    "examples": []
+  },
+  "Status": {
+    "locations": [
+      "public/pg-more.js:27"
+    ],
+    "examples": []
+  },
+  "Step by step": {
+    "locations": [
+      "public/pg-more.js:210"
+    ],
+    "examples": []
+  },
+  "Storage": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Store of value": {
+    "locations": [
+      "markets/binance.js:5"
+    ],
+    "examples": []
+  },
+  "Success": {
+    "locations": [
+      "public/pg-core.js:217"
+    ],
+    "examples": []
+  },
+  "Support": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-more.js:137",
+      "public/pg-more.js:200",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:26",
+      "public/pg-views.js:54",
+      "public/pg-views.js:67",
+      "public/pg-views.js:77"
+    ],
+    "examples": []
+  },
+  "Synthetic positions at cost": {
+    "locations": [
+      "public/pg-more.js:287"
+    ],
+    "examples": []
+  },
+  "Tap the star on any market to pin it here.": {
+    "locations": [
+      "public/pg-views.js:246"
+    ],
+    "examples": []
+  },
+  "Target price": {
+    "locations": [
+      "public/pg-trade.js:217"
+    ],
+    "examples": []
+  },
+  "Task reward (legacy)": {
+    "locations": [
+      "public/pg-views.js:196"
+    ],
+    "examples": []
+  },
+  "Temporarily unavailable": {
+    "locations": [
+      "public/pg-trade.js:347",
+      "public/pg-trade.js:366"
+    ],
+    "examples": []
+  },
+  "The daily collection fee budget has been reached.": {
+    "locations": [
+      "public/pg-more.js:330"
+    ],
+    "examples": []
+  },
+  "The email or password is incorrect.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "The network or storage is temporarily unavailable.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "The network receipt needs review.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "The price changed. Review a new quote.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "The rate applies to your entire Earn balance at the time of Claim. Below {value0} {value1}, no daily reward is available.": {
+    "locations": [
+      "public/pg-more.js:37"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:37",
+        "placeholders": {
+          "value0": "200",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "The request was not found.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "The signed transfer expired and needs review.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "The website never holds private keys or seed phrases and Portgainy staff will never ask for them.": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "The working wallet does not have enough USDT.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "The working wallet is temporarily unavailable.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "The working wallet needs more TRX for network fees.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "This page is for administrators only.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "This request was already processed. Refresh the list.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "This transfer has already been signed and cannot be cancelled.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Time left": {
+    "locations": [
+      "public/pg-more.js:68"
+    ],
+    "examples": []
+  },
+  "To send": {
+    "locations": [
+      "public/pg-more.js:373"
+    ],
+    "examples": []
+  },
+  "Toggle balances": {
+    "locations": [
+      "public/pg-trade.js:265"
+    ],
+    "examples": []
+  },
+  "Too many attempts. Try again in a little while.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Total": {
+    "locations": [
+      "public/pg-trade.js:47"
+    ],
+    "examples": []
+  },
+  "Total account USDT": {
+    "locations": [
+      "public/pg-more.js:287"
+    ],
+    "examples": []
+  },
+  "Total cost": {
+    "locations": [
+      "public/pg-trade.js:162"
+    ],
+    "examples": []
+  },
+  "Total earned": {
+    "locations": [
+      "public/pg-more.js:111"
+    ],
+    "examples": []
+  },
+  "Total received": {
+    "locations": [
+      "public/pg-trade.js:162"
+    ],
+    "examples": []
+  },
+  "Total recorded earned": {
+    "locations": [
+      "public/pg-more.js:296"
+    ],
+    "examples": []
+  },
+  "Total withdrawn": {
+    "locations": [
+      "public/pg-more.js:111"
+    ],
+    "examples": []
+  },
+  "Trade": {
+    "locations": [
+      "public/pg-main.js:5",
+      "public/pg-more.js:34",
+      "public/pg-trade.js:20",
+      "public/pg-trade.js:250",
+      "public/pg-trade.js:280",
+      "public/pg-trade.js:287",
+      "public/pg-trade.js:454",
+      "public/pg-views.js:22"
+    ],
+    "examples": []
+  },
+  "Trade complete": {
+    "locations": [
+      "public/pg-trade.js:189"
+    ],
+    "examples": []
+  },
+  "Trade, transfer or withdraw": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": []
+  },
+  "Trade. Earn.": {
+    "locations": [
+      "public/pg-views.js:81"
+    ],
+    "examples": []
+  },
+  "Trade. Earn. Level up.": {
+    "locations": [
+      "public/pg-main.js:21"
+    ],
+    "examples": []
+  },
+  "Trades": {
+    "locations": [
+      "public/pg-more.js:104",
+      "public/pg-trade.js:258"
+    ],
+    "examples": []
+  },
+  "Trading": {
+    "locations": [
+      "public/pg-more.js:219"
+    ],
+    "examples": []
+  },
+  "Trading · Withdraw": {
+    "locations": [
+      "public/pg-trade.js:249"
+    ],
+    "examples": []
+  },
+  "Trading fee": {
+    "locations": [
+      "public/pg-trade.js:80"
+    ],
+    "examples": []
+  },
+  "Trading is temporarily unavailable.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Transactions": {
+    "locations": [
+      "public/pg-trade.js:259"
+    ],
+    "examples": []
+  },
+  "Transfer": {
+    "locations": [
+      "public/pg-trade.js:250",
+      "public/pg-trade.js:270",
+      "public/pg-trade.js:280",
+      "public/pg-trade.js:335",
+      "public/pg-views.js:238"
+    ],
+    "examples": []
+  },
+  "Transfer cancelled.": {
+    "locations": [
+      "public/pg-main.js:414"
+    ],
+    "examples": []
+  },
+  "Transfer requested. It will appear after network confirmation.": {
+    "locations": [
+      "public/pg-main.js:414"
+    ],
+    "examples": []
+  },
+  "Transfer to Earn": {
+    "locations": [
+      "public/pg-trade.js:397",
+      "public/pg-views.js:192"
+    ],
+    "examples": []
+  },
+  "Transferred to Earn": {
+    "locations": [
+      "public/pg-trade.js:428"
+    ],
+    "examples": []
+  },
+  "Transfers": {
+    "locations": [
+      "public/pg-trade.js:258"
+    ],
+    "examples": []
+  },
+  "Transfers are temporarily unavailable.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Transparency": {
+    "locations": [
+      "public/pg-more.js:228"
+    ],
+    "examples": []
+  },
+  "TRON (TRC20) address": {
+    "locations": [
+      "public/pg-trade.js:391"
+    ],
+    "examples": []
+  },
+  "Try a different search or category.": {
+    "locations": [
+      "public/pg-views.js:294",
+      "public/pg-views.js:305"
+    ],
+    "examples": []
+  },
+  "Try again": {
+    "locations": [
+      "public/pg-trade.js:347",
+      "public/pg-trade.js:366",
+      "public/pg-views.js:133"
+    ],
+    "examples": []
+  },
+  "Try another keyword or ask the assistant.": {
+    "locations": [
+      "public/pg-more.js:150"
+    ],
+    "examples": []
+  },
+  "Two referral levels": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": []
+  },
+  "TXID": {
+    "locations": [
+      "public/pg-trade.js:296"
+    ],
+    "examples": []
+  },
+  "Unavailable": {
+    "locations": [
+      "public/pg-more.js:264",
+      "public/pg-more.js:265",
+      "public/pg-more.js:268",
+      "public/pg-more.js:334",
+      "public/pg-more.js:335",
+      "public/pg-more.js:336"
+    ],
+    "examples": []
+  },
+  "Under review": {
+    "locations": [
+      "public/pg-views.js:222"
+    ],
+    "examples": []
+  },
+  "Unique deposit addresses": {
+    "locations": [
+      "public/pg-more.js:193"
+    ],
+    "examples": []
+  },
+  "Unrealized PNL": {
+    "locations": [
+      "public/pg-trade.js:269",
+      "public/pg-trade.js:286",
+      "public/pg-views.js:236"
+    ],
+    "examples": []
+  },
+  "USDT on TRON (TRC20)": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "USDT to start Earn": {
+    "locations": [
+      "public/pg-more.js:181"
+    ],
+    "examples": []
+  },
+  "USDT wallet": {
+    "locations": [
+      "public/pg-more.js:182"
+    ],
+    "examples": []
+  },
+  "USDT wallet address": {
+    "locations": [
+      "public/pg-trade.js:391"
+    ],
+    "examples": []
+  },
+  "Use {spot} {currency} to trade, move it back to {earn}, or request a withdrawal ({fee}% fee, {minimum} {currency} minimum).": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:190",
+        "placeholders": {
+          "spot": "Spot",
+          "currency": "USDT",
+          "earn": "Earn",
+          "fee": "<runtime value>",
+          "minimum": "10"
+        }
+      }
+    ]
+  },
+  "Use a unique password, never share it, and remember that Portgainy staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "Use at least 8 characters with one letter and one number.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Use your {strongStart}{spot} balance{strongEnd} to trade from {strongStart}{minimum}{strongEnd}, up to {strongStart}{maximum} per order{strongEnd}. Review the price and fee before confirming. Positions follow market prices and settle in {currency}; you are trading price movements rather than receiving on-chain coins. Losses are possible.": {
+    "locations": [
+      "public/pg-notice.js:11"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:11",
+        "placeholders": {
+          "spot": "Spot",
+          "minimum": "1 USDT",
+          "maximum": "10,000 USDT",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "Users": {
+    "locations": [
+      "public/pg-more.js:269"
+    ],
+    "examples": []
+  },
+  "View address on {explorer}": {
+    "locations": [
+      "public/pg-trade.js:380"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-trade.js:380",
+        "placeholders": {
+          "explorer": "TRONSCAN"
+        }
+      }
+    ]
+  },
+  "View transaction": {
+    "locations": [
+      "public/pg-more.js:343",
+      "public/pg-more.js:344",
+      "public/pg-more.js:359",
+      "public/pg-more.js:375"
+    ],
+    "examples": []
+  },
+  "Visit Support": {
+    "locations": [
+      "public/pg-more.js:235"
+    ],
+    "examples": []
+  },
+  "Vol {volume}": {
+    "locations": [
+      "public/pg-main.js:146",
+      "public/pg-views.js:116"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-views.js:116",
+        "placeholders": {
+          "volume": "<runtime value>"
+        }
+      },
+      {
+        "location": "public/pg-main.js:146",
+        "placeholders": {
+          "volume": "<runtime value>"
+        }
+      }
+    ]
+  },
+  "Waiting for an outgoing withdrawal to confirm.": {
+    "locations": [
+      "public/pg-more.js:323"
+    ],
+    "examples": []
+  },
+  "Waiting for next claim": {
+    "locations": [
+      "public/pg-more.js:28"
+    ],
+    "examples": []
+  },
+  "Wallet address": {
+    "locations": [
+      "public/pg-trade.js:391"
+    ],
+    "examples": []
+  },
+  "We keep the model simple and visible. Your balances are split into clearly labeled accounts, every action leaves a record, and every limit, fee and rule is written down on this page instead of buried in fine print.": {
+    "locations": [
+      "public/pg-more.js:206"
+    ],
+    "examples": []
+  },
+  "Welcome": {
+    "locations": [
+      "public/pg-main.js:449"
+    ],
+    "examples": []
+  },
+  "Welcome back": {
+    "locations": [
+      "public/pg-views.js:95"
+    ],
+    "examples": []
+  },
+  "Welcome to Portgainy": {
+    "locations": [
+      "public/pg-views.js:194"
+    ],
+    "examples": []
+  },
+  "Welcome to the new {account} tiers": {
+    "locations": [
+      "public/pg-notice.js:9"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:9",
+        "placeholders": {
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "What are the withdrawal rules?": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": []
+  },
+  "What is the BTC price?": {
+    "locations": [
+      "public/pg-more.js:141"
+    ],
+    "examples": []
+  },
+  "What you can do": {
+    "locations": [
+      "public/pg-more.js:208"
+    ],
+    "examples": []
+  },
+  "Who we are": {
+    "locations": [
+      "public/pg-more.js:204"
+    ],
+    "examples": []
+  },
+  "Withdraw": {
+    "locations": [
+      "public/pg-trade.js:250"
+    ],
+    "examples": []
+  },
+  "Withdraw from your Spot account": {
+    "locations": [
+      "public/pg-trade.js:335"
+    ],
+    "examples": []
+  },
+  "Withdrawal fee": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Withdrawal marked as sent": {
+    "locations": [
+      "public/pg-main.js:236"
+    ],
+    "examples": []
+  },
+  "Withdrawal minimum": {
+    "locations": [
+      "public/pg-more.js:192"
+    ],
+    "examples": []
+  },
+  "Withdrawal processing is temporarily unavailable.": {
+    "locations": [
+      "public/pg-more.js:326"
+    ],
+    "examples": []
+  },
+  "Withdrawal rejected": {
+    "locations": [
+      "public/pg-main.js:236"
+    ],
+    "examples": []
+  },
+  "Withdrawal request": {
+    "locations": [
+      "public/pg-views.js:191"
+    ],
+    "examples": []
+  },
+  "Withdrawal requested": {
+    "locations": [
+      "public/pg-trade.js:428"
+    ],
+    "examples": []
+  },
+  "Withdrawal requests": {
+    "locations": [
+      "public/pg-main.js:79",
+      "public/pg-trade.js:262"
+    ],
+    "examples": []
+  },
+  "Withdrawal reservation": {
+    "locations": [
+      "public/pg-more.js:311"
+    ],
+    "examples": []
+  },
+  "Withdrawal returned": {
+    "locations": [
+      "public/pg-more.js:311"
+    ],
+    "examples": []
+  },
+  "Withdrawals": {
+    "locations": [
+      "public/pg-more.js:269",
+      "public/pg-more.js:291",
+      "public/pg-trade.js:258"
+    ],
+    "examples": []
+  },
+  "Withdrawals are processed automatically when funds and network resources are available.": {
+    "locations": [
+      "public/pg-trade.js:395"
+    ],
+    "examples": []
+  },
+  "Withdrawals are requested from {spot} and confirmed with your password. Automatic processing depends on available funds and network resources. A {fee}% fee applies and the minimum request is {minimum} {currency}. Status updates appear under {assets} → {history}.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:120",
+        "placeholders": {
+          "spot": "Spot",
+          "fee": "2",
+          "minimum": "10",
+          "currency": "USDT",
+          "assets": "Assets",
+          "history": "History"
+        }
+      }
+    ]
+  },
+  "Withdrawals are reviewed before they are sent.": {
+    "locations": [
+      "public/pg-trade.js:395"
+    ],
+    "examples": []
+  },
+  "Withdrawals are temporarily unavailable.": {
+    "locations": [
+      "public/pg-trade.js:387"
+    ],
+    "examples": []
+  },
+  "Withdrawn": {
+    "locations": [
+      "public/pg-more.js:386"
+    ],
+    "examples": []
+  },
+  "Working address": {
+    "locations": [
+      "public/pg-more.js:337"
+    ],
+    "examples": []
+  },
+  "Working wallet": {
+    "locations": [
+      "public/pg-more.js:297",
+      "public/pg-more.js:333"
+    ],
+    "examples": []
+  },
+  "Working wallet {value0}": {
+    "locations": [
+      "public/pg-more.js:335"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:335",
+        "placeholders": {
+          "value0": "TRX"
+        }
+      }
+    ]
+  },
+  "Working wallet TRX": {
+    "locations": [
+      "public/pg-more.js:298"
+    ],
+    "examples": []
+  },
+  "You earn {rate}% of every {account} reward they claim.": {
+    "locations": [
+      "public/pg-more.js:87"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:87",
+        "placeholders": {
+          "rate": "<runtime value>",
+          "account": "Earn"
+        }
+      }
+    ]
+  },
+  "You get ≈": {
+    "locations": [
+      "public/pg-trade.js:50"
+    ],
+    "examples": []
+  },
+  "You receive": {
+    "locations": [
+      "public/pg-trade.js:393"
+    ],
+    "examples": []
+  },
+  "You receive ≈": {
+    "locations": [
+      "public/pg-trade.js:50"
+    ],
+    "examples": []
+  },
+  "Your {account} balance is {balance} {currency}. Add {amount} {currency} more to unlock daily rewards.": {
+    "locations": [
+      "public/pg-more.js:24"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:24",
+        "placeholders": {
+          "account": "Earn",
+          "balance": "<runtime value>",
+          "amount": "<runtime value>",
+          "currency": "USDT"
+        }
+      }
+    ]
+  },
+  "Your account password is incorrect.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Your accounts": {
+    "locations": [
+      "public/pg-more.js:213"
+    ],
+    "examples": []
+  },
+  "Your activity will appear as soon as you use your account.": {
+    "locations": [
+      "public/pg-views.js:214"
+    ],
+    "examples": []
+  },
+  "Your balance updates automatically after blockchain confirmation.": {
+    "locations": [
+      "public/pg-trade.js:379"
+    ],
+    "examples": []
+  },
+  "Your balance. Your daily reward.": {
+    "locations": [
+      "public/pg-more.js:16"
+    ],
+    "examples": []
+  },
+  "Your claims and referral rewards will be listed here.": {
+    "locations": [
+      "public/pg-more.js:45"
+    ],
+    "examples": []
+  },
+  "Your first {claim} is available as soon as {earn} reaches {minimum} {currency}. Open {earn} and tap {claim}. Later claims are available once per day when the countdown finishes. Rewards credit {spot} and your {earn} principal stays untouched.": {
+    "locations": [
+      "public/pg-more.js:120"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:120",
+        "placeholders": {
+          "claim": "Claim",
+          "earn": "Earn",
+          "minimum": "200",
+          "currency": "USDT",
+          "spot": "Spot"
+        }
+      }
+    ]
+  },
+  "Your first {claim} is available as soon as your {earn} balance reaches {strongStart}{minimum}{strongEnd}. After that, claim once per day when the countdown finishes. Rewards go to {strongStart}{spot}{strongEnd}, while your {earn} balance stays intact. Missed days do not accumulate.": {
+    "locations": [
+      "public/pg-notice.js:10"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-notice.js:10",
+        "placeholders": {
+          "claim": "Claim",
+          "earn": "Earn",
+          "spot": "Spot",
+          "minimum": "200 USDT"
+        }
+      }
+    ]
+  },
+  "Your first Claim is available once Earn reaches {value0} {value1}. After that, claim once per day when the countdown finishes. Rewards credit Spot and your principal stays in Earn.": {
+    "locations": [
+      "public/pg-more.js:22"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:22",
+        "placeholders": {
+          "value0": "200",
+          "value1": "USDT"
+        }
+      }
+    ]
+  },
+  "Your first Claim is available when you start {earn}; later claims open once per day. Your daily rate is {range}, based on your {earn} balance. Rewards credit {spot}.": {
+    "locations": [
+      "public/pg-more.js:190"
+    ],
+    "examples": [
+      {
+        "location": "public/pg-more.js:190",
+        "placeholders": {
+          "earn": "Earn",
+          "range": "8–13%",
+          "spot": "Spot"
+        }
+      }
+    ]
+  },
+  "Your first Claim is available when you start Earn. Later claims open when the countdown finishes. Missed days do not accumulate.": {
+    "locations": [
+      "public/pg-more.js:44"
+    ],
+    "examples": []
+  },
+  "Your invite code": {
+    "locations": [
+      "public/pg-more.js:82",
+      "public/pg-views.js:159"
+    ],
+    "examples": []
+  },
+  "Your session ended. Please sign in again.": {
+    "locations": [
+      "public/pg-core.js:156"
+    ],
+    "examples": []
+  },
+  "Your team": {
+    "locations": [
+      "public/pg-more.js:90"
+    ],
+    "examples": []
+  },
+  "Your withdrawal requests and their status will show here.": {
+    "locations": [
+      "public/pg-trade.js:295"
+    ],
+    "examples": []
+  }
+}

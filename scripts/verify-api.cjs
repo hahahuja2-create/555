@@ -72,6 +72,38 @@ async function start(t, options = {}) {
   };
 }
 
+test('language preferences default to English and remain isolated per account', async t => {
+  const app = await start(t);
+  const first = await app.request('/api/auth/signup', { email: 'language-one@example.test', password });
+  const second = await app.request('/api/auth/signup', { email: 'language-two@example.test', password });
+  assert.equal(first.status, 201);
+  assert.equal(second.status, 201);
+  assert.equal(first.body.user.language, 'en');
+  assert.equal(second.body.user.language, 'en');
+  const firstCookie = first.headers.get('set-cookie').split(';')[0];
+  const secondCookie = second.headers.get('set-cookie').split(';')[0];
+  const patchLanguage = (language, cookie) => fetch(app.url + '/api/profile/language', {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json', ...(cookie ? { Cookie: cookie } : {}) },
+    body: JSON.stringify({ language })
+  });
+  assert.equal((await patchLanguage('ka')).status, 401);
+  assert.equal((await patchLanguage('unsupported', firstCookie)).status, 400);
+  const changed = await patchLanguage('ka', firstCookie);
+  assert.equal(changed.status, 200);
+  const user = (await changed.json()).user;
+  assert.equal(user.language, 'ka');
+  for (const field of ['lockedBalance', 'withdrawBalance', 'reservedBalance', 'earnedTotal']) {
+    assert.equal(user[field], first.body.user[field], field);
+  }
+  assert.equal((await app.request('/api/me', undefined, secondCookie)).body.user.language, 'en');
+  assert.equal((await app.request('/api/me', undefined, firstCookie)).body.user.language, 'ka');
+  const saved = JSON.parse(await fs.readFile(app.database, 'utf8'));
+  assert.equal(saved.users.find(item => item.id === user.id).language, 'ka');
+  assert.equal(saved.users.find(item => item.id === second.body.user.id).language, undefined);
+  assert.equal((await patchLanguage('en', firstCookie)).status, 200);
+  assert.equal((await app.request('/api/me', undefined, firstCookie)).body.user.language, 'en');
+});
+
 test('invite codes link new registrations to the correct team and reject unknown referrals', async t => {
   const app = await start(t);
   const inviter = await app.request('/api/auth/signup', { email: 'inviter@taskmall.test', password });

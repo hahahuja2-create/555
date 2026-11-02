@@ -49,6 +49,10 @@ const root = path.resolve(__dirname, '..');
         await page.evaluate(v => { location.hash = v; }, view);
         await page.waitForSelector(`.shell.view-${view}`);
         await checkEditableSizes(view);
+        if (view === 'profile') {
+          assert.equal(await page.locator('#profile-language').inputValue(), 'en', 'new accounts start in English');
+          assert.ok(await page.locator('#profile-language option[value="en"]').count(), 'English is available');
+        }
         if (view === 'markets') {
           const preserved = await page.evaluate(() => {
             S.markets = [];

@@ -22,6 +22,7 @@ const earn = require('./markets/earn');
 const referralPromotion = require('./markets/referral-promotion');
 const spot = require('./markets/spot');
 const maintenanceConfiguration = require('./config/platform-maintenance.json');
+const supportedLanguages = new Set(require('./public/pg-languages').map(language => language.code));
 if (process.env.TASKMALL_MAINTENANCE_ENABLED !== undefined && !['0', '1'].includes(process.env.TASKMALL_MAINTENANCE_ENABLED)) throw new Error('INVALID_MAINTENANCE_CONFIGURATION');
 const maintenance = require('./platform-maintenance').createMaintenance({ ...maintenanceConfiguration,
   enabled: process.env.TASKMALL_MAINTENANCE_ENABLED === undefined
@@ -212,6 +213,7 @@ function cleanUser(user) {
     id: user.id,
     name: user.name,
     email: user.email,
+    language: supportedLanguages.has(user.language) ? user.language : 'en',
     earnNoticeSeen: user.earnNotice?.version === require('./markets/earn-rates').NOTICE_VERSION,
     points: user.points,
     streak: user.streak,
@@ -1121,6 +1123,15 @@ async function handleApi(req, res, url) {
     const name = String(body.name || '').trim().replace(/\s+/g, ' ');
     if (name.length < 2 || name.length > 50) return json(res, 400, { error: 'INVALID_NAME' });
     user.name = name;
+    await saveDatabase();
+    return json(res, 200, { user: cleanUser(user) });
+  }
+  if (req.method === 'PATCH' && url.pathname === '/api/profile/language') {
+    const user = await requireUser(req, res);
+    if (!user) return;
+    const body = await readBody(req);
+    if (typeof body.language !== 'string' || !supportedLanguages.has(body.language)) return json(res, 400, { error: 'INVALID_LANGUAGE' });
+    user.language = body.language;
     await saveDatabase();
     return json(res, 200, { user: cleanUser(user) });
   }

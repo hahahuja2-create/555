@@ -5,6 +5,22 @@
 const app = document.querySelector('#app');
 const toastRegion = document.querySelector('#toast-region');
 const sheetRoot = document.querySelector('#sheet-root');
+const i18n = createPortgainyI18n(PORTGAINY_LANGUAGES, async code => {
+  const response = await fetch(`/locales/${encodeURIComponent(code)}.json`, { credentials: 'same-origin' });
+  if (!response.ok) throw new Error('Language catalog unavailable');
+  return response.json();
+});
+
+function updateDocumentLanguage() {
+  document.documentElement.lang = i18n.language;
+  document.documentElement.dir = ['ar', 'fa'].includes(i18n.language) ? 'rtl' : 'ltr';
+}
+
+async function useAccountLanguage(user) {
+  const code = PG_READY_LANGUAGES.includes(user?.language) ? user.language : 'en';
+  try { await i18n.use(code); } catch { await i18n.use('en'); }
+  updateDocumentLanguage();
+}
 
 const store = {
   read(key, fallback) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } },
@@ -74,15 +90,15 @@ const tone = value => (num(value) >= 0 ? 'up' : 'down');
 function dateText(value, long = false) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  return new Intl.DateTimeFormat('en-US', long ? { year: 'numeric', month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+  return new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : i18n.language, long ? { year: 'numeric', month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
 }
 
 function timeAgo(value) {
   const seconds = Math.max(0, (Date.now() - new Date(value).getTime()) / 1000);
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  return `${Math.floor(seconds / 86400)}d ago`;
+  if (seconds < 60) return i18n.text('just now');
+  if (seconds < 3600) return i18n.text('{count}m ago', {count:Math.floor(seconds / 60)});
+  if (seconds < 86400) return i18n.text('{count}h ago', {count:Math.floor(seconds / 3600)});
+  return i18n.text('{count}d ago', {count:Math.floor(seconds / 86400)});
 }
 
 const serverNow = () => Date.now() + S.serverOffset;
@@ -171,7 +187,7 @@ const ERRORS = {
   WITHDRAWAL_NOT_FOUND: 'The request was not found.'
 };
 
-const errMsg = error => ERRORS[error?.code] || 'Something went wrong. Please try again.';
+const errMsg = error => i18n.text(ERRORS[error?.code] || 'Something went wrong. Please try again.');
 
 async function api(path, options = {}) {
   const hasBody = options.body !== undefined;
@@ -198,7 +214,7 @@ function toast(message, kind = 'ok', title) {
   const el = document.createElement('div');
   el.className = `toast is-${kind}`;
   const glyph = kind === 'ok' ? 'check' : kind === 'warn' ? 'bell' : 'info';
-  el.innerHTML = `<span class="toast-badge">${icon(glyph)}</span><span class="toast-copy"><em>${esc(title || (kind === 'ok' ? 'Success' : kind === 'warn' ? 'Alert' : 'Notice'))}</em><b>${esc(message)}</b></span><i class="toast-shine"></i>`;
+  el.innerHTML = `<span class="toast-badge">${icon(glyph)}</span><span class="toast-copy"><em>${i18n.html(title || (kind === 'ok' ? 'Success' : kind === 'warn' ? 'Alert' : 'Notice'))}</em><b>${i18n.html(message)}</b></span><i class="toast-shine"></i>`;
   toastRegion.append(el);
   setTimeout(() => el.classList.add('is-out'), 3400);
   setTimeout(() => el.remove(), 3900);
@@ -214,7 +230,7 @@ function openSheet(html, { wide = false, onClose, label = 'Dialog' } = {}) {
   closeSheet(true);
   sheetEl = document.createElement('div');
   sheetEl.className = `sheet-backdrop${wide ? ' is-wide' : ''}`;
-  sheetEl.innerHTML = `<section class="sheet" role="dialog" aria-modal="true" aria-label="${esc(label)}"><span class="sheet-grip" aria-hidden="true"></span>${html}</section>`;
+  sheetEl.innerHTML = `<section class="sheet" role="dialog" aria-modal="true" aria-label="${i18n.html(label)}"><span class="sheet-grip" aria-hidden="true"></span>${html}</section>`;
   sheetEl.addEventListener('mousedown', event => { if (event.target === sheetEl) closeSheet(); });
   sheetRoot.append(sheetEl);
   document.body.classList.add('has-sheet');
@@ -237,7 +253,7 @@ function closeSheet(immediate = false) {
   callback?.();
 }
 
-const sheetHead = (title, sub = '') => `<header class="sheet-head"><div><h2>${esc(title)}</h2>${sub ? `<p>${esc(sub)}</p>` : ''}</div><button class="sheet-x" type="button" data-act="close-sheet" aria-label="Close">${icon('close')}</button></header>`;
+const sheetHead = (title, sub = '') => `<header class="sheet-head"><div><h2>${i18n.html(title)}</h2>${sub ? `<p>${i18n.html(sub)}</p>` : ''}</div><button class="sheet-x" type="button" data-act="close-sheet" aria-label="${i18n.html('Close')}">${icon('close')}</button></header>`;
 
 document.addEventListener('keydown', event => { if (event.key === 'Escape' && sheetEl) closeSheet(); });
 

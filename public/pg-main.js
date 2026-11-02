@@ -18,7 +18,7 @@ function render() {
   if (S.loading) renderLoading();
   else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else renderAuth(); }
   else renderShell();
-  document.title = `Portgainy | ${S.user || PUBLIC_VIEWS.includes(S.view) ? (TITLES[S.view] || 'Home') : 'Trade. Earn. Level up.'}`;
+  document.title = `Portgainy | ${i18n.text(S.user || PUBLIC_VIEWS.includes(S.view) ? (TITLES[S.view] || 'Home') : 'Trade. Earn. Level up.')}`;
   document.body.dataset.view = S.user ? S.view : 'auth';
   postRender();
   window.scrollTo(0, y);
@@ -143,7 +143,7 @@ function refreshCells() {
   for (const el of document.querySelectorAll('[data-px-usd]')) { const row = map.get(el.dataset.pxUsd); if (row) el.textContent = price(row.price); }
   for (const el of document.querySelectorAll('[data-hi]')) { const row = map.get(el.dataset.hi); if (row) el.textContent = price(row.high); }
   for (const el of document.querySelectorAll('[data-lo]')) { const row = map.get(el.dataset.lo); if (row) el.textContent = price(row.low); }
-  for (const el of document.querySelectorAll('[data-vol]')) { const row = map.get(el.dataset.vol); if (row) el.textContent = `Vol ${compact(row.volume)}`; }
+  for (const el of document.querySelectorAll('[data-vol]')) { const row = map.get(el.dataset.vol); if (row) el.textContent = i18n.text('Vol {volume}', {volume:compact(row.volume)}); }
   for (const el of document.querySelectorAll('[data-live-badge]')) el.outerHTML = liveBadge();
   if (S.user) {
     const total = S.hide ? '••••••' : usd(totalValue());
@@ -244,7 +244,7 @@ function updateTimers() {
   const e = S.earn;
   if (e) {
     const ms = e.nextClaimAt - serverNow(), ready = claimReady();
-    for (const el of document.querySelectorAll('[data-earn-timer]')) { if (ready) { if (el.textContent !== 'Ready') el.textContent = 'Ready'; } else el.textContent = clock(ms); }
+    for (const el of document.querySelectorAll('[data-earn-timer]')) { if (ready) { const label = i18n.text('Ready'); if (el.textContent !== label) el.textContent = label; } else el.textContent = clock(ms); }
     for (const button of document.querySelectorAll('[data-claim-btn]')) {
       button.disabled = !ready || S.claimBusy;
       button.classList.toggle('btn-lime', ready); button.classList.toggle('btn-dark', !ready);
@@ -332,12 +332,13 @@ const acts = {
   logout: async () => {
     try { await api('/api/auth/logout', { method: 'POST', body: {} }); } catch { /* cookie is cleared by the server when reachable */ }
     Object.assign(S, { user: null, activities: [], team: null, earn: null, referrals: null, portfolio: null, admin: null, view: 'home', wallet: { withdrawals: null, deposits: null } });
+    await useAccountLanguage(null);
     history.replaceState(null, '', location.pathname); closeSheet(true); render();
   },
   'assets-tab': el => { S.assetsTab = el.dataset.tab; render(); },
   'history-filter': el => { S.historyFilter = el.dataset.filter; render(); },
   'export-history': exportHistory,
-  'chat-suggest': el => sendChat(el.dataset.text),
+  'chat-suggest': el => sendChat(el.dataset.text, i18n.text(el.dataset.text)),
   'admin-tab': el => { S.adminTab = el.dataset.tab; render(); },
   'admin-deposit-page': el => { const offset = Number(el.dataset.offset); if (Number.isSafeInteger(offset) && offset >= 0) { S.adminDepositOffset = offset; loadAdmin(); } },
   'admin-journal-page': el => { const offset = Number(el.dataset.offset); if (Number.isSafeInteger(offset) && offset >= 0) { S.adminJournalOffset = offset; loadAdmin(); } },
@@ -361,7 +362,7 @@ document.addEventListener('click', event => {
 document.addEventListener('input', event => {
   const t = event.target;
   if (t.id === 'market-search') { S.marketQuery = t.value; refreshMarketList(); }
-  else if (t.id === 'faq-search') { S.faqQuery = t.value; document.querySelector('#faq-list').innerHTML = faqList(FAQ.filter(([a, b]) => !t.value || `${a} ${b}`.toLowerCase().includes(t.value.toLowerCase()))); }
+  else if (t.id === 'faq-search') { S.faqQuery = t.value; document.querySelector('#faq-list').innerHTML = faqList(filterFaq(t.value)); }
   else if (t.id === 'admin-search') { S.adminSearch = t.value; const results = document.querySelector('#admin-users-results'); if (results && S.admin) results.innerHTML = adminUserResults(S.admin.users); }
   else if (t.id === 'order-input') {
     const places = S.trade.side === 'BUY' ? 6 : 8;
@@ -372,6 +373,26 @@ document.addEventListener('input', event => {
     S.trade.input = v; updateOrderEstimate();
   } else if (t.id === 'calc-amount') { const r = document.querySelector('#calc-range'); if (r) r.value = clamp(num(t.value), 200, 10000); updateCalc(); }
   else if (t.id === 'calc-range') { const a = document.querySelector('#calc-amount'); if (a) a.value = t.value; updateCalc(); }
+});
+
+document.addEventListener('change', async event => {
+  const select = event.target;
+  if (select.id !== 'profile-language' || !S.user || !PG_READY_LANGUAGES.includes(select.value)) return;
+  const code = select.value, userId = S.user.id, previous = i18n.language;
+  if (code === previous && code === S.user.language) return;
+  select.disabled = true;
+  try {
+    if (!await i18n.use(code)) return;
+    if (S.user?.id !== userId) { await useAccountLanguage(S.user); return; }
+    const result = await api('/api/profile/language', { method:'PATCH', body:{ language:code } });
+    if (S.user?.id !== userId) { await useAccountLanguage(S.user); return; }
+    S.user = result.user;
+    updateDocumentLanguage();
+    render();
+  } catch (error) {
+    await i18n.use(previous).catch(() => {});
+    if (S.user?.id === userId) { select.value = previous; toast(errMsg(error), 'error'); }
+  } finally { if (select.isConnected) select.disabled = false; }
 });
 
 document.addEventListener('submit', async event => {
@@ -422,7 +443,7 @@ async function submitAuth(form) {
   S.busy = true; button.disabled = true; msg.textContent = '';
   try {
     const result = await api(signup ? '/api/auth/signup' : '/api/auth/login', { method: 'POST', body: { name: nameFromEmail(email), email, password: data.get('password'), referral: data.get('referral') } });
-    S.user = result.user; S.view = 'home'; S.referralCode = '';
+    S.user = result.user; await useAccountLanguage(S.user); S.view = 'home'; S.referralCode = '';
     const url = new URL(location.href); url.searchParams.delete('ref'); history.replaceState(null, '', `${url.pathname}${url.search}#home`);
     await loadAll(); render(); showEarnNotice();
     if (signup) toast('Account created. Welcome to Portgainy.', 'ok', 'Welcome');
@@ -446,9 +467,10 @@ async function init() {
   try {
     const me = await api('/api/me');
     S.user = me.user;
+    await useAccountLanguage(S.user);
     await loadAll();
     if (S.view === 'admin' && !S.user.isAdmin) S.view = 'home';
-  } catch { S.user = null; }
+  } catch { S.user = null; await useAccountLanguage(null); }
   S.loading = false;
   render();
   showEarnNotice();

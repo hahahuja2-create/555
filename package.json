@@ -51,6 +51,10 @@
     "test:payments": "node --test scripts/verify-payments.cjs",
     "check": "node --check server.js && node --check task-catalog.js && node --check public/pg-core.js && node --check public/pg-views.js && node --check public/pg-trade.js && node --check public/pg-more.js && node --check public/pg-main.js && node --check payments/tron.js && node --check payments/store.js && node --check payments/watcher.js && node --check payments/vault.js && node --check payments/outgoing.js && node --check payments/operator.js && node --check payments/transactions.js && node --check payments/collector.js && node --check payments/payouts.js && node --check payments/portal.js && node --check scripts/verify-admin.cjs && node --check payments/collection-activation.js && node --check payments/private-terminal.js && node --check payments/offline-backup.js && node --check payments/iphone-backup.js && node --check payments/operator-ui/app.js && node --check payments/operator-ui/unlock.js && node --check scripts/payment-status.cjs && node --check scripts/wallet-backup.cjs && node --check scripts/iphone-backup.cjs && node --check scripts/verify-iphone-backup.cjs && node --check scripts/payment-operator.cjs && node --check scripts/collection-worker.cjs && node --check scripts/operator-open.cjs && node --check scripts/verify-tronlink.cjs && node --check scripts/verify-collection-activation.cjs && node --check scripts/tron-test-helpers.cjs && node --check scripts/tron-fixture-preload.cjs && npm run check:backup && node --check markets/binance.js && node --check markets/earn.js && node --check markets/assistant.js && node --check markets/credentials.js && node --check markets/spot.js && node --check public/coin-logos.js",
     "test:ui": "node scripts/verify-ui.cjs",
+    "check:i18n": "node --check public/pg-languages.js && node --check public/pg-i18n.js && node --check scripts/check-locale-catalog.cjs && node --check scripts/check-i18n-release.cjs && node --check scripts/extract-i18n-source.cjs && node --check scripts/verify-i18n.cjs && node --check scripts/verify-i18n-ui.cjs",
+    "check:i18n-release": "node scripts/check-i18n-release.cjs",
+    "extract:i18n": "node scripts/extract-i18n-source.cjs",
+    "test:i18n": "node --test scripts/verify-i18n.cjs scripts/verify-i18n-ui.cjs",
     "test:notice": "node --test scripts/verify-notice.cjs",
     "test:api": "node --test scripts/verify-api.cjs",
     "test:maintenance": "node --test scripts/verify-maintenance.cjs",
@@ -78,6 +82,7 @@
     }
   },
   "devDependencies": {
+    "acorn": "^8.19.0",
     "playwright": "^1.63.0"
   }
 }
