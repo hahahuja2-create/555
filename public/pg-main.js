@@ -189,10 +189,10 @@ async function claimReward() {
     S.user = result.user; S.activities = result.activities; S.earn = result.earn;
     S.serverOffset = result.earn.serverTime - Date.now(); S.claimKey = null;
     render(); burst();
-    toast(`${usd(result.receipt.amount)} USDT added to Spot`, 'ok', 'Reward claimed');
+    toast(i18n.text('{amount} USDT added to Spot', {amount:usd(result.receipt.amount)}), 'ok', 'Reward claimed');
   } catch (error) {
     const label = document.querySelector('#earn-error');
-    if (label) label.textContent = 'Could not claim. Refresh and try again.';
+    if (label) label.textContent = i18n.text('Could not claim. Refresh and try again.');
     toast('Could not claim. Refresh and try again.', 'error');
   } finally { S.claimBusy = false; updateTimers(); }
 }
@@ -320,7 +320,7 @@ const acts = {
   'wallet-deposit': () => openWallet('deposit'), 'wallet-withdraw': () => openWallet('withdraw'), 'wallet-transfer': () => openWallet('transfer'),
   'retry-wallet': el => openWallet(el.dataset.type),
   'wallet-max': () => { const input = document.querySelector('#wallet-amount'); if (input) { input.value = maxAmount(); input.dispatchEvent(new Event('input', { bubbles: true })); } },
-  'copy-address': async el => { const v = document.querySelector('#dep-address')?.value; if (v && await copyText(v)) { el.textContent = 'COPIED'; setTimeout(() => { el.textContent = 'COPY'; }, 1500); } },
+  'copy-address': async el => { const v = document.querySelector('#dep-address')?.value; if (v && await copyText(v)) { el.textContent = i18n.text('COPIED'); setTimeout(() => { el.textContent = i18n.text('COPY'); }, 1500); } },
   claim: claimReward,
   'copy-invite': async () => { if (await copyText(S.team?.inviteCode || S.user.inviteCode)) toast('Invite code copied'); },
   'copy-invite-link': async () => { if (await copyText(inviteUrl(S.team?.inviteCode || S.user.inviteCode))) toast('Invite link copied'); },
@@ -420,8 +420,8 @@ document.addEventListener('submit', async event => {
   }
   if (kind === 'alert') {
     const data = new FormData(form), target = num(String(data.get('price')).replace(',', '.')), msg = form.querySelector('#alert-msg');
-    if (!(target > 0)) { msg.textContent = 'Enter a target price.'; return; }
-    if (S.alerts.length >= 30) { msg.textContent = 'You can keep up to 30 alerts.'; return; }
+    if (!(target > 0)) { msg.textContent = i18n.text('Enter a target price.'); return; }
+    if (S.alerts.length >= 30) { msg.textContent = i18n.text('You can keep up to 30 alerts.'); return; }
     S.alerts.push({ id: crypto.randomUUID(), symbol: S.trade.symbol, dir: data.get('dir') === 'below' ? 'below' : 'above', price: target, created: Date.now() });
     store.write('pg_alerts', S.alerts); closeSheet(); S.trade.tab = 'alerts'; render(); toast('Price alert created');
   }
@@ -438,8 +438,8 @@ async function submitAuth(form) {
   if (S.busy) return;
   const data = new FormData(form), msg = document.querySelector('#auth-message'), button = form.querySelector('button[type="submit"]');
   const signup = S.authMode === 'signup', email = String(data.get('email') || '').trim();
-  if (!email || !data.get('password')) { msg.textContent = 'Enter your email and password.'; return; }
-  if (signup && data.get('password') !== data.get('confirm')) { msg.textContent = 'Passwords do not match.'; return; }
+  if (!email || !data.get('password')) { msg.textContent = i18n.text('Enter your email and password.'); return; }
+  if (signup && data.get('password') !== data.get('confirm')) { msg.textContent = i18n.text('Passwords do not match.'); return; }
   S.busy = true; button.disabled = true; msg.textContent = '';
   try {
     const result = await api(signup ? '/api/auth/signup' : '/api/auth/login', { method: 'POST', body: { name: nameFromEmail(email), email, password: data.get('password'), referral: data.get('referral') } });

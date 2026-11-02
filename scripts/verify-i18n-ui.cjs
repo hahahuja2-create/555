@@ -22,9 +22,7 @@ test('profile language uses account preference, survives reload and returns to E
       child.stdout.on('data', data => { const match=String(data).match(/http:\/\/127\.0\.0\.1:\d+/); if (match) { clearTimeout(timeout); resolve(match[0]); } });
       child.once('exit',()=>{clearTimeout(timeout);reject(new Error('server exited'));});
     });
-    const script = (await fs.readFile(path.join(root,'public','pg-i18n.js'),'utf8'))
-      .replace("Object.freeze(['en'])", "Object.freeze(['en','ka','ar'])");
-    assert.match(script, /Object\.freeze\(\['en','ka','ar'\]\)/);
+    const script = await fs.readFile(path.join(root,'public','pg-i18n.js'),'utf8');
     browser = await chromium.launch();
     const page = await browser.newPage({ viewport:{width:390,height:844} });
     let catalogAvailable = true;
@@ -94,6 +92,16 @@ test('profile language uses account preference, survives reload and returns to E
     assert.equal(await page.locator('html').getAttribute('lang'),'en');
     assert.equal(await page.locator('#profile-language').inputValue(),'en');
     assert.equal(await page.evaluate(()=>S.user.language),'en');
+    await page.unroute('**/locales/ka.json');
+    await page.unroute('**/locales/ar.json');
+    const codes = await page.locator('#profile-language option').evaluateAll(options => options.map(option => option.value));
+    assert.ok(codes.length >= 25);
+    for (const code of codes.filter(value => value !== 'en')) {
+      await page.locator('#profile-language').selectOption(code);
+      await page.waitForFunction(value => document.documentElement.lang === value && S.user.language === value, code);
+      assert.equal(await page.locator('.language-note').count(), 1);
+      assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
+    }
     await page.locator('[data-act="logout"]').click();
     await page.waitForSelector('#auth-form');
     assert.equal(await page.locator('html').getAttribute('lang'),'en');

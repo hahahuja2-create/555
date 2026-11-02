@@ -105,6 +105,7 @@ function profileView() {
     <section class="card">${sectionHead('Preferences')}
       <div class="setting"><span>${icon('eyeOff')}<span><b>${i18n.html("Hide balances")}</b><small>${i18n.html("Mask amounts across the app")}</small></span></span><button class="switch ${S.hide ? 'is-on' : ''}" type="button" role="switch" aria-checked="${S.hide}" data-act="toggle-hide"><i></i></button></div>
       <label class="field profile-language"><span>${i18n.html('Language')}</span><div class="control">${icon('globe')}<select id="profile-language" aria-label="${i18n.html('Language')}">${PORTGAINY_LANGUAGES.filter(item => PG_READY_LANGUAGES.includes(item.code)).map(item => `<option value="${esc(item.code)}" ${item.code === i18n.language ? 'selected' : ''}>${esc(item.name)}</option>`).join('')}</select>${icon('chevronDown')}</div></label>
+      ${PG_REVIEWED_LANGUAGES.includes(i18n.language) ? '' : `<p class="language-note">${i18n.html('Automatic translation may be incomplete. Some information remains in English.')}</p>`}
     </section>
     <section class="card">${sectionHead('Account')}
       <form class="form" data-form="profile" novalidate><label class="field"><span>${i18n.html("Display name")}</span><div class="control">${icon('user')}<input name="name" type="text" value="${esc(u.name)}" minlength="2" maxlength="50" required></div></label><p class="form-msg" id="profile-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${icon('check')}${i18n.html('Save name')}</button></form>

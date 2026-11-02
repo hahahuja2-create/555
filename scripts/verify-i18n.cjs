@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createPortgainyI18n } = require('../public/pg-i18n');
+const { createPortgainyI18n, PG_READY_LANGUAGES, PG_REVIEWED_LANGUAGES } = require('../public/pg-i18n');
 const languages = require('../public/pg-languages');
 const { MysqlPaymentStore } = require('../payments/mysql-store');
 const { validateCatalog } = require('./check-locale-catalog.cjs');
@@ -14,6 +14,20 @@ test('language identifiers are unique and default to English', () => {
   for (const language of languages) {
     assert.match(language.code, /^[a-z]{2}(?:-[A-Z]{2})?$/);
     assert.ok(language.name.trim());
+  }
+});
+
+test('enabled preview catalogs exist and preserve placeholders and numeric values', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const source = require('../localization/source.en.json');
+  assert.ok(PG_READY_LANGUAGES.length >= 25);
+  assert.deepEqual(PG_REVIEWED_LANGUAGES, ['en']);
+  for (const code of PG_READY_LANGUAGES.filter(value => value !== 'en')) {
+    const catalog = JSON.parse(fs.readFileSync(path.join(__dirname,'../public/locales',`${code}.json`),'utf8'));
+    assert.ok(Object.keys(catalog).length > 0, `${code} is empty`);
+    const subset = Object.fromEntries(Object.keys(catalog).filter(key => Object.hasOwn(source,key)).map(key => [key,source[key]]));
+    assert.deepEqual(validateCatalog(subset,catalog), [], `${code} contains invalid entries`);
   }
 });
 
@@ -52,6 +66,16 @@ test('right-to-left translations isolate account values and identifiers', async 
   const i18n = createPortgainyI18n(languages, async () => ({[source]:'أرسل {amount} إلى {address}'}));
   await i18n.use('ar');
   assert.equal(i18n.text(source, {amount:'12.5 USDT',address:'T123'}), 'أرسل \u206812.5 USDT\u2069 إلى \u2068T123\u2069');
+});
+
+test('claim and price alert messages preserve their dynamic values', async () => {
+  const i18n = createPortgainyI18n(languages, async () => ({
+    '{amount} USDT added to Spot': 'Spot: {amount} USDT',
+    '{asset} rose above {target} — now {current}': '{asset}: {current} > {target}'
+  }));
+  await i18n.use('ka');
+  assert.equal(i18n.text('{amount} USDT added to Spot', {amount:'406.20'}), 'Spot: 406.20 USDT');
+  assert.equal(i18n.text('{asset} rose above {target} — now {current}', {asset:'BTC', target:'70,000.00', current:'71,200.00'}), 'BTC: 71,200.00 > 70,000.00');
 });
 
 test('a slow catalog cannot override a newer choice and failed loading keeps current language', async () => {

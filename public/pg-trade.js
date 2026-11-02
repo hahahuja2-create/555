@@ -107,7 +107,7 @@ async function loadTradeHistory() {
     document.querySelector('#chart-status')?.replaceChildren();
     drawTradeChart();
   } catch {
-    if (token === T.token) { const el = document.querySelector('#chart-status'); if (el) el.textContent = 'Price history temporarily unavailable'; }
+    if (token === T.token) { const el = document.querySelector('#chart-status'); if (el) el.textContent = i18n.text('Price history temporarily unavailable'); }
   }
 }
 
@@ -233,7 +233,7 @@ function checkAlerts() {
   });
   if (!fired.length) return;
   store.write('pg_alerts', S.alerts);
-  for (const [a, row] of fired) toast(`${row.base} ${a.dir === 'above' ? 'rose above' : 'fell below'} ${price(a.price)} — now ${price(row.price)}`, 'warn', 'Price alert');
+  for (const [a, row] of fired) toast(i18n.text(a.dir === 'above' ? '{asset} rose above {target} — now {current}' : '{asset} fell below {target} — now {current}', {asset:row.base, target:price(a.price), current:price(row.price)}), 'warn', 'Price alert');
   if (S.view === 'trade') document.querySelector('#trade-tab-body') && (document.querySelector('#trade-tab-body').innerHTML = tradeTabBody(coinBySymbol(S.trade.symbol)));
 }
 

@@ -1,7 +1,8 @@
 'use strict';
 
-// A locale is enabled here only after its entire catalog has passed review.
-const PG_READY_LANGUAGES = Object.freeze(['en']);
+// Non-English catalogs are explicitly marked as incomplete automatic translations.
+const PG_REVIEWED_LANGUAGES = Object.freeze(['en']);
+const PG_READY_LANGUAGES = Object.freeze(['en','ka','es','fr','de','it','pt','tr','ru','uk','ar','fa','hi','bn','id','vi','th','zh-CN','ja','ko','nl','pl','ro','el','cs','hu','sw']);
 
 /* Local catalog loader. Catalogs contain interface copy only; account data stays in the browser. */
 function createPortgainyI18n(languages, loadCatalog) {
@@ -85,4 +86,4 @@ function createPortgainyI18n(languages, loadCatalog) {
   return Object.freeze({ use, text, html, rich, get language() { return language; } });
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { createPortgainyI18n, PG_READY_LANGUAGES };
+if (typeof module !== 'undefined' && module.exports) module.exports = { createPortgainyI18n, PG_READY_LANGUAGES, PG_REVIEWED_LANGUAGES };

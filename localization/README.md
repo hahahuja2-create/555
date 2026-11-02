@@ -1,8 +1,9 @@
 # Localization work in progress
 
-Only English is enabled. The profile selector, per-account preference, local
-catalog loader and right-to-left layout foundations are implemented, but the
-requested multilingual release is not complete.
+English is the default. The other selectable languages are **automatic,
+incomplete previews** and have not passed professional linguistic review. Missing
+entries fall back to English. The requested fully translated and reviewed
+multilingual release is not complete; the profile page communicates this limit.
 
 `source.en.json` contains messages already migrated to the localization API;
 it is **not** an inventory of every possible screen or assistant response.
@@ -16,13 +17,14 @@ Translation catalogs use English source messages as keys. Placeholders such as
 movable formatting boundaries; translators must keep each pair balanced.
 The runtime escapes catalog text and substitutes dynamic values locally.
 
-Before enabling a language, finish migrating and reviewing all screens,
+Before marking a language as reviewed, finish migrating and reviewing all screens,
 including uncommon wallet states, administrative records and the support
 assistant. Review the actual financial meaning in context, not just placeholder
 or number equality. Add the reviewed catalog and review metadata, then set
 `localization/coverage.json` to complete only after verifying that coverage.
-`check:i18n-release` checks catalog completeness, placeholders, numeric values
-and review digests for every enabled language. It does not prove translation
+`check:i18n-release` checks placeholders and numeric values for enabled preview
+catalog entries and reports coverage. It also requires complete coverage and
+review digests for any language marked reviewed. It does not prove translation
 quality or discover untranslated application text.
 
 Useful commands:
@@ -35,7 +37,8 @@ npm run check:i18n-release
 npm run test:ui
 ```
 
-Unreviewed machine-generated candidate files used during development are in
-the ignored `artifacts/locales-candidate` directory and are not release
-catalogs. The current Georgian candidate contains a limited manual review of
-financial messages; the rest remains unreviewed.
+The preview catalogs are in `public/locales`. Some longer financial messages
+have intentionally been omitted from the previews so they fall back to English;
+this filter is not a substitute for professional review. The Georgian catalog
+also contains a limited manual review of financial messages. Development
+candidates are in the ignored `artifacts/locales-candidate` directory.

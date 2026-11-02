@@ -323,6 +323,7 @@
 .setting small { color: var(--text-3); font-size: 11.5px; }
 .setting .ic { color: var(--lime); }
 .profile-language { margin-top: 20px; }
+.language-note { margin: 8px 0 0; color: var(--text-3); font-size: 12px; line-height: 1.5; }
 .card .form + .facts { margin-top: 12px; }
 .links { padding: 4px 14px; }
 .links button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 0; border-bottom: 1px solid var(--line); font: 700 14px var(--f-hud); }
