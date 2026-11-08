@@ -45,8 +45,7 @@ function phoneHome() {
       sub: t.next ? i18n.html('Add {amount} USDT to reach tier {n}', { amount: usd(Math.max(0, t.next[0] - t.bal)), n: t.idx + 2 }) : i18n.html('You are on the highest tier'), cls: '' });
   return `<div class="page phome">
     <section class="ph-top"><i class="ph-glow"></i>
-      <div class="ph-bar"><button class="ph-round" type="button" data-act="goto" data-view="profile" aria-label="${i18n.html('Profile')}">${avatarHex(u.name, 'is-sm')}</button>
-        <span class="ph-pill">${markImg(22)}<b>Portgainy</b></span>
+      <div class="ph-bar"><span class="ph-pill">${markImg(22)}<b>Portgainy</b></span>
         <span class="ph-bar-r"><button class="ph-round" type="button" data-act="open-search" aria-label="${i18n.html('Search')}">${icon('search')}</button><button class="ph-round" type="button" data-act="open-notices" aria-label="${i18n.html('Notifications')}">${icon('bell')}${S.activities.length ? '<i class="dot"></i>' : ''}</button></span></div>
       <div class="ph-bal"><span class="ph-lbl">${i18n.html('Wallet balance')}<button class="eye-btn" type="button" data-act="toggle-hide" aria-label="${i18n.html(S.hide ? 'Show balances' : 'Hide balances')}">${icon(S.hide ? 'eyeOff' : 'eye')}</button></span>
         <strong><i>$</i><span data-total>${S.hide ? '••••••' : usd(totalValue())}</span></strong>

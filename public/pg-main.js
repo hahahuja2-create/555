@@ -326,6 +326,8 @@ const acts = {
   },
   'confirm-order': confirmOrder,
   'close-sheet': () => closeSheet(),
+  'open-tx': el => openTx(el.dataset.id),
+  'copy-value': async el => { if (el.dataset.value && await copyText(el.dataset.value)) { buzz(6); toast('Copied to clipboard'); } },
   'alert-dir': el => { document.querySelector('[data-form="alert"] [name="dir"]').value = el.dataset.dir; for (const b of el.parentElement.children) b.classList.toggle('is-on', b === el); },
   'remove-alert': el => { S.alerts = S.alerts.filter(a => a.id !== el.dataset.id); store.write('pg_alerts', S.alerts); render(); },
   'wallet-deposit': () => openWallet('deposit'), 'wallet-withdraw': () => openWallet('withdraw'), 'wallet-transfer': () => openWallet('transfer'),

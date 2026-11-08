@@ -179,6 +179,13 @@
   /* ------------------------------------------------------------ app bar on inner pages */
   .ab { background: color-mix(in srgb, var(--bg) 88%, transparent); }
   .ab-title { font-size: 18px; }
+  /* Tab pages: brand on the left (Profile lives in the tab bar), actions on the right. */
+  .ab.is-tab .ab-in { grid-template-columns: 1fr auto; padding-left: 14px; }
+  .ab.is-tab .ab-brand { height: 42px; transition: transform 0.15s var(--spring); }
+  .ab.is-tab .ab-brand:active { transform: scale(0.96); }
+  .ab.is-tab .ab-brand .mark { width: 28px; height: 28px; }
+  .ab.is-tab .ab-brand .wordmark { font-size: 21px; }
+  .ph-bar { padding-left: 2px; }
 }
 
 @media (max-width: 1023px) {

@@ -133,6 +133,49 @@
 .act-amt { display: grid; justify-items: end; font: 650 14.5px var(--font); font-variant-numeric: tabular-nums; }
 .act-amt small { color: var(--ink-4); font: 500 10.5px var(--hud); letter-spacing: 0.08em; }
 
+/* Tappable rows — each opens the transaction details sheet. */
+.act-li { border-bottom: 1px solid var(--line); }
+.act-li:last-child { border-bottom: 0; }
+.act-li > .act { width: calc(100% + 16px); margin: 0 -8px; padding: 11px 8px; border: 0; border-radius: 14px; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; transition: background 0.15s; -webkit-tap-highlight-color: transparent; }
+.act-li > .act:active { background: var(--hover); }
+@media (hover: hover) { .act-li > .act:hover { background: var(--hover); } }
+.act-li > .act:focus-visible { outline: 2px solid var(--violet); outline-offset: -2px; }
+
+/* Transaction details sheet */
+.tx-hero { display: grid; justify-items: center; gap: 6px; padding: 4px 0 16px; text-align: center; }
+.tx-hero .act-ic { width: 56px; height: 62px; margin-bottom: 4px; }
+.tx-hero .act-ic .ic { width: 24px; height: 24px; }
+.tx-amt { font: 700 32px/1.1 var(--font); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+.tx-amt.up { color: var(--up); }
+.tx-amt.down { color: var(--down); }
+.tx-amt small { margin-left: 6px; color: var(--ink-3); font: 600 12px var(--hud); letter-spacing: 0.08em; }
+.tx-title { color: var(--ink-2); font: 600 14px var(--font); }
+.tx-hero .st { margin: 2px 0 0; padding: 4px 12px; font-size: 11px; }
+.tx-track { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 0 16px; padding: 0; list-style: none; }
+.tx-track li { position: relative; display: grid; justify-items: center; gap: 7px; color: var(--ink-3); font: 600 11px var(--hud); letter-spacing: 0.04em; text-align: center; }
+.tx-track li::before { content: ''; position: absolute; top: 10px; inset-inline-end: 50%; width: 100%; height: 2px; background: var(--line); }
+.tx-track li:first-child::before { display: none; }
+.tx-track li.is-done::before, .tx-track li.is-now::before { background: var(--up); }
+.tx-track li i { position: relative; z-index: 1; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2); box-shadow: inset 0 0 0 2px var(--line); color: #fff; }
+.tx-track li i .ic { width: 12px; height: 12px; }
+.tx-track li.is-done { color: var(--ink); }
+.tx-track li.is-done i { background: var(--up); box-shadow: none; }
+.tx-track li.is-now { color: var(--ink); }
+.tx-track li.is-now i { background: var(--amber); box-shadow: 0 0 0 4px var(--amber-soft); }
+.tx-list { display: grid; margin: 0; padding: 2px 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface-2); }
+.tx-list > div { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.tx-list > div:last-child { border-bottom: 0; }
+.tx-list dt { flex: none; color: var(--ink-3); font: 500 13px var(--font); }
+.tx-list dd { min-width: 0; margin: 0; text-align: end; font: 600 13.5px var(--font); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.tx-list dd.mono { font: 500 12px/1.5 ui-monospace, 'SFMono-Regular', Consolas, monospace; word-break: break-all; }
+.tx-list > div.is-long { flex-direction: column; gap: 6px; }
+.tx-list > div.is-long dd { width: 100%; text-align: start; direction: ltr; }
+.tx-list dd .muted { color: var(--ink-4); font-weight: 500; }
+.tx-copy { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-inline-start: 4px; vertical-align: middle; border-radius: 8px; background: var(--hover); color: var(--ink-2); transition: transform 0.15s var(--spring); }
+.tx-copy:active { transform: scale(0.88); }
+.tx-copy .ic { width: 14px; height: 14px; }
+.tx-explorer { width: 100%; margin-top: 12px; }
+
 /* ---------------------------------------------------------------- trade */
 .pair-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0 0; }
 .pair-btn { display: flex; align-items: center; gap: 12px; min-width: 0; }

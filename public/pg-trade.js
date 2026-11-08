@@ -329,7 +329,7 @@ function withdrawalsList() {
   const rows = S.wallet.withdrawals;
   if (!rows) return `<div class="skeleton-list"><i class="skeleton"></i><i class="skeleton"></i></div>`;
   if (!rows.length) return emptyState('withdraw', 'No withdrawals', 'Your withdrawal requests and their status will show here.');
-  return `<ul class="acts">${rows.map(w => `<li class="act"><span class="act-ic withdraw">${icon('withdraw')}</span><span class="act-copy"><b>${usd(w.amount)} USDT <em class="st withdrawal-state st-${esc(w.status)}">${esc(withdrawStatus(w))}</em></b><small>${i18n.html('{date} · to {address}', {date:dateText(w.createdAt),address:shortAddress(w.destination)})}${/^[a-f0-9]{64}$/.test(w.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${w.txid}" target="_blank" rel="noopener noreferrer">${i18n.html("TXID")}</a>` : ''}</small></span><span class="act-amt">${S.hide ? '••••' : usd(w.netAmount)}<small>${i18n.html("net")}</small></span></li>`).join('')}</ul>`;
+  return `<ul class="acts">${rows.map(w => `<li class="act-li"><button class="act" type="button" data-act="open-tx" data-id="${esc(w.id)}" aria-label="${i18n.html('Transaction details')}"><span class="act-ic withdraw">${icon('withdraw')}</span><span class="act-copy"><b>${usd(w.amount)} USDT <em class="st withdrawal-state st-${esc(w.status)}">${esc(withdrawStatus(w))}</em></b><small>${i18n.html('{date} · to {address}', {date:dateText(w.createdAt),address:shortAddress(w.destination)})}</small></span><span class="act-amt">${S.hide ? '••••' : usd(w.netAmount)}<small>${i18n.html("net")}</small></span></button></li>`).join('')}</ul>`;
 }
 
 const shortAddress = value => (String(value || '').length > 14 ? `${value.slice(0, 6)}…${value.slice(-6)}` : String(value || ''));

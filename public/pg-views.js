@@ -54,15 +54,15 @@ function accountMenu(name) {
 const TAB_VIEWS = ['home', 'markets', 'earn', 'assets', 'profile'];
 
 /* Phone app bar: avatar or back button, centred title, search and notifications. */
-function appBar(name) {
+function appBar() {
   const inner = !TAB_VIEWS.includes(S.view);
-  const title = S.view === 'home' ? '' : i18n.text(TITLES[S.view] || 'Home');
+  const title = i18n.text(TITLES[S.view] || 'Home');
   const left = inner
     ? `<button class="ab-btn" type="button" data-act="back" aria-label="${i18n.html('Back')}">${icon('chevronLeft')}</button>`
-    : `<button class="ab-avatar" type="button" data-act="goto" data-view="profile" aria-label="${i18n.html('Profile')}">${avatarHex(name, 'is-sm')}</button>`;
-  const center = S.view === 'home' ? `<span class="ab-brand">${markImg(26)}${wordmark()}</span>` : `<b class="ab-title">${esc(title)}</b>`;
+    : `<button class="ab-brand" type="button" data-act="goto" data-view="home" aria-label="Portgainy">${markImg(26)}${wordmark()}</button>`;
+  const center = inner ? `<span class="ab-c"><b class="ab-title">${esc(title)}</b></span>` : '';
   const live = ['markets', 'trade'].includes(S.view) ? `<span class="ab-live">${liveBadge()}</span>` : '';
-  return `<header class="ab" id="ab"><div class="ab-in"><span class="ab-l">${left}</span><span class="ab-c">${center}</span>
+  return `<header class="ab${inner ? '' : ' is-tab'}" id="ab"><div class="ab-in"><span class="ab-l">${left}</span>${center}
     <span class="ab-r">${live}<button class="ab-btn" type="button" data-act="open-search" aria-label="${i18n.html('Search')}">${icon('search')}</button><button class="ab-btn" type="button" data-act="open-notices" aria-label="${i18n.html('Notifications')}">${icon('bell')}${S.activities.length ? '<i class="dot"></i>' : ''}</button></span></div></header>`;
 }
 
@@ -71,7 +71,7 @@ function renderShell() {
   const body = (views[S.view] || homeView)();
   const name = S.user.name || 'Player';
   app.innerHTML = `<div class="shell view-${S.view}">
-    ${appBar(name)}
+    ${appBar()}
     <header class="topbar gh"><div class="gh-in">
       <button class="gh-brand" type="button" data-act="goto" data-view="home" aria-label="Portgainy">${brandLockup(32)}</button>
       <nav class="gh-nav" aria-label="${i18n.html('Main')}">${NAV.map(([v, l]) => headerLink([v, l])).join('')}${headerLink(['referrals', 'Referrals'])}</nav>
@@ -242,8 +242,94 @@ function activityList(limit = 0, filter = 'all') {
   return `<ul class="acts">${rows.map(a => {
     const amt = activityAmount(a);
     const status = a.type === 'withdraw' && a.status ? `<em class="st st-${esc(a.status)}">${esc(withdrawStatus(a))}</em>` : '';
-    return `<li class="act"><span class="act-ic ${a.type}">${icon(activityIconFor(a))}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))} ${status}</small></span><span class="act-amt ${amt.cls}">${S.hide ? '••••' : esc(amt.text)}<small>USDT</small></span></li>`;
+    return `<li class="act-li"><button class="act" type="button" data-act="open-tx" data-id="${esc(a.id)}" aria-label="${i18n.html('Transaction details')}: ${esc(activityTitle(a))}"><span class="act-ic ${a.type}">${icon(activityIconFor(a))}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))} ${status}</small></span><span class="act-amt ${amt.cls}">${S.hide ? '••••' : esc(amt.text)}<small>USDT</small></span></button></li>`;
   }).join('')}</ul>`;
+}
+
+/* ---- Transaction details: opened by tapping a row in History, Home activity or Withdrawal requests ---- */
+const TX_HASH = /^[a-f0-9]{64}$/;
+const TX_STEPS = ['Requested', 'Processing', 'Sent'];
+const TX_REACHED = { requested: 1, approved: 2, submitted: 2, confirmed: 3 };
+
+function dateTimeText(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : i18n.language, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+}
+
+/* A wallet activity merged with the live withdrawal record (which knows the full address and the TXID). */
+function txRecord(id) {
+  const a = S.activities.find(item => item.id === id) || null;
+  const w = S.wallet?.withdrawals?.find(item => item.id === id) || null;
+  if (!a && !w) return null;
+  if (!w) return a;
+  const base = a || { id: w.id, type: 'withdraw', network: 'USDT TRC20', at: w.createdAt };
+  return { ...base, amount: w.amount ?? base.amount, fee: w.fee ?? base.fee, netAmount: w.netAmount ?? base.netAmount, status: w.status || base.status, wallet: w.destination || base.wallet, txid: w.txid || base.txid, automatic: w.automatic ?? base.automatic };
+}
+
+function txStatus(a) {
+  if (a.type === 'withdraw') return { key: a.status || 'pending', text: withdrawStatus(a) };
+  if (a.type === 'deposit') return a.status === 'below-minimum' ? { key: 'pending', text: i18n.text('Awaiting minimum') } : { key: 'confirmed', text: i18n.text('Confirmed') };
+  return { key: 'confirmed', text: i18n.text('Completed') };
+}
+
+function txTracker(a) {
+  const reached = TX_REACHED[a.status];
+  if (!reached) return '';
+  return `<ol class="tx-track" aria-label="${i18n.html('Withdrawal progress')}">${TX_STEPS.map((label, i) => `<li class="${i < reached ? 'is-done' : i === reached ? 'is-now' : ''}"><i>${i < reached ? icon('check') : ''}</i><span>${i18n.html(label)}</span></li>`).join('')}</ol>`;
+}
+
+function txCopy(value, label) {
+  return `<button class="tx-copy" type="button" data-act="copy-value" data-value="${esc(value)}" aria-label="${i18n.html('Copy')}: ${esc(label)}">${icon('copy')}</button>`;
+}
+
+function txDetailRows(a) {
+  const rows = [];
+  const add = (label, value, extra = '') => { if (value !== '' && value !== undefined && value !== null) rows.push(`<div${extra ? ' class="is-long"' : ''}><dt>${i18n.html(label)}</dt><dd${extra}>${value}</dd></div>`); };
+  const mono = ' class="mono"';
+  const hash = TX_HASH.test(a.txid || '') ? a.txid : '';
+  const address = a.type === 'withdraw' ? (a.wallet || '') : (a.address || '');
+  const hidden = '••••';
+  add('Date', esc(dateTimeText(a.at)));
+  add('Network', esc(a.network || (a.type === 'deposit' || a.type === 'withdraw' ? 'USDT TRC20' : '')));
+  if (a.type === 'withdraw') {
+    add('Amount', S.hide ? hidden : `${usd(a.amount)} USDT`);
+    add('Fee', S.hide ? hidden : `${usd(a.fee)} USDT`);
+    add('You receive', S.hide ? hidden : `<b>${usd(a.netAmount)} USDT</b>`);
+    if (address) add('To address', `${esc(address)} ${txCopy(address, i18n.text('Address'))}`, mono);
+    add('Transaction ID', hash ? `${esc(hash)} ${txCopy(hash, i18n.text('Transaction ID'))}` : (['rejected', 'failed'].includes(a.status) ? '' : `<span class="muted">${i18n.html('Shown once the transfer is sent')}</span>`), hash ? mono : '');
+  } else if (a.type === 'deposit') {
+    add('Deposited', S.hide ? hidden : `${usd(a.amount)} USDT`);
+    if (a.creditedAmount !== undefined) add('Credited', S.hide ? hidden : `<b>${usd(a.creditedAmount)} USDT</b>`);
+    if (num(a.heldAmount) > 0) add('Held until minimum', S.hide ? hidden : `${usd(a.heldAmount)} USDT`);
+    if (address) add('Deposit address', `${esc(address)} ${txCopy(address, i18n.text('Address'))}`, mono);
+    add('Transaction ID', hash ? `${esc(hash)} ${txCopy(hash, i18n.text('Transaction ID'))}` : '', mono);
+    if (a.blockNumber) add('Block', esc(String(a.blockNumber)));
+  } else {
+    if (a.amount) add('Amount', S.hide ? hidden : `${usd(a.amount)} USDT`);
+    if (a.type === 'spot') { add('Pair', esc(a.symbol || (a.base ? `${a.base}/USDT` : ''))); add('Price', a.price ? `${price(a.price)} USDT` : ''); add('Quantity', a.quantity ? esc(qty(a.quantity)) : ''); }
+    if (a.type === 'referral' && a.level) add('Level', esc(String(a.level)));
+  }
+  add('Reference', `${esc(String(a.id || '').slice(0, 8))} ${txCopy(a.id, i18n.text('Reference'))}`, mono);
+  return rows.join('');
+}
+
+function txSheet(a) {
+  const amt = activityAmount(a), st = txStatus(a);
+  const hash = TX_HASH.test(a.txid || '') ? a.txid : '';
+  return `${sheetHead('Transaction details')}
+    <div class="tx-hero"><span class="act-ic ${esc(a.type)}">${icon(activityIconFor(a))}</span>
+      <strong class="tx-amt ${amt.cls}">${S.hide ? '••••' : esc(amt.text)}<small>USDT</small></strong>
+      <span class="tx-title">${esc(activityTitle(a))}</span>
+      <em class="st st-${esc(st.key)}">${esc(st.text)}</em></div>
+    ${a.type === 'withdraw' ? txTracker(a) : ''}
+    <dl class="tx-list">${txDetailRows(a)}</dl>
+    ${hash ? `<a class="btn btn-ghost tx-explorer" href="https://tronscan.org/#/transaction/${hash}" target="_blank" rel="noopener noreferrer">${i18n.html('View on {explorer}', { explorer: 'TRONSCAN' })} ${icon('external')}</a>` : ''}`;
+}
+
+function openTx(id) {
+  const record = txRecord(id);
+  if (record) openSheet(txSheet(record), { label: 'Transaction details' });
 }
 
 const WITHDRAW_STATUS = { requested: 'Under review', approved: 'Approved', submitted: 'Awaiting confirmation', confirmed: 'Sent', rejected: 'Rejected', pending: 'Pending', failed: 'Failed' };

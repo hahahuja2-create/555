@@ -65,7 +65,13 @@ const nf8 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 });
 const nfCompact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 });
 
 const mask = text => (S.hide ? '••••••' : text);
-const usd = value => nf6.format(num(value));
+/* Money is shown with two decimals, cut (never rounded up) so the screen never claims more than the account holds.
+   Dust below one cent keeps up to six decimals so a real balance never reads as 0.00. */
+function usd(value) {
+  const n = num(value), abs = Math.abs(n);
+  if (abs > 0 && abs < 0.01) return nf6.format(n);
+  return nf2.format(Math.trunc(n * 100 + (n < 0 ? -1e-6 : 1e-6)) / 100);
+}
 const usdt = value => `${usd(value)} USDT`;
 const money = value => mask(usd(value));
 const moneyUsdt = value => mask(usdt(value));
