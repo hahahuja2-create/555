@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const acorn = require('acorn');
 const root = path.resolve(__dirname, '..');
-const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js','pg-forge.js','pg-landing.js'];
+const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js','pg-forge.js','pg-landing.js','pg-app-phone.js'];
 const messages = new Map();
 const examples = new Map();
 
@@ -98,6 +98,10 @@ for (const statement of marketAst.body) {
   if (declaration) arrayStrings(declaration.init, `${marketFile}:${declaration.loc.start.line}`, 2);
 }
 record('Other', `${marketFile}:other`);
+// Strings that are composed or passed through helper functions (phone tiles, transaction rows, About copy) cannot be
+// found by the syntax walk above; they are listed here so they are inventoried and validated like every other message.
+const extraFile = path.join(root,'localization','source-extra.json');
+if (fs.existsSync(extraFile)) for (const value of JSON.parse(fs.readFileSync(extraFile,'utf8'))) record(value, 'localization/source-extra.json');
 const ordered = [...messages.keys()].sort((a,b)=>a.localeCompare(b,'en'));
 const english = Object.fromEntries(ordered.map(value => [value,value]));
 const contexts = Object.fromEntries(ordered.map(value => [value,{locations:[...messages.get(value)].sort(), examples:examples.get(value) || []}]));

@@ -118,7 +118,7 @@ function profileHead() {
   const u = S.user, forge = u.forgeEnabled, r = stats(), t = earnTier();
   const levelValue = forge ? i18n.html('Forge collector') : t.idx < 0 ? i18n.html('Not started') : i18n.html('Tier {n} of {total}', { n: t.idx + 1, total: EARN_TIERS.length });
   return `<section class="pp-head"><div class="pp-id"><span class="pp-avatar">${esc(String(u.name || 'P').trim().charAt(0).toUpperCase() || 'P')}</span><span class="pp-name"><b>${esc(u.name)}</b><small>${i18n.html('ID')}: ${esc(u.inviteCode)}<button type="button" data-act="copy-invite" aria-label="${i18n.html('Copy code')}">${icon('copy')}</button></small></span>
-      <button class="pp-edit" type="button" data-act="focus-name">${icon('settings')}<span>${i18n.html('Edit profile')}</span></button></div>
+      <button class="pp-edit" type="button" data-act="focus-name" aria-label="${i18n.html('Edit profile')}">${icon('settings')}<span>${i18n.html('Edit profile')}</span></button></div>
     <div class="pp-tiles"><button type="button" data-act="goto" data-view="${forge ? 'earn' : 'earn'}"><span class="ht-ring" style="--p:${forge ? 100 : Math.round(t.progress * 100)}"><span class="ht-ic t-violet">${icon('trophy')}</span></span><small>${i18n.html(forge ? 'Collection' : 'Earn level')}</small><b>${levelValue}</b></button>
       <button type="button" data-act="goto" data-view="referrals"><span class="ht-ic t-lime">${icon('users')}</span><small>${i18n.html('Invites')}</small><b>${r.invites} <em>${i18n.html('members')}</em></b></button></div></section>`;
 }

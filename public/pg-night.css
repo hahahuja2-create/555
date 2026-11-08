@@ -165,8 +165,10 @@
   .pp-name small { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-3); font: 500 14px var(--font); }
   .pp-name small button { display: grid; place-items: center; width: 26px; height: 26px; color: var(--ink-3); }
   .pp-name small .ic { width: 16px; height: 16px; }
-  .pp-edit { display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px; border-radius: 99px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); font: 600 14px var(--font); }
-  .pp-edit .ic { width: 16px; height: 16px; }
+  /* Icon-only so a long translated label can never push over the name. */
+  .pp-edit { display: grid; place-items: center; flex: none; width: 42px; height: 42px; padding: 0; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-2); }
+  .pp-edit span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pp-edit .ic { width: 18px; height: 18px; }
   .pp-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pp-tiles button { display: grid; align-content: start; gap: 6px; padding: 14px; border-radius: 24px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); text-align: left; transition: transform 0.15s var(--spring); }
   .pp-tiles button:active { transform: scale(0.97); }
@@ -186,6 +188,9 @@
   .ab.is-tab .ab-brand .mark { width: 28px; height: 28px; }
   .ab.is-tab .ab-brand .wordmark { font-size: 21px; }
   .ph-bar { padding-left: 2px; }
+  /* Earn balance cards: stacked actions, so longer translated labels (Georgian, German, Russian…) are never clipped. */
+  .tile .btn-row { flex-direction: column; gap: 6px; }
+  .tile .btn-row > .btn { flex: none; width: 100%; justify-content: center; }
 }
 
 @media (max-width: 1023px) {
