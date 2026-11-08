@@ -32,6 +32,13 @@ const root = path.resolve(__dirname, '..');
       page.on('console', m => { if (m.type() === 'error' && !/401|Failed to load resource/.test(m.text())) problems.push(`${name}: ${m.text()}`); });
       await page.goto(base);
       assert.match(await page.title(), /Portgainy/);
+      await page.waitForSelector('.land');
+      await checkEditableSizes('landing');
+      for (const section of ['features', 'wallet', 'markets', 'security', 'how', 'faq']) assert.ok(await page.locator(`#sec-${section}`).count(), `landing section ${section}`);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name}/landing: horizontal overflow`);
+      await page.goto(base + '/#signin');
+      await page.waitForSelector('.auth');
+      if (touch) assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1), `${name}: sign-in must fit one screen`);
       await checkEditableSizes('sign-in');
       await page.click('[data-act="auth-mode"][data-mode="signup"]');
       await checkEditableSizes('sign-up');
@@ -70,7 +77,7 @@ const root = path.resolve(__dirname, '..');
         const text = await page.locator('#content').innerText();
         if (/undefined|NaN|\[object/.test(text)) problems.push(`${name}/${view}: bad text`);
       }
-      await page.locator('[data-act="open-search"]').click();
+      await page.locator('[data-act="open-search"]:visible').first().click();
       await page.waitForSelector('#global-search');
       await checkEditableSizes('global-search');
       await page.locator('#global-search').fill('BTC');
@@ -139,10 +146,15 @@ const root = path.resolve(__dirname, '..');
         const nonAdmin = manualAdminDisplay();
         return {home, referrals, profile, unchanged, future, other, nonAdmin};
       });
-      assert.match(display.home, /Earned all-time.*4,650\.00/);
-      assert.match(display.home, /Level 1 . 10%<\/small><b>5<\/b>/);
-      assert.match(display.home, /Level 2 . 5%<\/small><b>12<\/b>/);
-      assert.match(display.home, /420\.00/);
+      if (touch) {
+        // The phone Home always shows the account's real figures.
+        assert.doesNotMatch(display.home, /4,650\.00|420\.00/);
+      } else {
+        assert.match(display.home, /Earned all-time.*4,650\.00/);
+        assert.match(display.home, /Level 1 . 10%<\/small><b>5<\/b>/);
+        assert.match(display.home, /Level 2 . 5%<\/small><b>12<\/b>/);
+        assert.match(display.home, /420\.00/);
+      }
       assert.doesNotMatch(display.referrals, /manual display/i);
       assert.doesNotMatch(display.home, /manual display/i);
       assert.match(display.referrals, /5 <small>members/);

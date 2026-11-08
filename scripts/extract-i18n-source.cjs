@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const acorn = require('acorn');
 const root = path.resolve(__dirname, '..');
-const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js'];
+const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js','pg-forge.js','pg-landing.js'];
 const messages = new Map();
 const examples = new Map();
 
@@ -52,7 +52,8 @@ function visit(node, file) {
       recordExample(node.arguments[0], node.arguments[1], origin);
     }
     if (callee.type === 'Identifier') {
-      const indexes = {sectionHead:[0],section:[0],entry:[0,2],moreLink:[0],sheetHead:[0,1],emptyState:[1,2],unavailable:[0],toast:[0,2]}[callee.name] || [];
+      const localizedAlias=(file.endsWith('pg-forge.js')&&callee.name==='text')||(file.endsWith('pg-landing.js')&&callee.name==='lt');
+      const indexes = {sectionHead:[0],section:[0],entry:[0,2],moreLink:[0],sheetHead:[0,1],emptyState:[1,2],unavailable:[0],toast:[0,2]}[callee.name] || (localizedAlias?[0]:[]);
       for (const index of indexes) collectLiterals(node.arguments[index], origin);
       if (callee.name === 'openSheet' && node.arguments[1]?.type === 'ObjectExpression') {
         const label = node.arguments[1].properties.find(property => !property.computed && (property.key?.name || property.key?.value) === 'label');
@@ -70,7 +71,7 @@ function visit(node, file) {
     const positions = {facts:[1],products:[1,2],steps:[0,1],accounts:[0,1,2],limits:[0,1],safety:[1,2]}[name];
     if (positions) for (const index of positions) arrayStrings(node.init, origin, index);
     if (name === 'metrics' || name === 'tabs') arrayStrings(node.init, origin, name === 'metrics' ? 0 : 1);
-    if (name === 'FAQ') {
+    if (name === 'FAQ' || (file.endsWith('pg-forge.js')&&name==='faq')) {
       arrayStrings(node.init, origin, null);
       for (const row of node.init?.elements || []) if (row?.type === 'ArrayExpression') recordExample(row.elements[1], row.elements[2], origin);
     }

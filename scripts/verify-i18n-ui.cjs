@@ -39,8 +39,7 @@ test('profile language uses account preference, survives reload and returns to E
       ? route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(georgianFixture)})
       : route.fulfill({status:503,body:'Unavailable'}));
     await page.route('**/locales/ar.json', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({Language:'اللغة'})}));
-    await page.goto(base);
-    await page.click('[data-act="auth-mode"][data-mode="signup"]');
+    await page.goto(base + '/#signup');
     await page.fill('input[name=email]','i18n-fixture@example.test');
     await page.fill('input[name=password]','FixturePassword2026');
     await page.fill('input[name=confirm]','FixturePassword2026');
@@ -60,7 +59,7 @@ test('profile language uses account preference, survives reload and returns to E
     assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     const notice = await page.evaluate(()=>{const el=document.createElement('div');el.innerHTML=earnNoticeContent();return el.textContent;});
     assert.match(notice,/დღიური Earn ჯილდო: 8–13%/);
-    assert.match(notice,/200 USDT/);
+    assert.match(notice,/100 USDT/);
     assert.match(notice,/2% fee/);
     assert.doesNotMatch(notice,/\{(?:minimum|fee|range)\}/);
     await page.evaluate(()=>{S.pay.withdrawals=true;S.pay.mode='tron-watch-only';S.pay.networks=[{id:'fixture',label:'TRC20'}];openSheet(walletSheet('withdraw',['Withdraw','Fixture']));});
@@ -102,8 +101,8 @@ test('profile language uses account preference, survives reload and returns to E
       assert.equal(await page.locator('.language-note').count(), 1);
       assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     }
-    await page.locator('[data-act="logout"]').click();
-    await page.waitForSelector('#auth-form');
+    await page.locator('.page.profile [data-act="logout"]').click();
+    await page.waitForSelector('.land');
     assert.equal(await page.locator('html').getAttribute('lang'),'en');
   } finally {
     if (browser) await browser.close();

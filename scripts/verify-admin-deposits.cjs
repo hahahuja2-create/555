@@ -21,7 +21,7 @@ function account(id, email, balance) {
   return { id, email, name:id, passwordSalt:salt, passwordHash:crypto.scryptSync(password,salt,64).toString('hex'),
     lockedBalance:balance, withdrawBalance:0, reservedBalance:0, earnedTotal:0, withdrawnTotal:0, withdrawFeeTotal:0,
     activities:[{id:crypto.randomUUID(),at:new Date().toISOString(),type:'adjustment',amount:balance}],
-    vipId:'free', createdAt:new Date(Date.now()-86_400_000).toISOString() };
+    vipId:'free', earnNotice: { version: require('../markets/earn-rates').NOTICE_VERSION, seenAt: 1 }, createdAt:new Date(Date.now()-86_400_000).toISOString() };
 }
 
 function receipt(txid, to, values) {

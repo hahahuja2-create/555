@@ -21,9 +21,9 @@ test('starting at or after reset permits the first claim immediately, then waits
  }
 });
 test('the first claim cannot be earned below the minimum; referral income is not a personal claim',()=>{
- const {u,state}=fixture();u.lockedBalance=199;u.activities=[{type:'referral',amount:10,at:new Date(reset-100).toISOString()}];
+ const {u,state}=fixture();u.lockedBalance=99;u.activities=[{type:'referral',amount:10,at:new Date(reset-100).toISOString()}];
  assert.equal(earn.snapshot(state,u,reset+1,true).canClaim,false);assert.throws(()=>earn.claim(state,u.id,key(),reset+1),/MINIMUM/);
- u.lockedBalance=200;assert.equal(earn.claim(state,u.id,key(),reset+1).receipt.amount,16);
+ u.lockedBalance=100;assert.equal(earn.claim(state,u.id,key(),reset+1).receipt.amount,8);
 });
 test('claim history and persisted receipts prevent a second first-claim exception after restart',()=>{
  const {u,state}=fixture();u.earnLastReceipt={at:new Date(reset+1).toISOString(),amount:16};

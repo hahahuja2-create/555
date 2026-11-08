@@ -71,9 +71,9 @@ function rateBps(state, user, now = Date.now()) {
   return require('./earn-rates').rateBps(units(user.lockedBalance));
 }
 
-const EARN_MINIMUM = 200_000_000n;
+const EARN_MINIMUM = 100_000_000n;
 
-// Earn starts at 200 USDT; smaller balances accrue no reward until they reach the minimum.
+// Earn starts at 100 USDT; smaller balances accrue no reward until they reach the minimum.
 const minimumUnits = state => (/^\d+$/.test(state?.earn?.minimumUnits ?? '') ? BigInt(state.earn.minimumUnits) : EARN_MINIMUM);
 
 function rewardUnits(state, user, now = Date.now()) {

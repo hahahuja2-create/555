@@ -1,0 +1,11 @@
+{
+  "spark": {"name":"Spark Capsule","primary":"lime","secondary":"cyan","form":"Ignition capsule"},
+  "bolt": {"name":"Bolt Strider","primary":"amber","secondary":"lime","form":"Quad-drive strider"},
+  "pulse": {"name":"Pulse Gyro","primary":"violet","secondary":"pink","form":"Orbital dynamo"},
+  "flux": {"name":"Flux Gateway","primary":"cyan","secondary":"violet","form":"Fold-space gateway"},
+  "alloy": {"name":"Alloy Sentinel","primary":"lime","secondary":"amber","form":"Mechanical sentinel"},
+  "titan": {"name":"Titan Bastion","primary":"violet","secondary":"lime","form":"Twin-reactor bastion"},
+  "nova": {"name":"Nova Prism","primary":"pink","secondary":"violet","form":"Stellar prism"},
+  "helix": {"name":"Helix Spire","primary":"cyan","secondary":"lime","form":"Double-helix spire"},
+  "apex": {"name":"Apex Sovereign","primary":"lime","secondary":"violet","form":"Crowned reactor"}
+}

@@ -5,6 +5,7 @@
 /* ------------------------------------------------------------------ earn */
 
 function earnView() {
+  if(S.user?.forgeEnabled)return PortgainyForge.view();
   const u = S.user, e = S.earn;
   const rate = earnRatePct();
   const reward = earnActive() ? (e?.nextReward ?? num(u.lockedBalance) * (rate / 100)) : 0;
@@ -18,8 +19,8 @@ function earnView() {
       <div class="gauge-wrap"><div class="gauge" style="--p:${clamp(rate / 13, 0, 1) * 100}"></div><span class="gauge-in"><b>${rate}<small>%</small></b><em>${i18n.html("per day")}</em></span></div>
       <div class="earn-hero-copy">
         <span class="eyebrow">${i18n.html("Daily reward rate")}</span>
-        <h2>${i18n.html('{rate}% of your {account} balance, every day', {rate,account:'Earn'})}</h2>
-        <p>${i18n.html("Your first Claim is available once Earn reaches {value0} {value1}. After that, claim once per day when the countdown finishes. Rewards credit Spot and your principal stays in Earn.", {"value0":"200","value1":"USDT"})}</p>
+        <h2>${i18n.html('{rate}% of your {account} balance, every day', {rate,account:S.user.forgeEnabled?'Forge':'Earn'})}</h2>
+        <p>${i18n.html("Your first Claim is available once Earn reaches {value0} {value1}. After that, claim once per day when the countdown finishes. Rewards credit Spot and your principal stays in Earn.", {"value0":String(earnMin()),"value1":"USDT"})}</p>
       </div>
       ${active ? '' : `<div class="earn-gate"><div class="earn-gate-top"><span>${icon('lock')}${i18n.html('{account} starts at {amount} {currency}', {account:'Earn',amount:earnMin(),currency:'USDT'})}</span><b>${i18n.html('{amount} {currency} to go', {amount:usd(short),currency:'USDT'})}</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(num(u.lockedBalance) / earnMin(), 0, 1) * 100)}%"></b></i><p>${i18n.html('Your {account} balance is {balance} {currency}. Add {amount} {currency} more to unlock daily rewards.', {account:'Earn',balance:money(u.lockedBalance),amount:usd(short),currency:'USDT'})}</p><button class="btn btn-lime btn-block" type="button" data-act="wallet-deposit">${icon('deposit')}${i18n.html('Add {amount} {currency}', {amount:usd(short),currency:'USDT'})}</button></div>`}
       ${active ? `      <div class="claim-box ${ready ? 'is-ready' : ''}">
@@ -34,10 +35,10 @@ function earnView() {
       <article class="tile"><span class="tile-ic is-cyan">${icon('wallet')}</span><small>${i18n.html("Spot balance")}</small><strong>${money(u.withdrawBalance)}</strong><div class="btn-row"><button class="btn btn-ghost btn-sm" data-act="goto" data-view="trade">${icon('candles')}${i18n.html('Trade')}</button><button class="btn btn-ghost btn-sm" data-act="wallet-withdraw">${icon('withdraw')}${i18n.html('Send')}</button></div></article>
     </section>
     
-    <section class="card">${sectionHead('Daily reward tiers')}${earnTierTable()}<p class="fine">${i18n.html("The rate applies to your entire Earn balance at the time of Claim. Below {value0} {value1}, no daily reward is available.", {"value0":"200","value1":"USDT"})}</p></section>
+    <section class="card">${sectionHead('Daily reward tiers')}${earnTierTable()}<p class="fine">${i18n.html("The rate applies to your entire Earn balance at the time of Claim. Below {value0} {value1}, no daily reward is available.", {"value0":String(earnMin()),"value1":"USDT"})}</p></section>
     <section class="card calc">${sectionHead('Reward calculator', `<span class="tag">${i18n.html('Estimate')}</span>`)}
       <label class="field"><span>${i18n.html("Earn balance")}</span><div class="control"><input id="calc-amount" type="number" inputmode="decimal" min="0" step="1" value="${calcBase}"><b class="suffix">USDT</b></div></label>
-      <input id="calc-range" class="range" type="range" min="200" max="10000" step="10" value="${clamp(calcBase, 200, 10000)}" aria-label="${i18n.html("Balance")}">
+      <input id="calc-range" class="range" type="range" min="${earnMin()}" max="10000" step="10" value="${clamp(calcBase, earnMin(), 10000)}" aria-label="${i18n.html("Balance")}">
       <div class="calc-out" data-rate="${rate}"><span><small>${i18n.html("Daily")}</small><b data-calc="d">—</b></span><span><small>${i18n.html("{value0} days", {"value0":"7"})}</small><b data-calc="w">—</b></span><span><small>${i18n.html("{value0} days", {"value0":"30"})}</small><b data-calc="m">—</b></span></div>
       <p class="fine">${icon('info')}${i18n.html('Estimate for an unchanged balance and one claim per day. The calculator uses the tier for the entered balance. Future rewards are not guaranteed.')}</p>
     </section>
@@ -84,8 +85,8 @@ function referralsView() {
       <a class="invite-link" data-invite-link href="${esc(link)}" target="_blank" rel="noopener">${esc(link)}</a>
       <div class="btn-row"><button class="btn btn-lime" type="button" data-act="copy-invite-link">${icon('link')}${i18n.html('Copy link')}</button><button class="btn btn-ghost" type="button" data-act="share-invite">${icon('share')}${i18n.html('Share')}</button></div>
     </article>
-    <section class="tiles">${[[1, 10, displayReferralCount(1), i18n.text('Directly invited friends')], [2, 5, displayReferralCount(2), i18n.text('Friends invited by your friends')]].map(([lv, rate, count, text]) => `<article class="tile level"><span class="eyebrow">${i18n.html('Level {level}', {level:lv})}</span><strong class="big">${rate}<small>%</small></strong><p>${esc(text)}. ${i18n.html('You earn {rate}% of every {account} reward they claim.', {rate,account:'Earn'})}</p><b class="count">${count} <small>${i18n.html("members")}</small></b></article>`).join('')}</section>
-    <div class="note">${icon('info')}${i18n.html('Referral rewards credit your Spot balance and never reduce your friends’ own rewards.')}</div>
+    <section class="tiles">${[[1, 10, displayReferralCount(1), i18n.text('Directly invited friends')], [2, 5, displayReferralCount(2), i18n.text('Friends invited by your friends')]].map(([lv, rate, count, text]) => `<article class="tile level"><span class="eyebrow">${i18n.html('Level {level}', {level:lv})}</span><strong class="big">${rate}<small>%</small></strong><p>${esc(text)}. ${i18n.html('You earn {rate}% of every {account} reward they claim.', {rate,account:S.user.forgeEnabled?'Forge':'Earn'})}</p><b class="count">${count} <small>${i18n.html("members")}</small></b></article>`).join('')}</section>
+    <div class="note">${icon('info')}${i18n.html(S.user.forgeEnabled?'Collect settled referral rewards into your USDT wallet. They never reduce your friends’ own rewards.':'Referral rewards credit your Spot balance and never reduce your friends’ own rewards.')}</div>
     <section class="card">${sectionHead('Referral income', `<b class="up">${money(displayReferralEarned())} USDT</b>`)}${income.length ? `<ul class="acts">${income.slice(0, 12).map(a => `<li class="act"><span class="act-ic referral">${icon('users')}</span><span class="act-copy"><b>${esc(activityTitle(a))}</b><small>${esc(dateText(a.at))}</small></span><span class="act-amt up">${S.hide ? '••••' : `+${usd(a.amount)}`}<small>USDT</small></span></li>`).join('')}</ul>` : emptyState('users', 'No recorded referral income yet', 'Rewards appear after your friends claim their Earn rewards.')}</section>
     <section class="card">${sectionHead('Your team', `<span class="tag">${i18n.html('{count} members', {count:members.length})}</span>`)}${members.length ? `<ul class="acts">${members.map(m => `<li class="act"><span class="act-ic transfer">${icon('user')}</span><span class="act-copy"><b>${esc(m.name)}</b><small>${i18n.html('Joined {date}', {date:dateText(m.createdAt, true)})}</small></span></li>`).join('')}</ul>` : emptyState('user', 'No members yet', 'Share your link to bring friends in.')}</section>
   </div>`;
@@ -96,14 +97,15 @@ function referralsView() {
 function profileView() {
   const u = S.user, r = stats();
   return `<div class="page profile">
-    <article class="profile-hero">
+    ${isPhone() ? profileHead() : `    <article class="profile-hero">
       <div class="profile-badge">${avatarHex(u.name, 'is-xl')}</div>
       <h1>${esc(u.name)}</h1><p>${esc(u.email)}</p>
-      <span class="tag tag-lime">${earnActive() ? i18n.html('{account} active · {rate}% daily', {account:'Earn',rate:earnRatePct()}) : i18n.html('{account} starts at {amount} {currency}', {account:'Earn',amount:earnMin(),currency:'USDT'})}</span>
+      <span class="tag tag-lime">${S.user.forgeEnabled ? i18n.html('Forge collector') : earnActive() ? i18n.html('{account} active · {rate}% daily', {account:'Earn',rate:earnRatePct()}) : i18n.html('{account} starts at {amount} {currency}', {account:'Earn',amount:earnMin(),currency:'USDT'})}</span>
     </article>
-    <section class="tiles stats3">${[[i18n.text('Claims'), r.claims, 'earn'], [i18n.text('Trades'), r.trades, 'swords'], [i18n.text('Invites'), r.invites, 'users']].map(([l, v, g]) => `<article class="tile mini"><span class="tile-ic">${icon(g)}</span><strong>${v}</strong><small>${esc(l)}</small></article>`).join('')}</section>
+    <section class="tiles stats3">${[[i18n.text('Claims'), r.claims, 'earn'], [i18n.text('Trades'), r.trades, 'swords'], [i18n.text('Invites'), r.invites, 'users']].map(([l, v, g]) => `<article class="tile mini"><span class="tile-ic">${icon(g)}</span><strong>${v}</strong><small>${esc(l)}</small></article>`).join('')}</section>`}
     <section class="card">${sectionHead('Preferences')}
       <div class="setting"><span>${icon('eyeOff')}<span><b>${i18n.html("Hide balances")}</b><small>${i18n.html("Mask amounts across the app")}</small></span></span><button class="switch ${S.hide ? 'is-on' : ''}" type="button" role="switch" aria-checked="${S.hide}" data-act="toggle-hide"><i></i></button></div>
+      <div class="setting"><span>${icon('moon')}<span><b>${i18n.html("Dark mode")}</b><small>${i18n.html("Switch between light and dark appearance")}</small></span></span><button class="switch ${PGTheme.get() === 'dark' ? 'is-on' : ''}" type="button" role="switch" aria-checked="${PGTheme.get() === 'dark'}" data-act="toggle-theme"><i></i></button></div>
       <label class="field profile-language"><span>${i18n.html('Language')}</span><div class="control">${icon('globe')}<select id="profile-language" aria-label="${i18n.html('Language')}">${PORTGAINY_LANGUAGES.filter(item => PG_READY_LANGUAGES.includes(item.code)).map(item => `<option value="${esc(item.code)}" ${item.code === i18n.language ? 'selected' : ''}>${esc(item.name)}</option>`).join('')}</select>${icon('chevronDown')}</div></label>
       ${PG_REVIEWED_LANGUAGES.includes(i18n.language) ? '' : `<p class="language-note">${i18n.html('Automatic translation may be incomplete. Some information remains in English.')}</p>`}
     </section>
@@ -111,7 +113,7 @@ function profileView() {
       <form class="form" data-form="profile" novalidate><label class="field"><span>${i18n.html("Display name")}</span><div class="control">${icon('user')}<input name="name" type="text" value="${esc(u.name)}" minlength="2" maxlength="50" required></div></label><p class="form-msg" id="profile-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${icon('check')}${i18n.html('Save name')}</button></form>
       <dl class="facts"><div><dt>${i18n.html("Email")}</dt><dd>${esc(u.email)}</dd></div><div><dt>${i18n.html("Invite code")}</dt><dd>${esc(u.inviteCode)}</dd></div><div><dt>${i18n.html("Member since")}</dt><dd>${esc(dateText(u.createdAt, true))}</dd></div><div><dt>${i18n.html("Total earned")}</dt><dd>${money(displayEarnedTotal())} USDT</dd></div><div><dt>${i18n.html("Total withdrawn")}</dt><dd>${money(u.withdrawnTotal)} USDT</dd></div></dl>
     </section>
-    <section class="card links">${[['support', 'headset', i18n.text('Help & Support')], ['about', 'building', i18n.text('About Portgainy')], ['referrals', 'users', i18n.text('Referrals')], ...(u.isAdmin ? [['admin', 'shield', i18n.text('Admin console')]] : [])].map(([v, g, l]) => `<button type="button" data-act="goto" data-view="${v}">${icon(g)}<span>${esc(l)}</span>${icon('chevron')}</button>`).join('')}</section>
+    <section class="card links">${[...(isPhone() ? [['assets-history', 'receipt', i18n.text('Transaction history')]] : []), ['support', 'headset', i18n.text('Help & Support')], ['about', 'building', i18n.text('About Portgainy')], ['referrals', 'users', i18n.text('Referrals')], ...(u.isAdmin ? [['admin', 'shield', i18n.text('Admin console')]] : [])].map(([v, g, l], i) => `<button type="button" data-act="${v === 'assets-history' ? 'assets-history' : 'goto'}" data-view="${v}"><i class="gi g${i % 4}">${icon(g)}</i><span>${esc(l)}</span>${icon('chevron')}</button>`).join('')}</section>
     <button class="btn btn-danger btn-lg btn-block" type="button" data-act="logout">${icon('logout')}${i18n.html('Sign out')}</button>
   </div>`;
 }
@@ -120,7 +122,7 @@ function profileView() {
 
 const FAQ = [
   ['How do deposits work?', 'Send {currency} on the {network} network to your personal deposit address. Once the transfer is confirmed on the blockchain it is credited to your {earn} account automatically.', {currency:'USDT',network:'TRON (TRC20)',earn:'Earn'}],
-  ['How do I claim my daily reward?', 'Your first {claim} is available as soon as {earn} reaches {minimum} {currency}. Open {earn} and tap {claim}. Later claims are available once per day when the countdown finishes. Rewards credit {spot} and your {earn} principal stays untouched.', {claim:'Claim',earn:'Earn',minimum:'200',currency:'USDT',spot:'Spot'}],
+  ['How do I claim my daily reward?', 'Your first {claim} is available as soon as {earn} reaches {minimum} {currency}. Open {earn} and tap {claim}. Later claims are available once per day when the countdown finishes. Rewards credit {spot} and your {earn} principal stays untouched.', {claim:'Claim',earn:'Earn',minimum:String(EARN_MIN_DEFAULT),currency:'USDT',spot:'Spot'}],
   ['What are the withdrawal rules?', 'Withdrawals are requested from {spot} and confirmed with your password. Automatic processing depends on available funds and network resources. A {fee}% fee applies and the minimum request is {minimum} {currency}. Status updates appear under {assets} → {history}.', {spot:'Spot',fee:'2',minimum:'10',currency:'USDT',assets:'Assets',history:'History'}],
   ['How does trading work?', 'Choose a market, enter an amount in {currency} and review a {seconds}-second quote. Prices follow live {provider} quotes; positions are recorded by {platform} and settled in {currency}.', {currency:'USDT',seconds:'15',provider:'Binance',platform:'Portgainy'}],
   ['How do referrals pay out?', 'Level {firstLevel} earns {firstRate}% and level {secondLevel} earns {secondRate}% of the {earn} rewards your network claims. Referral rewards credit your {spot} balance.', {firstLevel:'1',firstRate:'10',secondLevel:'2',secondRate:'5',earn:'Earn',spot:'Spot'}],
@@ -129,7 +131,7 @@ const FAQ = [
 
 function filterFaq(query) {
   const q = String(query || '').toLocaleLowerCase(i18n.language);
-  return FAQ.filter(([a, b, parameters]) => !q || `${a} ${b} ${i18n.text(a)} ${i18n.text(b, parameters)}`.toLocaleLowerCase(i18n.language).includes(q));
+  return (S.user?.forgeEnabled?PortgainyForge.faq:FAQ).filter(([a, b, parameters]) => !q || `${a} ${b} ${i18n.text(a)} ${i18n.text(b, parameters)}`.toLocaleLowerCase(i18n.language).includes(q));
 }
 
 function supportView() {
@@ -179,7 +181,7 @@ function refreshChat() {
 function aboutView() {
   const fee = +(num(S.user?.withdrawalFeeRate, 0.02) * 100).toFixed(2);
   const status = i18n.text(S.pay.mode === 'disabled' && !S.pay.available ? 'Payment status is loading or temporarily unavailable.' : S.pay.withdrawals ? 'Deposits and withdrawals are available.' : 'Deposits are available. Withdrawals are currently paused.');
-  const facts = [[`${S.markets.length || '80+'}`, 'Live markets'], ['8–13%', 'Daily Earn rate'], ['200', 'USDT to start Earn'], ['15s', 'Quote validity']];
+  const facts = [[`${S.markets.length || '80+'}`, 'Live markets'], [`${PG_READY_LANGUAGES.length}`, 'Interface languages'], [String(earnMin()), 'USDT to start Earn'], ['15s', 'Quote validity']];
   const products = [
     ['chart', 'Live markets', 'Real-time prices for dozens of leading assets with 24-hour range, volume, favorites, category filters and a market-mood read-out.'],
     ['candles', 'Spot trading', 'Review a quote, confirm in one tap and track every position with live unrealized PNL. Orders settle in USDT.'],
@@ -188,9 +190,9 @@ function aboutView() {
     ['wallet', 'USDT wallet', 'A unique TRON (TRC20) deposit address per account, password-confirmed withdrawals and a clear status trail.'],
     ['bell', 'Price alerts', 'Set above/below targets on any market and get notified the moment a price is reached while Portgainy is open.']
   ];
-  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to explore live markets.'], ['Fund Earn', i18n.text('Deposit {currency} ({network}). {account} starts once your {account} balance reaches {minimum} {currency}.', {currency:'USDT',network:'TRC20',account:'Earn',minimum:200})], ['Claim every day', i18n.text('Your first Claim is available when you start {earn}; later claims open once per day. Your daily rate is {range}, based on your {earn} balance. Rewards credit {spot}.', {earn:'Earn',range:'8–13%',spot:'Spot'})], ['Trade, transfer or withdraw', i18n.text('Use {spot} {currency} to trade, move it back to {earn}, or request a withdrawal ({fee}% fee, {minimum} {currency} minimum).', {spot:'Spot',currency:'USDT',earn:'Earn',fee,minimum:10})]];
+  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to explore live markets.'], ['Fund Earn', i18n.text('Deposit {currency} ({network}). {account} starts once your {account} balance reaches {minimum} {currency}.', {currency:'USDT',network:'TRC20',account:'Earn',minimum:earnMin()})], ['Claim every day', i18n.text('Your first Claim is available when you start {earn}; later claims open once per day. Your daily rate is {range}, based on your {earn} balance. Rewards credit {spot}.', {earn:'Earn',range:'8–13%',spot:'Spot'})], ['Trade, transfer or withdraw', i18n.text('Use {spot} {currency} to trade, move it back to {earn}, or request a withdrawal ({fee}% fee, {minimum} {currency} minimum).', {spot:'Spot',currency:'USDT',earn:'Earn',fee,minimum:10})]];
   const accounts = [['Earn', 'Deposits and principal', 'Generates your daily reward. Principal is never reduced by claims.', 'earn'], ['Spot', 'Rewards, trading, withdrawals', 'Receives claims and referral rewards. Used for trades and withdrawal requests.', 'wallet'], ['Reserved', 'Pending withdrawals', 'Funds held while a withdrawal request is processed.', 'clock']];
-  const limits = [['Earn minimum', '200 USDT'], ['Daily reward rate', '8–13% of your Earn balance'], ['Claim cycle', 'First claim when you start Earn; then once per day'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Spot order size', '1 – 10,000 USDT per order'], ['Quote validity', '15 seconds'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
+  const limits = [['Earn minimum', `${earnMin()} USDT`], ['Daily reward rate', '8–13% of your Earn balance'], ['Claim cycle', 'First claim when you start Earn; then once per day'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Spot order size', '1 – 10,000 USDT per order'], ['Quote validity', '15 seconds'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
   const safety = [['lock', 'Password-confirmed withdrawals', 'Confirm withdrawals with your account password. Automatic processing requires sufficient funds and network resources.'], ['qr', 'Unique deposit addresses', 'Each account receives its own TRON address. Deposits are credited only after blockchain confirmation.'], ['fingerprint', 'Idempotent operations', 'Claims, orders and withdrawals use request keys to protect retries against duplicate processing.'], ['shield', 'Protected sessions', 'Sessions use secure, same-site cookies and sensitive endpoints are rate-limited against abuse.'], ['key', 'No keys in the browser', 'The website never holds private keys or seed phrases and Portgainy staff will never ask for them.'], ['history', 'Full transaction trail', 'Every deposit, transfer, claim, trade and withdrawal is recorded and can be exported as CSV.']];
   return `<div class="page about">
     <article class="about-hero">
@@ -214,8 +216,8 @@ function aboutView() {
     <section class="block">${sectionHead('Your accounts')}<div class="acct-cards">${accounts.map(([t, sub, d, g]) => `<article class="tile"><span class="tile-ic ${t === 'Spot' ? 'is-cyan' : ''}">${icon(g)}</span><strong>${i18n.html(t)}</strong><small>${i18n.html(sub)}</small><p>${i18n.html(d)}</p></article>`).join('')}</div></section>
 
     <section class="card about-sec"><span class="eyebrow">Earn</span><h2>${i18n.html("A daily reward on your Earn balance")}</h2>
-      <p>${i18n.html("Earn starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your Earn balance at Claim. Your first Claim is available when you start Earn. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.", {"value0":"200","value1":"USDT","value2":"8","value3":"13%"})}</p>${earnTierTable()}
-      <ul class="ticks"><li>${icon('check')}${i18n.html("Rewards are credited to your Spot balance.")}</li><li>${icon('check')}${i18n.html("Level {value0} referrals earn you {value1} and level {value2} earns you {value3} of each reward they claim, without reducing theirs.", {"value0":"1","value1":"10%","value2":"2","value3":"5%"})}</li><li>${icon('check')}${i18n.html("Accounts below {value0} {value1} see exactly how much is needed to start.", {"value0":"200","value1":"USDT"})}</li></ul></section>
+      <p>${i18n.html("Earn starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your Earn balance at Claim. Your first Claim is available when you start Earn. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.", {"value0":String(earnMin()),"value1":"USDT","value2":"8","value3":"13%"})}</p>${earnTierTable()}
+      <ul class="ticks"><li>${icon('check')}${i18n.html("Rewards are credited to your Spot balance.")}</li><li>${icon('check')}${i18n.html("Level {value0} referrals earn you {value1} and level {value2} earns you {value3} of each reward they claim, without reducing theirs.", {"value0":"1","value1":"10%","value2":"2","value3":"5%"})}</li><li>${icon('check')}${i18n.html("Accounts below {value0} {value1} see exactly how much is needed to start.", {"value0":String(earnMin()),"value1":"USDT"})}</li></ul></section>
 
     <section class="card about-sec"><span class="eyebrow">${i18n.html("Trading")}</span><h2>${i18n.html("How orders are priced and settled")}</h2>
       <p>${i18n.html("Prices come from Binance public market data. When you place an order you receive a quote that is valid for {value0} seconds; if the market moves materially, a fresh quote is required. Orders are unleveraged, cannot be sold short and settle in {value1}.", {"value0":"15","value1":"USDT"})}</p>
@@ -264,15 +266,16 @@ function adminView() {
   const total = (rows, field) => Math.round(rows.reduce((s, r) => s + num(r[field]), 0) * 1e6) / 1e6;
   const metrics = [['Confirmed deposits', depositInfo ? exactDepositAmount(depositInfo.totalAmount) : i18n.text('Unavailable'), 'deposit', 'deposits', i18n.text('All-time USDT · TRC20')],
     ['Pending', String(report?.withdrawals.pending.count ?? open.length), 'clock', 'pending'], ['Pending net', report ? exactDepositAmount(report.withdrawals.pending.net) : i18n.text('Unavailable'), 'withdraw', 'to-send'],
-    ['Earn balances', report ? exactDepositAmount(report.balances.earn) : usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'],
-    ['Spot balances', report ? exactDepositAmount(report.balances.spot) : usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', i18n.text('Reserved separately: {amount}', {amount:report ? exactDepositAmount(report.balances.reserved) : usdt(total(users, 'reservedBalance'))})],
+    [S.user.forgeEnabled?'Pending Forge rewards':'Earn balances', S.user.forgeEnabled?usdt(S.admin.forgeReport?.pending||0):report ? exactDepositAmount(report.balances.earn) : usdt(total(users, 'lockedBalance')), 'earn', 'vip-balance'],
+    [S.user.forgeEnabled?'USDT wallets':'Spot balances', report ? exactDepositAmount(report.balances.spot) : usdt(total(users, 'withdrawBalance')), 'wallet', 'withdraw-balance', i18n.text('Reserved separately: {amount}', {amount:report ? exactDepositAmount(report.balances.reserved) : usdt(total(users, 'reservedBalance'))})],
     ['Accounts', String(users.length), 'users', 'users'], ['Paid out', report ? sumExactAmounts(report.withdrawals.chainConfirmed.net,report.withdrawals.manualConfirmed.net) : i18n.text('Unavailable'), 'check', 'paid']];
   const tabs = [['accounting', 'Accounting', ''], ['withdrawals', 'Withdrawals', report?.withdrawals.pending.count ?? open.length], ['deposits', 'Deposits', depositInfo?.count ?? '—'], ['users', 'Users', users.length],
+    ...(S.user.forgeEnabled ? [['forge','Forge rewards','']] : []),
     ...(S.admin.workingWallet ? [['working-wallet', 'Working wallet', '']] : [])];
   return `<div class="page admin">${head}
     <section class="metric-grid">${metrics.map(([l, v, g, key, note]) => `<article class="metric" data-metric="${key}"><span>${icon(g)}${i18n.html(l)}</span><strong>${esc(v)}</strong>${note ? `<small>${esc(note)}</small>` : ''}</article>`).join('')}</section>
     <div class="tabs">${tabs.map(([k, l, n]) => `<button class="${S.adminTab === k ? 'is-on' : ''}" type="button" data-act="admin-tab" data-tab="${k}">${i18n.html(l)}<sup>${n}</sup></button>`).join('')}</div>
-    ${S.adminTab === 'accounting' ? adminAccounting(report,S.admin.workingWallet) : S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : S.adminTab === 'working-wallet' && S.admin.workingWallet ? adminWorkingWallet(S.admin.workingWallet) : adminWithdrawals(withdrawals)}</div>`;
+    ${S.adminTab === 'forge' && S.user.forgeEnabled ? PortgainyForge.adminView(S.admin.forgeReport) : S.adminTab === 'accounting' ? adminAccounting(report,S.admin.workingWallet) : S.adminTab === 'users' ? adminUsers(users) : S.adminTab === 'deposits' ? adminDepositList(depositInfo) : S.adminTab === 'working-wallet' && S.admin.workingWallet ? adminWorkingWallet(S.admin.workingWallet) : adminWithdrawals(withdrawals)}</div>`;
 }
 
 function adminAccounting(report,wallet) {
@@ -284,7 +287,7 @@ function adminAccounting(report,wallet) {
   return `<div class="page accounting">
     <p class="note">${icon('info')}${i18n.html("Ledger totals are all-time. Balances are not deposits or profit; wallet values are separate on-chain balances. Synthetic positions are shown at cost, not market value.")}</p>
     <div class="accounting-grid">
-    ${section('Customer balances',entry('Earn USDT',value(b.earn))+entry('Spot USDT',value(b.spot))+entry('Reserved withdrawals',value(b.reserved))+
+    ${section('Customer balances',(S.user.forgeEnabled?entry('Available USDT',value(b.spot)):entry('Earn USDT',value(b.earn))+entry('Spot USDT',value(b.spot)))+entry('Reserved withdrawals',value(b.reserved))+
       entry('Total account USDT',value(b.totalUsdt))+entry('Synthetic positions at cost',value(b.positionCost),i18n.text('{count} positions',{count:b.positionCount})))}
     ${section('Deposits and collection',entry('Confirmed wallet deposits',value(d.total),i18n.text('{count} deposits',{count:d.count}))+
       entry('Collected to treasury',value(c.confirmed.gross),i18n.text('{count} transfers · all destinations',{count:c.confirmed.count}))+entry('Credited but not yet collected',value(d.uncollected),'ledger estimate')+
@@ -384,5 +387,5 @@ function adminUsers(users) {
 function adminUserResults(users) {
   const q = S.adminSearch.trim().toLowerCase();
   const rows = [...users].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).filter(u => !q || `${u.email} ${u.name}`.toLowerCase().includes(q));
-  return `${rows.length ? `<ul class="admin-list" id="admin-users">${rows.map(u => `<li class="admin-card" data-user="${esc(u.id)}"><div class="admin-row"><b>${esc(u.email)}</b><span class="tag">${Math.round(num(u.earnRate ?? 0.1) * 100)}% / 24h</span></div><small>${i18n.html('{name} · joined {date}', {name:u.name,date:dateText(u.createdAt, true)})}</small><div class="admin-kv"><span>Earn</span>${adminNum(u.lockedBalance)}<span>Spot</span>${adminNum(u.withdrawBalance)}<span>${i18n.html("Reserved")}</span>${adminNum(u.reservedBalance)}<span>${i18n.html("Earned")}</span>${adminNum(u.earnedTotal)}<span>${i18n.html("Withdrawn")}</span>${adminNum(u.withdrawnTotal)}</div></li>`).join('')}</ul>` : emptyState('users', 'No users found')}`;
+  return `${rows.length ? `<ul class="admin-list" id="admin-users">${rows.map(u => `<li class="admin-card" data-user="${esc(u.id)}"><div class="admin-row"><b>${esc(u.email)}</b><span class="tag">${S.user.forgeEnabled?'Forge':Math.round(num(u.earnRate ?? 0.1) * 100)+'% / 24h'}</span></div><small>${i18n.html('{name} · joined {date}', {name:u.name,date:dateText(u.createdAt, true)})}</small><div class="admin-kv">${S.user.forgeEnabled?'':`<span>Earn</span>${adminNum(u.lockedBalance)}`}<span>${i18n.html(S.user.forgeEnabled?'USDT wallet':'Spot')}</span>${adminNum(u.withdrawBalance)}<span>${i18n.html("Reserved")}</span>${adminNum(u.reservedBalance)}<span>${i18n.html("Earned")}</span>${adminNum(u.earnedTotal)}<span>${i18n.html("Withdrawn")}</span>${adminNum(u.withdrawnTotal)}</div></li>`).join('')}</ul>` : emptyState('users', 'No users found')}`;
 }

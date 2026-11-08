@@ -11,16 +11,16 @@ test('existing users see only a one-time update, with persistent dismissal and c
  browser=await(process.env.PORTGAINY_TEST_BROWSER==='webkit'?webkit:chromium).launch();
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const login=async()=>{await page.fill('input[name=email]',user.email);await page.fill('input[name=password]',password);await page.click('button[type=submit]');await page.waitForSelector('.shell');};
- await page.goto(base);await login();await page.waitForSelector('.system-notice');assert.match(await page.locator('.system-notice').innerText(),/1 USDT/);assert.equal(await page.locator('.system-notice tbody tr').count(),6);
+ await page.goto(base+'/#signin');await login();await page.waitForSelector('.system-notice');assert.match(await page.locator('.system-notice').innerText(),/1 USDT/);assert.equal(await page.locator('.system-notice tbody tr').count(),6);
  assert.equal(await page.locator('[data-act^="guide-"],[id*="language"]').count(),0);
  await fs.mkdir(path.resolve(__dirname,'../artifacts/earn-notice'),{recursive:true});
  await page.evaluate(()=>document.fonts.ready);
  for(const [name,width]of [['phone',390],['small-phone',320],['desktop',1366]]){await page.setViewportSize({width,height:844});await page.screenshot({path:path.resolve(__dirname,`../artifacts/earn-notice/${name}.png`),animations:'disabled'});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1));}
  await page.locator('[data-act="dismiss-earn-notice"]').first().click();await page.waitForFunction(()=>!S.earnNoticeActive);assert.equal(await page.locator('[data-act^="guide-"]').count(),0);
  await page.reload();await page.waitForSelector('.shell');assert.equal(await page.locator('.system-notice').count(),0);
- await page.evaluate(()=>go('profile'));await page.waitForSelector('[data-act="logout"]');await page.locator('[data-act="logout"]').click();await page.waitForSelector('input[name=email]');await login();assert.equal(await page.locator('.system-notice').count(),0);
+ await page.evaluate(()=>go('profile'));await page.waitForSelector('.page.profile [data-act="logout"]');await page.locator('.page.profile [data-act="logout"]').click();await page.waitForSelector('.land');await page.goto(base+'/#signin');await page.waitForSelector('input[name=email]');await login();assert.equal(await page.locator('.system-notice').count(),0);
  await page.evaluate(()=>go('earn'));await page.waitForSelector('#calc-amount');assert.match(await page.locator('.earn-hero-copy h2').innerText(),/^9%/);
- await page.fill('#calc-amount','4000');assert.match(await page.locator('[data-calc=d]').innerText(),/520/);await page.fill('#calc-amount','199');assert.match(await page.locator('[data-calc=d]').innerText(),/^0/);
+ await page.fill('#calc-amount','4000');assert.match(await page.locator('[data-calc=d]').innerText(),/520/);await page.fill('#calc-amount','99');assert.match(await page.locator('[data-calc=d]').innerText(),/^0/);
  await page.evaluate(()=>{acceptMarkets({markets:['BTC','ETH','SOL','BNB','PEPE'].map(base=>({base,symbol:base+'USDT',name:base,price:100,change:1,volume:1000,high:120,low:90})),status:'live'});go('markets');});
  await page.waitForSelector('.mrow .coin-mark img');
  const logos=await page.locator('.mrow .coin-mark img').evaluateAll(async nodes=>Promise.all(nodes.map(async img=>{await img.decode();return{path:img.getAttribute('src'),width:img.naturalWidth,display:getComputedStyle(img).display};})));

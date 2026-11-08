@@ -21,7 +21,7 @@ const moreLink = (label, view) => `<button class="more-link" type="button" data-
 
 const NAV = [
   ['home', 'Home', 'home'], ['markets', 'Markets', 'chart'], ['trade', 'Trade', 'candles'],
-  ['earn', 'Earn', 'earn'], ['assets', 'Assets', 'wallet']
+  ['earn', 'Earn', 'earn'], ['assets', 'Wallet', 'wallet']
 ];
 const RAIL_EXTRA = [['referrals', 'Referrals', 'users'], ['support', 'Support', 'headset'], ['about', 'About', 'building']];
 
@@ -31,8 +31,39 @@ function liveBadge() {
 }
 
 function navButton([view, label, glyph], mode) {
+  if(view==='earn'&&S.user?.forgeEnabled)label='Forge';
   const active = S.view === view;
-  return `<button class="${mode}-item ${active ? 'is-active' : ''} ${view === 'trade' && mode === 'tab' ? 'is-hero' : ''}" type="button" data-act="goto" data-view="${view}" ${active ? 'aria-current="page"' : ''}><span class="nav-ic">${icon(glyph)}</span><span>${i18n.html(label)}</span></button>`;
+  return `<button class="${mode}-item ${active ? 'is-active' : ''} ${view === 'earn' && mode === 'tab' ? 'is-hero' : ''}" type="button" data-act="goto" data-view="${view}" ${active ? 'aria-current="page"' : ''}><span class="nav-ic">${icon(glyph)}</span><span>${i18n.html(label)}</span></button>`;
+}
+
+function headerLink([view, label], extra = '') {
+  if(view==='earn'&&S.user?.forgeEnabled)label='Forge';
+  const active = S.view === view;
+  return `<button class="gh-link ${active ? 'is-active' : ''} ${extra}" type="button" data-act="goto" data-view="${view}" ${active ? 'aria-current="page"' : ''}>${i18n.html(label)}</button>`;
+}
+
+function accountMenu(name) {
+  const items = [['profile', 'Profile', 'user'], ['referrals', 'Referrals', 'users'], ['support', 'Support', 'headset'], ['about', 'About', 'building'], ...(S.user.isAdmin ? [['admin', 'Admin', 'shield']] : [])];
+  return `<span class="gh-menu"><button class="gh-avatar" type="button" data-act="menu-toggle" aria-haspopup="true" aria-expanded="false" aria-label="${i18n.html('Account')}">${avatarHex(name, 'is-sm')}${icon('chevronDown')}</button>
+    <div class="gh-pop" role="menu"><div class="gh-pop-head">${avatarHex(name, 'is-sm')}<span><strong>${esc(name)}</strong><small>${esc(S.user.email)}</small></span></div>
+      ${items.map(([v, l, g]) => `<button type="button" role="menuitem" data-act="goto" data-view="${v}">${icon(g)}<span>${i18n.html(l)}</span></button>`).join('')}
+      <button type="button" role="menuitem" data-act="toggle-theme">${icon('moon')}<span>${i18n.html('Switch theme')}</span></button>
+      <button type="button" role="menuitem" class="is-danger" data-act="logout">${icon('logout')}<span>${i18n.html('Sign out')}</span></button></div></span>`;
+}
+
+const TAB_VIEWS = ['home', 'markets', 'earn', 'assets', 'profile'];
+
+/* Phone app bar: avatar or back button, centred title, search and notifications. */
+function appBar(name) {
+  const inner = !TAB_VIEWS.includes(S.view);
+  const title = S.view === 'home' ? '' : i18n.text(TITLES[S.view] || 'Home');
+  const left = inner
+    ? `<button class="ab-btn" type="button" data-act="back" aria-label="${i18n.html('Back')}">${icon('chevronLeft')}</button>`
+    : `<button class="ab-avatar" type="button" data-act="goto" data-view="profile" aria-label="${i18n.html('Profile')}">${avatarHex(name, 'is-sm')}</button>`;
+  const center = S.view === 'home' ? `<span class="ab-brand">${markImg(26)}${wordmark()}</span>` : `<b class="ab-title">${esc(title)}</b>`;
+  const live = ['markets', 'trade'].includes(S.view) ? `<span class="ab-live">${liveBadge()}</span>` : '';
+  return `<header class="ab" id="ab"><div class="ab-in"><span class="ab-l">${left}</span><span class="ab-c">${center}</span>
+    <span class="ab-r">${live}<button class="ab-btn" type="button" data-act="open-search" aria-label="${i18n.html('Search')}">${icon('search')}</button><button class="ab-btn" type="button" data-act="open-notices" aria-label="${i18n.html('Notifications')}">${icon('bell')}${S.activities.length ? '<i class="dot"></i>' : ''}</button></span></div></header>`;
 }
 
 function renderShell() {
@@ -40,32 +71,23 @@ function renderShell() {
   const body = (views[S.view] || homeView)();
   const name = S.user.name || 'Player';
   app.innerHTML = `<div class="shell view-${S.view}">
-    <aside class="rail" aria-label="${i18n.html('Main')}">
-      <button class="rail-brand" type="button" data-act="goto" data-view="home">${brandLockup(40)}</button>
-      <nav class="rail-nav">${NAV.map(item => navButton(item, 'rail')).join('')}<span class="rail-label">${i18n.html('Community')}</span>${RAIL_EXTRA.map(item => navButton(item, 'rail')).join('')}${S.user.isAdmin ? navButton(['admin', 'Admin', 'shield'], 'rail') : ''}</nav>
-      <button class="rail-rank" type="button" data-act="goto" data-view="profile">${avatarHex(name)}<span><strong>${esc(name)}</strong><small>${esc(S.user.email)}</small></span></button>
-    </aside>
+    ${appBar(name)}
+    <header class="topbar gh"><div class="gh-in">
+      <button class="gh-brand" type="button" data-act="goto" data-view="home" aria-label="Portgainy">${brandLockup(32)}</button>
+      <nav class="gh-nav" aria-label="${i18n.html('Main')}">${NAV.map(([v, l]) => headerLink([v, l])).join('')}${headerLink(['referrals', 'Referrals'])}</nav>
+      <button class="avatar-btn" type="button" data-act="goto" data-view="profile" aria-label="${i18n.html('Profile')}">${avatarHex(name, 'is-sm')}</button>
+      <button class="search-pill" type="button" data-act="open-search">${icon('search')}<span>${i18n.html('Search coins and pages')}</span><kbd>/</kbd></button>
+      <span class="top-live">${liveBadge()}</span>
+      <button class="icon-btn" type="button" data-act="open-notices" aria-label="${i18n.html('Notifications')}">${icon('bell')}${S.activities.length ? '<i class="dot"></i>' : ''}</button>
+      <button class="btn btn-lime btn-sm top-deposit" type="button" data-act="wallet-deposit">${icon('plus')}${i18n.html('Deposit')}</button>
+      ${accountMenu(name)}
+    </div></header>
     <div class="stage">
-      <header class="topbar">
-        <button class="avatar-btn" type="button" data-act="goto" data-view="profile" aria-label="${i18n.html('Profile')}">${avatarHex(name, 'is-sm')}</button>
-        <button class="search-pill" type="button" data-act="open-search">${icon('search')}<span>${i18n.html('Search coins and pages')}</span><kbd>/</kbd></button>
-        <span class="top-live">${liveBadge()}</span>
-        <button class="icon-btn" type="button" data-act="open-notices" aria-label="${i18n.html('Notifications')}">${icon('bell')}${S.activities.length ? '<i class="dot"></i>' : ''}</button>
-        <button class="icon-btn hide-sm" type="button" data-act="goto" data-view="support" aria-label="${i18n.html('Support')}">${icon('headset')}</button>
-        <button class="btn btn-lime btn-sm top-deposit" type="button" data-act="wallet-deposit">${icon('plus')}${i18n.html('Deposit')}</button>
-      </header>
-      <main class="content" id="content">${body}</main>
+      <main class="content" id="content">${S.platform?.localTestWallet?`<p class="note">${icon('info')}Local testing · Account balances and deposits here are simulated. Do not send real crypto.</p>`:''}${body}</main>
       <footer class="foot"><span>Portgainy &copy; 2026</span><span>${i18n.html('Prices by {provider} · Positions are settled in {currency}', {provider:'Binance',currency:'USDT'})}</span></footer>
     </div>
-    <nav class="tabbar" aria-label="${i18n.html('Primary')}">${NAV.map(item => navButton(item, 'tab')).join('')}</nav>
+    <nav class="tabbar" aria-label="${i18n.html('Primary')}">${PHONE_NAV.map(item => navButton(item, 'tab')).join('')}</nav>
   </div>`;
-}
-
-function renderPublic() {
-  const view = S.view === 'support' ? supportView : aboutView;
-  app.innerHTML = `<div class="public">
-    <header class="public-top"><button class="rail-brand" type="button" data-act="auth-home">${brandLockup(34)}</button><nav><button class="link-btn" data-act="goto" data-view="about">${i18n.html("About")}</button><button class="link-btn" data-act="goto" data-view="support">${i18n.html("Support")}</button><button class="btn btn-lime btn-sm" data-act="auth-home">${i18n.html("Sign in")}</button></nav></header>
-    <main class="content public-content">${view()}</main></div>`;
 }
 
 /* ------------------------------------------------------------------ auth */
@@ -82,8 +104,8 @@ function renderAuth() {
         <p class="auth-sub">${i18n.html("One account for live crypto markets, daily Earn rewards and {value0} wallets.", {"value0":"USDT"})}</p>
       </div>
       <ul class="auth-stats">
-        <li><b>8–13%</b><span>${i18n.html("Daily Earn rate")}</span></li>
-        <li><b>24h</b><span>${i18n.html("Claim cycle")}</span></li>
+        <li><b>24/7</b><span>${i18n.html("Real-time prices")}</span></li>
+        <li><b>${PG_READY_LANGUAGES.length}</b><span>${i18n.html("Interface languages")}</span></li>
         <li><b>USDT</b><span>${i18n.html("Account currency")}</span></li>
       </ul>
     </section>
@@ -148,6 +170,7 @@ function claimStrip() {
 }
 
 function earnProgress() {
+  if(S.user?.forgeEnabled)return `<button class="earn-meter is-active" type="button" data-act="goto" data-view="earn"><span>${icon('earn')}${i18n.html('Your Forge collection')}</span><b>${S.forge?.cores?.length||0} ${i18n.html('Cores')}</b></button>`;
   const e = earnMin(), bal = num(S.user.lockedBalance), short = earnShortfall();
   if (!short) return `<div class="earn-meter is-active"><span>${icon('earn')}${i18n.html('{account} active · {rate}% daily', {account:'Earn',rate:earnRatePct()})}</span><b>${money(bal)} USDT</b></div>`;
   return `<button class="earn-meter" type="button" data-act="wallet-deposit"><span>${icon('earn')}${i18n.rich('{account} starts at {minimum} {currency} · {strongStart}{amount} {currency}{strongEnd} to go', {account:'Earn',minimum:e,currency:'USDT',amount:usd(short)})}</span><i class="bar"><b style="width:${Math.round(clamp(bal / e, 0, 1) * 100)}%"></b></i></button>`;
@@ -164,7 +187,7 @@ function referralCard() {
 
 function allocationCard() {
   const u = S.user;
-  const parts = [
+  const parts = u.forgeEnabled ? [[i18n.text('USDT wallet'),num(u.withdrawBalance),'var(--lime)'],[i18n.text('Crypto'),cryptoValue(),'var(--pink)'],[i18n.text('Pending withdrawals'),num(u.reservedBalance),'var(--amber)']] : [
     [i18n.text('Spot USDT'), num(u.withdrawBalance), 'var(--cyan)'],
     [i18n.text('Earn USDT'), num(u.lockedBalance), 'var(--lime)'],
     [i18n.text('Crypto'), cryptoValue(), 'var(--pink)'],
@@ -185,9 +208,12 @@ function activityIconFor(a) {
 
 function activityTitle(a) {
   switch (a.type) {
+    case 'forge_purchase': return i18n.text('Forge Core purchase');
+    case 'forge_upgrade': return i18n.text('Forge Core upgrade');
+    case 'forge_reward': return i18n.text('Forge rewards collected');
     case 'earn': return i18n.text('Daily Earn claim');
-    case 'referral': return i18n.text('Referral reward · Level {level}', {level:a.level || 1});
-    case 'deposit': return i18n.text('Deposit to Earn');
+    case 'referral': return a.source==='forge'?i18n.text('Forge referral rewards collected'):i18n.text('Referral reward · Level {level}', {level:a.level || 1});
+    case 'deposit': return i18n.text(S.user?.forgeEnabled ? (a.status==='below-minimum'?'Deposit awaiting minimum':'USDT deposit') : 'Deposit to Earn');
     case 'withdraw': return i18n.text('Withdrawal request');
     case 'transfer': return i18n.text('Transfer to Earn');
     case 'spot': return i18n.text('{action} {asset}', {action:i18n.text(a.side === 'BUY' ? 'Bought' : 'Sold'),asset:a.base || ''}).trim();
@@ -200,8 +226,9 @@ function activityTitle(a) {
 }
 
 function activityAmount(a) {
+  if(a.type==='deposit'&&a.creditedAmount!==undefined)return a.status==='below-minimum'?{text:usd(a.amount),cls:''}:{text:`+${usd(a.creditedAmount)}`,cls:'up'};
   if (!a.amount) return { text: '—', cls: '' };
-  if (a.type === 'withdraw' || a.type === 'vip') return { text: `-${usd(a.amount)}`, cls: 'down' };
+  if (a.type === 'withdraw' || a.type === 'vip' || a.type==='forge_purchase' || a.type==='forge_upgrade') return { text: `-${usd(a.amount)}`, cls: 'down' };
   if (a.type === 'transfer') return { text: `${usd(a.amount)}`, cls: '' };
   if (a.type === 'spot') return { text: `${a.side === 'BUY' ? '-' : '+'}${usd(a.amount)}`, cls: a.side === 'BUY' ? 'down' : 'up' };
   return { text: `+${usd(a.amount)}`, cls: 'up' };
@@ -209,7 +236,7 @@ function activityAmount(a) {
 
 function activityList(limit = 0, filter = 'all') {
   let rows = S.activities;
-  if (filter !== 'all') rows = rows.filter(a => (filter === 'trades' ? a.type === 'spot' : filter === 'rewards' ? ['earn', 'referral'].includes(a.type) : a.type === filter));
+  if (filter !== 'all') rows = rows.filter(a => (filter === 'trades' ? a.type === 'spot' : filter === 'rewards' ? ['earn', 'referral','forge_reward'].includes(a.type) : a.type === filter));
   if (limit) rows = rows.slice(0, limit);
   if (!rows.length) return emptyState('receipt', 'Nothing here yet', 'Your activity will appear as soon as you use your account.');
   return `<ul class="acts">${rows.map(a => {
@@ -222,7 +249,32 @@ function activityList(limit = 0, filter = 'all') {
 const WITHDRAW_STATUS = { requested: 'Under review', approved: 'Approved', submitted: 'Awaiting confirmation', confirmed: 'Sent', rejected: 'Rejected', pending: 'Pending', failed: 'Failed' };
 const withdrawStatus = item => item.automatic && ['requested', 'approved'].includes(item.status) ? i18n.text('Processing') : (WITHDRAW_STATUS[item.status] ? i18n.text(WITHDRAW_STATUS[item.status]) : item.status);
 
+function tickerRow() {
+  const list = sortedMarkets('hot').slice(0, 8);
+  if (!list.length) return '';
+  return `<div class="tickrow" role="list">${list.map(r => `<button class="tick-chip" type="button" role="listitem" data-act="open-trade" data-symbol="${esc(r.symbol)}">${coinMark(r.base, 22)}<b>${esc(r.base)}</b><span data-px="${esc(r.symbol)}">${price(r.price)}</span><i class="chg-text ${tone(r.change)}" data-chg="${esc(r.symbol)}">${pct(r.change)}</i></button>`).join('')}</div>`;
+}
+
+/* A medal stepper for the six balance tiers, shown on phones. */
+function earnLevelCard() {
+  if(S.user?.forgeEnabled)return PortgainyForge.summaryCard();
+  const bal = num(S.user.lockedBalance);
+  let idx = -1;
+  EARN_TIERS.forEach(([min], i) => { if (bal >= min) idx = i; });
+  const next = EARN_TIERS[idx + 1], base = EARN_TIERS[Math.max(idx, 0)][0];
+  const progress = next ? clamp((bal - (idx < 0 ? 0 : base)) / (next[0] - (idx < 0 ? 0 : base)), 0, 1) : 1;
+  const steps = EARN_TIERS.map(([min], i) => `<li class="${i < idx ? 'is-done' : i === idx ? 'is-now' : ''}"><i>${i <= idx ? `<b>${i + 1}</b>` : icon('lock')}</i><small>${compact(min)}</small></li>`).join('');
+  const title = idx < 0 ? i18n.html('Not started') : i18n.html('Tier {n} of {total}', { n: idx + 1, total: EARN_TIERS.length });
+  const hint = next ? i18n.html('Add {amount} USDT to reach tier {n}', { amount: usd(Math.max(0, next[0] - bal)), n: idx + 2 }) : i18n.html('You are on the highest tier');
+  return `<article class="card earnlvl"><div class="sec-head"><h2>${i18n.html('Earn level')}</h2><button class="more-link" type="button" data-act="goto" data-view="earn">${i18n.html('Details')}${icon('chevron')}</button></div>
+    <div class="lvl-top"><strong>${title}</strong><span class="tag ${idx >= 0 ? 'tag-lime' : ''}">${idx >= 0 ? `${earnRatePct()}% ${i18n.html('daily')}` : `${earnMin()} USDT`}</span></div>
+    <ol class="lvl-steps" style="--k:${((idx < 0 ? 0 : idx + (next ? progress : 0)) / (EARN_TIERS.length - 1)).toFixed(3)}">${steps}</ol>
+    <i class="xp"><b style="width:${Math.round(progress * 100)}%"></b></i>
+    <p class="lvl-hint">${hint}</p></article>`;
+}
+
 function homeView() {
+  if (isPhone()) return phoneHome();
   const u = S.user, pnl = unrealized();
   const hasCrypto = holdings().length > 0;
   const tabs = [['hot', i18n.text('Hot')], ['gainers', i18n.text('Gainers')], ['losers', i18n.text('Losers')], ['favorites', i18n.text('Favorites')]];
@@ -235,18 +287,20 @@ function homeView() {
       <div class="hero-sub"><span>≈ $<span data-total-usd>${S.hide ? '••••' : usd(totalValue())}</span></span>
         ${hasCrypto ? `<span class="pnl ${tone(pnl.amount)}" data-pnl>${S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)} (${pct(pnl.percent)})`}<small>${i18n.html("Unrealized PNL")}</small></span>` : ''}${!hasCrypto || manualAdminDisplay() ? `<span class="pnl-note">${i18n.html("Earned all-time")} <b>${money(displayEarnedTotal())}</b></span>` : ''}</div>
       ${earnProgress()}
-      <div class="quick">${[['wallet-deposit', 'deposit', i18n.text('Add Funds')], ['wallet-withdraw', 'withdraw', i18n.text('Send')], ['wallet-transfer', 'transfer', i18n.text('Transfer')], ['goto', 'earn', i18n.text('Earn'), 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${esc(label)}</span></button>`).join('')}</div>
+      <div class="quick">${[['wallet-deposit', 'deposit', i18n.text('Add Funds')], ['wallet-withdraw', 'withdraw', i18n.text('Send')], [u.forgeEnabled?'goto':'wallet-transfer', u.forgeEnabled?'candles':'transfer', i18n.text(u.forgeEnabled?'Trade':'Transfer'), u.forgeEnabled?'trade':null], ['goto', 'earn', i18n.text(u.forgeEnabled?'Forge':'Earn'), 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${esc(label)}</span></button>`).join('')}</div>
     </article>
+    ${tickerRow()}
     ${claimStrip()}
+    ${earnLevelCard()}
     ${allocationCard()}
     ${referralCard()}
     </div><div class="col">
-    <section class="card">
+    <section class="card home-markets">
       <div class="tabs" role="tablist">${tabs.map(([key, label]) => `<button class="${S.marketTab === key ? 'is-on' : ''}" type="button" role="tab" data-act="market-tab" data-tab="${key}">${esc(label)}</button>`).join('')}<button class="more-link push" type="button" data-act="goto" data-view="markets">${i18n.html('All')}${icon('chevron')}</button></div>
       <div class="mlist" id="home-markets">${rows.length ? rows.map(row => marketRow(row)).join('') : S.markets.length ? emptyState('star', 'No favorites yet', 'Tap the star on any market to pin it here.') : marketsLoading()}</div>
     </section>
     ${movers.length ? `<section class="movers">${movers.map(row => `<button class="mover" type="button" data-act="open-trade" data-symbol="${esc(row.symbol)}"><span class="mover-top">${coinMark(row.base, 24)}<b>${esc(row.base)}</b></span><strong data-px="${esc(row.symbol)}">${price(row.price)}</strong><span class="chg-text ${tone(row.change)}" data-chg="${esc(row.symbol)}">${pct(row.change)}</span></button>`).join('')}</section>` : ''}
-    <section class="card">${sectionHead('Recent activity', moreLink('History', 'assets'))}${activityList(5)}</section>
+    <section class="card home-activity">${sectionHead('Recent activity', moreLink('History', 'assets'))}${activityList(5)}</section>
   </div></div>`;
 }
 
@@ -287,9 +341,11 @@ function marketsView() {
       <div class="mood-bar"><i style="width:${breadth}%"></i></div>
       <div class="mood-legend"><span class="up">${i18n.html('{count} rising', {count:up})}</span><span class="muted">${i18n.html('Avg {percent}', {percent:pct(avg)})}</span><span class="down">${i18n.html('{count} falling', {count:down})}</span></div>
     </article>
+    <div class="mk-sticky">
     <div class="search-field"><span>${icon('search')}</span><input id="market-search" type="search" value="${esc(S.marketQuery)}" placeholder="${i18n.html("Search coin or name")}" autocomplete="off" aria-label="${i18n.html("Search markets")}"></div>
     <div class="tabs" role="tablist">${tabs.map(([key, label]) => `<button class="${S.marketTab === key ? 'is-on' : ''}" type="button" role="tab" data-act="market-tab" data-tab="${key}">${esc(label)}</button>`).join('')}</div>
     <div class="chips" role="tablist" aria-label="${i18n.html("Categories")}">${cats.map(c => `<button class="${S.marketCategory === c ? 'is-on' : ''}" type="button" data-act="market-cat" data-cat="${esc(c)}">${i18n.html(c === 'all' ? 'All' : c)}</button>`).join('')}</div>
+    </div>
     <section class="card flush"><div class="mhead"><span>${i18n.html("Name")}</span><span>${i18n.html("Last price")}</span><span>24h</span></div>
       <div class="mlist" id="market-list">${rows.length ? rows.map(row => marketRow(row, { star: true })).join('') : S.markets.length ? emptyState('search', 'No assets found', 'Try a different search or category.') : marketsLoading()}</div></section>
   </div>`;

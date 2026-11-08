@@ -19,6 +19,8 @@ const { OperatorPortal } = require('./payments/portal');
 const { BinanceMarkets } = require('./markets/binance');
 const { assistantReply } = require('./markets/assistant');
 const earn = require('./markets/earn');
+const forge = require('./markets/forge');
+const forgeWallet = require('./markets/forge-wallet');
 const referralPromotion = require('./markets/referral-promotion');
 const spot = require('./markets/spot');
 const maintenanceConfiguration = require('./config/platform-maintenance.json');
@@ -42,7 +44,9 @@ const REVIEW_PAYMENT_ORIGIN=!IS_PRODUCTION&&process.env.TASKMALL_REVIEW_ORIGIN==
 const TEST_WALLET = process.env.NODE_ENV === 'test' && process.env.TASKMALL_TEST_WALLET === '1'
   && Boolean(process.env.TASKMALL_DATA_DIR) && path.resolve(DATA_DIR) !== path.join(__dirname, 'data');
 const DESIGN_PREVIEW = process.env.TASKMALL_DESIGN_PREVIEW === '1';
-const EARN_MODE = DESIGN_PREVIEW || process.env.TASKMALL_EARN_ENABLED === '1';
+if(process.env.PORTGAINY_FORGE_ENABLED!==undefined&&!['0','1'].includes(process.env.PORTGAINY_FORGE_ENABLED))throw new Error('INVALID_FORGE_CONFIGURATION');
+const FORGE_MODE = process.env.PORTGAINY_FORGE_ENABLED === '1';
+const EARN_MODE = FORGE_MODE || DESIGN_PREVIEW || process.env.TASKMALL_EARN_ENABLED === '1';
 if (DESIGN_PREVIEW && (IS_PRODUCTION || !process.env.TASKMALL_DATA_DIR || path.resolve(DATA_DIR) === path.join(__dirname,'data') || process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.TASKMALL_SQLITE === '1')) throw new Error('Design preview requires isolated local data and cannot use the live database.');
 const markets = new BinanceMarkets();
 
@@ -214,16 +218,20 @@ function cleanUser(user) {
     name: user.name,
     email: user.email,
     language: supportedLanguages.has(user.language) ? user.language : 'en',
-    earnNoticeSeen: user.earnNotice?.version === require('./markets/earn-rates').NOTICE_VERSION,
+    earnNoticeSeen: FORGE_MODE || user.earnNotice?.version === require('./markets/earn-rates').NOTICE_VERSION,
+    forgeEnabled: FORGE_MODE,
+    walletModel: FORGE_MODE ? 'unified' : 'legacy-split',
+    balance: balanceValue(user.withdrawBalance),
+    pendingDeposit: FORGE_MODE ? usdtAmount(BigInt(user.forgeHeldDepositUnits||'0')) : 0,
     points: user.points,
     streak: user.streak,
     completedCount: user.completedTaskIds.length,
     completedTaskIds: user.completedTaskIds,
     lockedBalance: balanceValue(user.lockedBalance),
     earningBalance: balanceValue(user.lockedBalance),
-    earnEnabled: EARN_MODE,
-    earnRate: EARN_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
-    nextEarnReward: EARN_MODE ? usdtAmount(referralPromotion.rewardUnits(db,user)) : null,
+    earnEnabled: EARN_MODE && !FORGE_MODE,
+    earnRate: EARN_MODE && !FORGE_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
+    nextEarnReward: EARN_MODE && !FORGE_MODE ? usdtAmount(referralPromotion.rewardUnits(db,user)) : null,
     referralPromotion: null,
     withdrawBalance: balanceValue(user.withdrawBalance),
     spotBalance: balanceValue(user.withdrawBalance),
@@ -277,7 +285,7 @@ function adminUserRow(user) {
     lastCompletionDate: user.lastCompletionDate,
     inviteCode: user.inviteCode,
     referredBy: user.referredBy,
-    earnRate: EARN_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
+    earnRate: EARN_MODE && !FORGE_MODE ? referralPromotion.rateBps(db,user)/10000 : null,
     createdAt: user.createdAt
   };
 }
@@ -351,15 +359,18 @@ async function loadDatabase() {
     }
     if (saved && !Array.isArray(saved.users)) throw new Error('Database users must be an array.');
     if(saved?.earn&&!EARN_MODE)throw new Error('Earn state requires TASKMALL_EARN_ENABLED=1; do not silently revert financial accounting.');
+    if(saved?.forge&&!FORGE_MODE)throw new Error('Forge state requires PORTGAINY_FORGE_ENABLED=1; reverting accounting is not automatic.');
     if(IS_PRODUCTION&&saved?.earn?.preview)throw new Error('Preview reward funds cannot be used in production.');
     db.users = saved?.users || [];
     if(saved?.earn)db.earn=saved.earn;
     if(saved?.spot)db.spot=saved.spot;
+    if(saved?.forge)db.forge=saved.forge;
     if(EARN_MODE)spot.initialize(db);
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     for (const user of db.users) ensureUserShape(user);
     if(EARN_MODE)earn.migrate(db,vipPlans);
     if(EARN_MODE)earn.revertTopUp(db);
+    if(FORGE_MODE){forgeWallet.unifyWallet(db);forge.ensure(db);}
     if(EARN_MODE){
       const history=db.earn.referralPromotion?[]:await paymentStore.sql.prepare('SELECT user_id,amount_units,timestamp,txid,log_index FROM deposits ORDER BY timestamp,txid,log_index').all();
       referralPromotion.initialize(db,history);
@@ -386,11 +397,13 @@ async function loadDatabase() {
           const credited = await paymentStore.credit(event, next, (state, userId, transfer) => {
             const user = state.users.find(item => item.id === userId);
             if (!user) throw new Error('Deposit account was not found.');
-            user.lockedBalance = usdtAmount(units(user.lockedBalance) + BigInt(transfer.units));
+            const depositCredit = FORGE_MODE ? forgeWallet.creditDeposit(user,transfer) : null;
+            if(!FORGE_MODE)user.lockedBalance = usdtAmount(units(user.lockedBalance) + BigInt(transfer.units));
             if(EARN_MODE)referralPromotion.hydrateUser(user,[...history,{user_id:userId,amount_units:transfer.units,timestamp:transfer.timestamp,txid:transfer.txid,log_index:transfer.logIndex}]);
             addActivity(user, { type: 'deposit', amount: usdtAmount(transfer.units), amountUnits: transfer.units,
               network: 'USDT TRC20', address: transfer.to, txid: transfer.txid, logIndex: transfer.logIndex,
               blockNumber: transfer.blockNumber, status: 'confirmed', at: new Date(transfer.timestamp).toISOString() });
+            if(depositCredit){const record=user.activities[0];record.creditedAmount=depositCredit.credited;record.heldAmount=depositCredit.held;record.releasedPrior=depositCredit.releasedPrior;record.status=depositCredit.held?'below-minimum':'confirmed';}
           });
           if (credited) db = next;
           return credited;
@@ -440,10 +453,12 @@ async function loadDatabase() {
     const saved = JSON.parse(raw.replace(/^\uFEFF/, ''));
     if (!Array.isArray(saved.users)) throw new Error('Database users must be an array.');
     if(saved.earn&&!EARN_MODE)throw new Error('Earn state requires TASKMALL_EARN_ENABLED=1; do not silently revert financial accounting.');
+    if(saved.forge&&!FORGE_MODE)throw new Error('Forge state requires PORTGAINY_FORGE_ENABLED=1; reverting accounting is not automatic.');
     if(IS_PRODUCTION&&saved.earn?.preview)throw new Error('Preview reward funds cannot be used in production.');
     db.users = saved.users;
     if(saved.earn)db.earn=saved.earn;
     if(saved.spot)db.spot=saved.spot;
+    if(saved.forge)db.forge=saved.forge;
     if(EARN_MODE)spot.initialize(db);
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     db.tasks = seedTasks;
@@ -452,6 +467,7 @@ async function loadDatabase() {
     if(EARN_MODE&&earn.migrate(db,vipPlans).length)changed=true;
     if(EARN_MODE&&earn.revertTopUp(db).length)changed=true;
     if(EARN_MODE&&referralPromotion.initialize(db))changed=true;
+    if(FORGE_MODE){if(forgeWallet.unifyWallet(db).length||!db.forge)changed=true;forge.ensure(db);}
     if (changed) await saveDatabase();
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
@@ -459,6 +475,7 @@ async function loadDatabase() {
     if(EARN_MODE)earn.pool(db,Date.now(),DESIGN_PREVIEW);
     if(EARN_MODE)earn.revertTopUp(db);
     if(EARN_MODE)referralPromotion.initialize(db);
+    if(FORGE_MODE){forgeWallet.unifyWallet(db);forge.ensure(db);}
     await saveDatabase();
   }
 }
@@ -790,13 +807,14 @@ async function handleApi(req, res, url) {
   }
 
   if (req.method === 'GET' && url.pathname === '/api/payment-config') {
+    // A chain transfer cannot be rejected by amount; small deposits are retained until the threshold.
     if(REVIEW_PAYMENT_ORIGIN&&!TRON_DEPOSITS)return json(res,200,{available:true,withdrawalsAvailable:true,mode:'production-redirect',origin:REVIEW_PAYMENT_ORIGIN,minimumWithdrawalAmount:MINIMUM_WITHDRAWAL_USDT,networks:[]});
     if (TRON_DEPOSITS) return json(res, 200, { available: storageHealthy && Boolean(depositWatcher?.ready()), mode: 'tron-watch-only',
       withdrawalsAvailable: storageHealthy && ((MANUAL_WITHDRAWALS && withdrawalReviewer()) || (AUTOMATIC_WITHDRAWALS && Boolean(automaticPayouts))) && Boolean(depositWatcher?.ready()), status: depositWatcher?.status || 'starting',
       automaticWithdrawals: AUTOMATIC_WITHDRAWALS,
-      minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
+      minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT, ...(FORGE_MODE ? {minimumDepositAmount:10,depositThresholdMode:'accumulate'} : {}),
       networks: storageHealthy && depositWatcher?.ready() ? [{ id: 'trc20', label: 'USDT TRC20' }] : [] });
-    return json(res, 200, { available: TEST_WALLET, withdrawalsAvailable: TEST_WALLET, mode: TEST_WALLET ? 'test-wallet' : 'disabled', minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT,
+    return json(res, 200, { available: TEST_WALLET, withdrawalsAvailable: TEST_WALLET, mode: TEST_WALLET ? 'test-wallet' : 'disabled', minimumWithdrawalAmount: MINIMUM_WITHDRAWAL_USDT, ...(FORGE_MODE ? {minimumDepositAmount:10} : {}),
       networks: TEST_WALLET ? Object.entries(paymentNetworks).map(([id, network]) => ({ id, ...network })) : [] });
   }
 
@@ -999,17 +1017,19 @@ async function handleApi(req, res, url) {
     if (!user) return;
     if (!TEST_WALLET) return json(res, 503, { error: 'PAYMENTS_UNAVAILABLE' });
     const body = await readBody(req);
-    const amount = parseAmount(body.amount, 5, 100_000);
+    const amount = parseAmount(body.amount, FORGE_MODE ? 10 : 5, 100_000);
     const network = getPaymentNetwork(body.network);
     if (!amount) return json(res, 400, { error: 'INVALID_AMOUNT' });
     if (!network) return json(res, 400, { error: 'INVALID_NETWORK' });
-    user.lockedBalance = money(user.lockedBalance + amount);
+    if(FORGE_MODE)user.withdrawBalance=usdtAmount(units(user.withdrawBalance)+units(amount));
+    else user.lockedBalance = money(user.lockedBalance + amount);
     addActivity(user, { type: 'deposit', amount, network: network.label, address: network.address });
     await saveDatabase();
     return json(res, 200, { user: cleanUser(user), activities: user.activities });
   }
 
   if (req.method === 'POST' && url.pathname === '/api/wallet/transfer') {
+    if(FORGE_MODE)return json(res,410,{error:'UNIFIED_WALLET_NO_TRANSFER_REQUIRED'});
     if (!allowRequest(req, 'transfer', 30, 60_000)) return json(res, 429, { error: 'TOO_MANY_REQUESTS' });
     const user = await requireUser(req, res);
     if (!user) return;
@@ -1147,6 +1167,7 @@ const mimeTypes = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.woff2': 'font/woff2',
+  '.webp': 'image/webp',
   '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json'
 };
@@ -1179,8 +1200,35 @@ async function serveStatic(req, res, url) {
 }
 
 async function handleExchangeApi(req,res,url) {
+  if(req.method==='GET'&&url.pathname==='/api/platform-config'){
+    const user=await currentUser(req),showForge=Boolean(user&&FORGE_MODE);
+    json(res,200,{forgeEnabled:showForge,walletModel:FORGE_MODE?'unified':'legacy-split',...(TEST_WALLET?{localTestWallet:true}:{}),...(showForge?{catalog:forge.CATALOG.map(item=>({...item,price:usdtAmount(BigInt(item.priceUnits)),estimate:forge.estimate(item)}))}:{})});return true;
+  }
+  if(url.pathname==='/api/forge'||url.pathname.startsWith('/api/forge/')||url.pathname.startsWith('/api/admin/forge')){
+    if(!FORGE_MODE){json(res,req.method==='GET'?200:503,{enabled:false,error:'FORGE_UNAVAILABLE'});return true;}
+    const user=await requireUser(req,res);if(!user)return true;
+    const admin=url.pathname.startsWith('/api/admin/forge');
+    if(admin&&!isAdmin(user)){json(res,403,{error:'FORBIDDEN'});return true;}
+    if(!allowRequest(req,'forge',60,60_000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
+    if(req.method==='GET'&&url.pathname==='/api/forge'){
+      await exclusive(async()=>{const next=structuredClone(db),rounds=forge.settle(next);if(rounds.length){await saveDatabase(next);db=next;}json(res,200,forge.snapshot(db,user.id));});return true;
+    }
+    if(req.method==='GET'&&url.pathname==='/api/admin/forge'){
+      const book=db.forge;json(res,200,{payoutModel:'platform-credit',allocated:usdtAmount(BigInt(book.allocatedUnits)),claimed:usdtAmount(BigInt(book.claimedUnits)),pending:usdtAmount(BigInt(book.allocatedUnits)-BigInt(book.claimedUnits)),heldDeposits:usdtAmount(db.users.reduce((sum,row)=>sum+BigInt(row.forgeHeldDepositUnits||'0'),0n)),coreCount:book.cores.length,policy:book.policy,rounds:book.rounds.slice(0,15)});return true;
+    }
+    if(req.method==='POST'&&url.pathname==='/api/forge/upgrade-quote'){
+      const body=req.taskmallBody;json(res,200,forge.quoteUpgrade(db,user.id,body.coreId,body.kind,body.value));return true;
+    }
+    const actions={'/api/forge/buy':(next,body)=>forge.buy(next,user.id,body.sku,body.requestKey),'/api/forge/upgrade':(next,body)=>forge.upgrade(next,user.id,body,body.requestKey),'/api/forge/claim':(next,body)=>forge.claim(next,user.id,body.requestKey)};
+    const action=actions[url.pathname];
+    if(req.method==='POST'&&action){
+      await exclusive(async()=>{const next=structuredClone(db),result=action(next,req.taskmallBody);await saveDatabase(next);db=next;const current=db.users.find(row=>row.id===user.id);json(res,200,{...result,user:cleanUser(current),forge:forge.snapshot(db,user.id),activities:current.activities});});return true;
+    }
+    json(res,404,{error:'NOT_FOUND'});return true;
+  }
   if(req.method==='GET'&&url.pathname==='/api/earn'){
     const user=await requireUser(req,res);if(!user)return true;
+    if(FORGE_MODE){json(res,200,{enabled:false,replacedBy:'forge',serverTime:Date.now()});return true;}
     json(res,200,earn.snapshot(db,user,Date.now(),EARN_MODE));return true;
   }
   if(req.method==='GET'&&url.pathname==='/api/earn/referrals'){
@@ -1203,6 +1251,7 @@ async function handleExchangeApi(req,res,url) {
   }
   if(req.method==='POST'&&url.pathname==='/api/earn/claim'){
     const user=await requireUser(req,res);if(!user)return true;
+    if(FORGE_MODE){json(res,410,{error:'PRODUCT_REPLACED_BY_FORGE'});return true;}
     if(!EARN_MODE){json(res,503,{error:'EARN_UNAVAILABLE'});return true;}
     if(!allowRequest(req,'earn-claim',15,60_000)){json(res,429,{error:'TOO_MANY_REQUESTS'});return true;}
     await exclusive(async()=>{const next=structuredClone(db);const result=earn.claim(next,user.id,String(req.taskmallBody.requestKey||''));
@@ -1301,7 +1350,12 @@ setInterval(() => {
   if (USE_MYSQL && paymentStore?.healthy) exclusive(() => paymentStore.pruneSessions()).catch(() => { storageHealthy = false; });
 }, 60_000).unref();
 
+let forgeTick;
 loadDatabase().then(() => {
+  if(FORGE_MODE)forgeTick=setInterval(()=>{
+    if(!storageHealthy)return;
+    exclusive(async()=>{const next=structuredClone(db),rounds=forge.settle(next);if(rounds.length){await saveDatabase(next);db=next;}}).catch(()=>{console.error('Forge settlement paused; review storage and reward state.');});
+  },30_000).unref();
   server.listen(PORT, HOST, () => {
     console.log(`TaskMall is running at http://${HOST}:${server.address().port}`);
   });
@@ -1314,6 +1368,7 @@ loadDatabase().then(() => {
 });
 
 function shutdown() {
+  clearInterval(forgeTick);
   markets.stop();
   depositWatcher?.stop();
   settlementWatcher?.stop();

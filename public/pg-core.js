@@ -17,10 +17,13 @@ function updateDocumentLanguage() {
 }
 
 async function useAccountLanguage(user) {
-  const code = PG_READY_LANGUAGES.includes(user?.language) ? user.language : 'en';
+  const code = PG_READY_LANGUAGES.includes(user?.language) ? user.language : (user ? 'en' : guestLanguage());
   try { await i18n.use(code); } catch { await i18n.use('en'); }
   updateDocumentLanguage();
 }
+
+const isPhone = () => window.matchMedia('(max-width: 1023px)').matches;
+const buzz = (ms = 8) => { try { navigator.vibrate?.(ms); } catch { /* unsupported */ } };
 
 const store = {
   read(key, fallback) { try { const raw = localStorage.getItem(key); return raw === null ? fallback : JSON.parse(raw); } catch { return fallback; } },
@@ -127,7 +130,7 @@ const ICONS = {
   building: 'Building2', list: 'ListFilter', target: 'Target', swords: 'Swords', crown: 'Crown', sparkles: 'Sparkles',
   trendUp: 'TrendingUp', trendDown: 'TrendingDown', globe: 'Globe', plus: 'Plus', minus: 'Minus', trash: 'Trash2',
   history: 'History', receipt: 'ReceiptText', fingerprint: 'Fingerprint', help: 'CircleHelp', external: 'ExternalLink', pie: 'ChartPie',
-  layers: 'Layers', coins: 'Coins', rocket: 'Rocket', mailCheck: 'MailCheck', key: 'KeyRound', menu: 'Menu', gamepad: 'Gamepad2'
+  layers: 'Layers', coins: 'Coins', rocket: 'Rocket', mailCheck: 'MailCheck', key: 'KeyRound', menu: 'Menu', gamepad: 'Gamepad2', sun: 'Sun', moon: 'Moon', chevronLeft: 'ChevronLeft', sliders: 'SlidersHorizontal'
 };
 
 function icon(name, cls = '') {
@@ -174,7 +177,7 @@ const ERRORS = {
   WORKING_WALLET_UNAVAILABLE: 'The working wallet is temporarily unavailable.',
   PAYMENTS_UNAVAILABLE: 'Deposits and withdrawals are temporarily unavailable.',
   DEPOSITS_UNAVAILABLE: 'Deposits are temporarily unavailable. Please try again later.',
-  EARN_MINIMUM_REQUIRED: 'Earn starts at 200 USDT. Add funds to your Earn balance to start claiming.',
+  EARN_MINIMUM_REQUIRED: 'Earn starts at 100 USDT. Add funds to your Earn balance to start claiming.',
   INSUFFICIENT_SPOT_BALANCE: 'Not enough Spot balance.',
   INSUFFICIENT_ASSET_BALANCE: 'Not enough of this asset.',
   SPOT_LIQUIDITY_UNAVAILABLE: 'Liquidity for this asset is currently insufficient. No funds were deducted.',
@@ -225,7 +228,7 @@ function toast(message, kind = 'ok', title) {
 let sheetEl = null;
 let sheetOnClose = null;
 
-function openSheet(html, { wide = false, onClose, label = 'Dialog' } = {}) {
+function openSheet(html, { wide = false, onClose, label = 'Dialog', focus = true } = {}) {
   if (S.earnNoticeActive) return sheetEl;
   closeSheet(true);
   sheetEl = document.createElement('div');
@@ -237,10 +240,34 @@ function openSheet(html, { wide = false, onClose, label = 'Dialog' } = {}) {
   sheetOnClose = onClose || null;
   requestAnimationFrame(() => {
     sheetEl?.classList.add('is-open');
-    const focus = sheetEl?.querySelector('[autofocus],input:not([type=hidden]),button.sheet-x');
-    focus?.focus({ preventScroll: true });
+    if (focus) sheetEl?.querySelector('[autofocus],input:not([type=hidden]),button.sheet-x')?.focus({ preventScroll: true });
   });
+  enableSheetDrag(sheetEl);
   return sheetEl;
+}
+
+/* Swipe a phone sheet down from its handle or header to dismiss it. */
+function enableSheetDrag(backdrop) {
+  const sheet = backdrop.querySelector('.sheet');
+  if (!sheet) return;
+  let y0 = null, dy = 0, t0 = 0;
+  sheet.addEventListener('touchstart', event => {
+    if (!window.matchMedia('(max-width: 639px)').matches || sheet.scrollTop > 0 || event.touches.length !== 1) return;
+    if (event.touches[0].clientY - sheet.getBoundingClientRect().top > 96) return;
+    y0 = event.touches[0].clientY; t0 = Date.now(); dy = 0; sheet.style.transition = 'none';
+  }, { passive: true });
+  sheet.addEventListener('touchmove', event => {
+    if (y0 === null) return;
+    dy = Math.max(0, event.touches[0].clientY - y0);
+    sheet.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  const end = () => {
+    if (y0 === null) return;
+    const fast = dy / Math.max(1, Date.now() - t0) > 0.6;
+    sheet.style.transition = ''; sheet.style.transform = ''; y0 = null;
+    if (dy > 110 || (fast && dy > 40)) closeSheet();
+  };
+  sheet.addEventListener('touchend', end); sheet.addEventListener('touchcancel', end);
 }
 
 function closeSheet(immediate = false) {
@@ -261,7 +288,7 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && sh
 
 const VIEW_ALIASES = { wallet: 'assets', me: 'profile', company: 'about', team: 'referrals', tasks: 'home', vip: 'earn' };
 const PUBLIC_VIEWS = ['about', 'support'];
-const VIEWS = ['home', 'markets', 'trade', 'earn', 'assets', 'referrals', 'profile', 'support', 'about', 'admin'];
+const VIEWS = ['home', 'markets', 'trade', 'earn', 'assets', 'referrals', 'profile', 'support', 'about', 'admin', 'signin', 'signup'];
 
 function parseHash() {
   const [raw, ...params] = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
@@ -280,6 +307,9 @@ function route() {
   const { view, params } = parseHash();
   S.view = view || 'home';
   S.params = params;
+  S.navCount = (S.navCount || 0) + 1;
+  if (!S.user && (view === 'signin' || view === 'signup')) S.authMode = view === 'signup' ? 'signup' : 'login';
+  if (S.user && (view === 'signin' || view === 'signup')) { S.view = 'home'; history.replaceState(null, '', '#home'); }
   if (S.view === 'admin' && !S.user?.isAdmin) S.view = 'home';
   if (S.view === 'trade' && params[0] && /^[A-Z0-9]+USDT$/.test(params[0])) {
     S.trade.symbol = params[0]; store.write('pg_last_symbol', params[0]);
@@ -313,8 +343,8 @@ function unrealized() {
   return { amount: value - cost, percent: cost > 0 ? (value - cost) / cost * 100 : 0, cost };
 }
 
-const EARN_MIN_DEFAULT = 200;
-const EARN_TIERS = [[200,500,8],[500,1000,9],[1000,1700,10],[1700,2500,11],[2500,4000,12],[4000,null,13]];
+const EARN_MIN_DEFAULT = 100;
+const EARN_TIERS = [[100,500,8],[500,1000,9],[1000,1700,10],[1700,2500,11],[2500,4000,12],[4000,null,13]];
 const earnRatePct = (balance = num(S.user?.lockedBalance)) => [...EARN_TIERS].reverse().find(t => balance >= t[0])?.[2] ?? 8;
 const earnMin = () => num(S.earn?.minimum, EARN_MIN_DEFAULT);
 const earnShortfall = () => Math.max(0, Math.round((earnMin() - num(S.user?.lockedBalance)) * 1e6) / 1e6);
@@ -323,7 +353,7 @@ const earnActive = () => earnShortfall() === 0;
 function stats() {
   const acts = S.activities || [];
   return {
-    claims: acts.filter(a => a.type === 'earn').length,
+    claims: acts.filter(a => a.type === 'earn' || a.type==='forge_reward').length,
     trades: acts.filter(a => a.type === 'spot').length,
     invites: (S.referrals?.level1 || 0) + (S.referrals?.level2 || 0),
     deposited: acts.some(a => a.type === 'deposit')

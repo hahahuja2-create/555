@@ -255,7 +255,9 @@ test('real API wiring allocates separate addresses and credits verified receipt 
   for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mobile', { width: 360, height: 740 }]]) {
     await page.setViewportSize(viewport);
     await page.goto(url + '/#assets');
-    await page.locator('.hero-card [data-act="wallet-deposit"]').click();
+    await page.locator('.hero-card, .pw-card').waitFor();
+    if (await page.locator('[data-act="dismiss-earn-notice"]').count()) { await page.locator('[data-act="dismiss-earn-notice"]').first().click(); await page.waitForFunction(() => !S.earnNoticeActive); }
+    await page.locator('.hero-card [data-act="wallet-deposit"], .pw-card [data-act="wallet-deposit"]').click();
     await page.locator('.deposit-qr').waitFor();
     assert.equal(await page.locator('#dep-address').inputValue(), address.body.address);
     assert.equal(await page.locator('form[data-wallet-form="deposit"]').count(), 0);

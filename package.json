@@ -61,7 +61,13 @@
     "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs scripts/verify-earn-tiers.cjs scripts/verify-claim-schedule.cjs",
     "preview:design": "node scripts/design-preview.cjs",
     "test:spot": "node --test scripts/verify-spot.cjs",
-    "test:assets": "node --test scripts/verify-assets.cjs"
+    "test:assets": "node --test scripts/verify-assets.cjs",
+    "test:forge": "node --test scripts/verify-forge.cjs scripts/verify-forge-api.cjs scripts/verify-forge-deposits.cjs && node scripts/verify-forge-ui.cjs",
+    "build:forge": "node scripts/build-forge.cjs",
+    "dev:forge": "node scripts/forge-local.cjs",
+    "dev:earn": "node scripts/earn-local.cjs",
+    "check:forge": "node --check markets/forge.js && node --check markets/forge-wallet.js && node --check public/pg-forge.js && node --check frontend/forge-viewer.mjs && node --check frontend/forge-hardware.mjs && node --check scripts/forge-readiness.cjs",
+    "render:forge": "node scripts/render-forge-assets.cjs"
   },
   "engines": {
     "node": ">=22.13"
@@ -74,6 +80,7 @@
     "lucide": "^1.52.0",
     "mysql2": "^3.24.5",
     "qrcode": "1.5.4",
+    "three": "0.187.0",
     "tronweb": "6.5.1"
   },
   "overrides": {
@@ -83,6 +90,7 @@
   },
   "devDependencies": {
     "acorn": "^8.19.0",
+    "esbuild": "0.28.2",
     "playwright": "^1.63.0"
   }
 }

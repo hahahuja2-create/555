@@ -21,7 +21,7 @@ function account(id, email, password, balances = {}) {
   const salt = crypto.randomBytes(16).toString('hex');
   return { id, email, name: email.split('@')[0], passwordSalt: salt, passwordHash: crypto.scryptSync(password, salt, 64).toString('hex'),
     lockedBalance: 0, withdrawBalance: 0, reservedBalance: 0, earnedTotal: 0, withdrawnTotal: 0, withdrawFeeTotal: 0, activities: [],
-    vipId: 'free', createdAt: new Date().toISOString(), ...balances };
+    vipId: 'free', earnNotice: { version: require('../markets/earn-rates').NOTICE_VERSION, seenAt: 1 }, createdAt: new Date().toISOString(), ...balances };
 }
 
 async function boot(t, { env = {}, users, chain = false, omit = [] }) {
@@ -159,7 +159,7 @@ test('admin sees every account and marks manual payouts paid; customers see unde
 
   const shopper = await open(customer.cookie, { width: 390, height: 844 });
   await shopper.page.goto(url + '/#assets');
-  await shopper.page.locator('.hero-card').waitFor();
+  await shopper.page.locator('.hero-card, .pw-card').waitFor();
   await shopper.page.locator('[data-act="assets-tab"][data-tab="history"]').click();
   assert.equal(await shopper.page.locator('[data-view="admin"]').count(), 0, 'customers never see the Admin page');
   assert.match(await shopper.page.locator('.withdrawal-state').first().textContent(), /Under review/);

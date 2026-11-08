@@ -2,13 +2,15 @@
 
 /* Portgainy main: rendering, data loading, live markets and event wiring. */
 
-const TITLES = { home: 'Home', markets: 'Markets', trade: 'Trade', earn: 'Earn', assets: 'Assets', referrals: 'Referrals', profile: 'Profile', support: 'Support', about: 'About', admin: 'Admin' };
+const TITLES = { home: 'Home', markets: 'Markets', trade: 'Trade', earn: 'Earn', assets: 'Wallet', referrals: 'Referrals', profile: 'Profile', support: 'Support', about: 'About', admin: 'Admin' };
 
 function renderLoading() {
   app.innerHTML = `<main class="loading" aria-label="Loading"><span class="loading-cube">${markImg(96, 'float')}</span><i class="xp is-lg"><b class="indeterminate"></b></i></main>`;
 }
 
 function render() {
+  window.PortgainyForge?.dispose();
+  TITLES.earn=S.user?.forgeEnabled?'Forge':'Earn';
   const active = document.activeElement;
   const keep = active && active.id && /^(admin-search|market-search|faq-search|chat-input|order-input|calc-amount)$/.test(active.id)
     ? { id: active.id, start: active.selectionStart, end: active.selectionEnd } : null;
@@ -16,10 +18,10 @@ function render() {
   S.renderedView = S.view;
   S.trade.chart?.destroy(); S.trade.chart = null;
   if (S.loading) renderLoading();
-  else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else renderAuth(); }
+  else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else if (S.view === 'signin' || S.view === 'signup') renderAuth(); else renderLanding(); }
   else renderShell();
   document.title = `Portgainy | ${i18n.text(S.user || PUBLIC_VIEWS.includes(S.view) ? (TITLES[S.view] || 'Home') : 'Trade. Earn. Level up.')}`;
-  document.body.dataset.view = S.user ? S.view : 'auth';
+  document.body.dataset.view = S.user ? S.view : (S.view === 'signin' || S.view === 'signup' ? 'auth' : PUBLIC_VIEWS.includes(S.view) ? 'public' : 'land');
   postRender();
   window.scrollTo(0, y);
   if (keep) { const el = document.getElementById(keep.id); if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(keep.start, keep.end); } catch { /* not a text field */ } } }
@@ -32,6 +34,7 @@ function postRender() {
     if (S.trade.history) drawTradeChart(); else if (coinBySymbol(S.trade.symbol)) loadTradeHistory();
   }
   if (S.view === 'earn') updateCalc();
+  if (S.view === 'earn' && S.user.forgeEnabled) PortgainyForge.mount();
   if (S.view === 'support') { const log = document.querySelector('#chat-log'); if (log) log.scrollTop = log.scrollHeight; }
   if (S.view === 'assets' && S.assetsTab === 'history') loadWalletLists();
   if (S.view === 'admin' && !S.admin) loadAdmin();
@@ -41,13 +44,15 @@ function postRender() {
 
 async function loadAll() {
   const id = S.user.id;
-  const [activity, team, config, earn, referrals, portfolio, spot] = await Promise.all([
+  const [activity, team, config, earn, referrals, portfolio, spot, forge] = await Promise.all([
     api('/api/activity'), api('/api/team'), api('/api/payment-config', { timeout: 15000 }).catch(() => ({})),
     api('/api/earn').catch(() => null), api('/api/earn/referrals').catch(() => null),
-    api('/api/spot/portfolio').catch(() => null), api('/api/spot/config').catch(() => null)
+    api('/api/spot/portfolio').catch(() => null), api('/api/spot/config').catch(() => null),
+    S.user.forgeEnabled ? api('/api/forge').catch(() => null) : null
   ]);
   if (S.user?.id !== id) return;
   S.activities = activity.activities; S.team = team.team; S.earn = earn; S.referrals = referrals;
+  S.forge=forge;
   if (earn) S.serverOffset = earn.serverTime - Date.now();
   if (portfolio) S.portfolio = portfolio;
   if (spot) S.spot = spot;
@@ -57,9 +62,10 @@ async function loadAll() {
 
 async function refreshAccount() {
   const id = S.user.id;
-  const [me, activity, earn, portfolio, team, referrals] = await Promise.all([
+  const [me, activity, earn, portfolio, team, referrals, forge] = await Promise.all([
     api('/api/me', { timeout: 15000 }), api('/api/activity', { timeout: 15000 }), api('/api/earn').catch(() => null),
-    api('/api/spot/portfolio').catch(() => null), api('/api/team').catch(() => null), api('/api/earn/referrals').catch(() => null)
+    api('/api/spot/portfolio').catch(() => null), api('/api/team').catch(() => null), api('/api/earn/referrals').catch(() => null),
+    S.user.forgeEnabled ? api('/api/forge').catch(() => null) : null
   ]);
   if (S.user?.id !== id) return;
   S.user = me.user; S.activities = activity.activities;
@@ -67,6 +73,7 @@ async function refreshAccount() {
   if (portfolio) S.portfolio = portfolio;
   if (team) S.team = team.team;
   if (referrals) S.referrals = referrals;
+  if (forge) S.forge = forge;
 }
 
 async function loadWalletLists() {
@@ -87,18 +94,20 @@ async function loadAdmin() {
   const userId = S.user.id;
   const id = ++adminRequest;
   try {
-    const [data, deposits, workingWallet, accounting, journal] = await Promise.all([
+    const [data, deposits, workingWallet, accounting, journal, forgeReport] = await Promise.all([
       api('/api/admin/overview', { timeout: 20000 }),
       api(`/api/admin/deposits?offset=${S.adminDepositOffset}`, { timeout: 20000 }).catch(() => null),
       api('/api/admin/working-wallet', { timeout: 20000 }).catch(() => null),
       api('/api/admin/accounting', { timeout: 20000 }).catch(() => null),
-      api(`/api/admin/accounting/journal?offset=${S.adminJournalOffset}`, {timeout:20000}).catch(()=>null)
+      api(`/api/admin/accounting/journal?offset=${S.adminJournalOffset}`, {timeout:20000}).catch(()=>null),
+      S.user.forgeEnabled ? api('/api/admin/forge',{timeout:20000}).catch(()=>null) : null
     ]);
     if (id !== adminRequest || S.user?.id !== userId || !S.user?.isAdmin) return;
     data.depositInfo = deposits;
     data.workingWallet = workingWallet;
     data.accounting = accounting;
     data.journal = journal;
+    data.forgeReport = forgeReport;
     S.admin = data;
   } catch (error) { if (id === adminRequest) toast(errMsg(error), 'error'); return; }
   if (S.view === 'admin' && !sheetEl && !isEditing()) render();
@@ -115,7 +124,8 @@ function acceptMarkets(data) {
   const first = !S.markets.length;
   S.markets = Array.isArray(data.markets) ? data.markets : [];
   S.marketStatus = data.status || 'live'; S.marketUpdated = data.updatedAt;
-  if (!S.user && !PUBLIC_VIEWS.includes(S.view)) return;
+  if (!S.user && !(S.view === 'home' || S.view === 'signin' || S.view === 'signup')) { if (!PUBLIC_VIEWS.includes(S.view)) return; }
+  if (!S.user && S.view === 'home') { if (first) landingFillMarkets(); else refreshCells(); return; }
   if (first && S.markets.length && S.user && ['home', 'markets', 'trade', 'assets'].includes(S.view) && !sheetEl) {
     if (isEditing()) { pendingMarketView = S.view; refreshCells(); }
     else render();
@@ -188,8 +198,7 @@ async function claimReward() {
     const result = await api('/api/earn/claim', { method: 'POST', body: { requestKey: S.claimKey } });
     S.user = result.user; S.activities = result.activities; S.earn = result.earn;
     S.serverOffset = result.earn.serverTime - Date.now(); S.claimKey = null;
-    render(); burst();
-    toast(i18n.text('{amount} USDT added to Spot', {amount:usd(result.receipt.amount)}), 'ok', 'Reward claimed');
+    render(); burst(); buzz(24);    toast(i18n.text('{amount} USDT added to Spot', {amount:usd(result.receipt.amount)}), 'ok', 'Reward claimed');
   } catch (error) {
     const label = document.querySelector('#earn-error');
     if (label) label.textContent = i18n.text('Could not claim. Refresh and try again.');
@@ -284,8 +293,8 @@ const acts = {
   'dismiss-earn-notice': dismissEarnNotice,
   goto: el => go(el.dataset.view),
   'open-trade': el => go('trade', el.dataset.symbol),
-  'auth-home': () => { S.view = 'home'; history.replaceState(null, '', location.pathname + location.search); render(); },
-  'auth-mode': el => { S.authMode = el.dataset.mode; render(); },
+  'auth-home': () => { S.view = 'home'; history.replaceState(null, '', location.pathname); window.scrollTo(0, 0); render(); },
+  'auth-mode': el => { S.authMode = el.dataset.mode; S.view = S.authMode === 'signup' ? 'signup' : 'signin'; history.replaceState(null, '', `#${S.view}`); render(); },
   'toggle-password': el => {
     const input = document.getElementById(el.dataset.target); if (!input) return;
     const show = input.type === 'password'; input.type = show ? 'text' : 'password';
@@ -304,7 +313,9 @@ const acts = {
   'refresh-markets': () => { S.marketStatus = 'loading'; render(); pollMarkets(); },
   'open-search': openSearch, 'open-notices': openNotices, 'open-alert': openAlertSheet, 'pick-pair': pickPair,
   'trade-range': el => { S.trade.range = el.dataset.range; S.trade.history = null; render(); },
-  'trade-side': el => { S.trade.side = el.dataset.side; S.trade.input = ''; render(); },
+  'trade-side': el => { S.trade.side = el.dataset.side; S.trade.input = ''; if (S.orderSheet) refreshOrderSheet(); else render(); },
+  'trade-open': el => { buzz(); openOrderSheet(el.dataset.side); },
+  back: () => { buzz(4); if (S.navCount > 0 && history.length > 1) history.back(); else go('home'); },
   'trade-tab': el => { S.trade.tab = el.dataset.tab; const box = document.querySelector('#trade-tab-body'); if (box) { box.innerHTML = tradeTabBody(coinBySymbol(S.trade.symbol)); for (const b of el.parentElement.children) b.classList.toggle('is-on', b === el); } },
   'trade-pct': el => {
     const T = S.trade, row = coinBySymbol(T.symbol), input = document.querySelector('#order-input'); if (!row || !input) return;
@@ -355,6 +366,7 @@ document.addEventListener('click', event => {
   const handler = acts[el.dataset.act];
   if (!handler) return;
   event.preventDefault();
+  if (el.classList.contains('tab-item')) buzz(6);
   if (sheetEl && ['goto', 'open-trade'].includes(el.dataset.act)) closeSheet(true);
   handler(el, event);
 });
@@ -371,7 +383,7 @@ document.addEventListener('input', event => {
     if (v.includes('.')) { const [w, f] = v.split('.'); v = `${w}.${f.slice(0, places)}`; }
     if (v !== t.value) t.value = v;
     S.trade.input = v; updateOrderEstimate();
-  } else if (t.id === 'calc-amount') { const r = document.querySelector('#calc-range'); if (r) r.value = clamp(num(t.value), 200, 10000); updateCalc(); }
+  } else if (t.id === 'calc-amount') { const r = document.querySelector('#calc-range'); if (r) r.value = clamp(num(t.value), earnMin(), 10000); updateCalc(); }
   else if (t.id === 'calc-range') { const a = document.querySelector('#calc-amount'); if (a) a.value = t.value; updateCalc(); }
 });
 
@@ -450,6 +462,44 @@ async function submitAuth(form) {
   } catch (error) { msg.textContent = errMsg(error); button.disabled = false; } finally { S.busy = false; }
 }
 
+/* ---------------------------------------------------- phone app behaviours */
+
+// The app bar gains a hairline once the page scrolls beneath it.
+window.addEventListener('scroll', () => { document.querySelector('#ab')?.classList.toggle('is-scrolled', window.scrollY > 6); }, { passive: true });
+
+// Crossing the phone/desktop breakpoint swaps the order ticket between inline card and sheet.
+window.matchMedia('(max-width: 1023px)').addEventListener('change', () => { if (S.orderSheet) closeSheet(true); if (S.user && !S.loading) render(); });
+
+// Pull down from the top of a page to refresh balances and prices.
+(() => {
+  const indicator = document.createElement('div');
+  indicator.className = 'ptr'; indicator.setAttribute('aria-hidden', 'true'); indicator.innerHTML = '<i class="spinner"></i>';
+  document.body.append(indicator);
+  let y0 = null;
+  document.addEventListener('touchstart', event => {
+    y0 = (window.scrollY > 0 || !S.user || sheetEl || event.touches.length !== 1 || !isPhone()) ? null : event.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchmove', event => {
+    if (y0 === null) return;
+    const dy = event.touches[0].clientY - y0;
+    if (dy <= 0) { indicator.style.opacity = 0; return; }
+    const d = Math.min(dy * 0.5, 72);
+    indicator.style.transform = `translate(-50%, ${d}px)`; indicator.style.opacity = String(Math.min(1, d / 48));
+    indicator.classList.toggle('is-ready', d >= 58);
+  }, { passive: true });
+  const finish = async () => {
+    if (y0 === null) return;
+    y0 = null;
+    const ready = indicator.classList.contains('is-ready');
+    if (ready) {
+      buzz(10); indicator.classList.add('is-loading');
+      try { await Promise.all([refreshAccount(), pollMarkets()]); if (!sheetEl && !isEditing()) render(); } catch { /* keep showing the last data */ }
+    }
+    indicator.classList.remove('is-ready', 'is-loading'); indicator.style.transform = ''; indicator.style.opacity = 0;
+  };
+  document.addEventListener('touchend', finish); document.addEventListener('touchcancel', finish);
+})();
+
 document.addEventListener('keydown', event => {
   if (event.key === '/' && S.user && !sheetEl && !event.target.closest('input,textarea,select,[contenteditable]')) { event.preventDefault(); openSearch(); }
 });
@@ -461,9 +511,11 @@ async function init() {
   const ref = (params.get('ref') || '').trim().toUpperCase();
   if (ref) { S.referralCode = ref.slice(0, 24); S.authMode = 'signup'; }
   renderLoading();
-  const parsed = parseHash(); S.view = parsed.view || 'home'; S.params = parsed.params;
+  const parsed = parseHash(); S.view = parsed.view || (ref ? 'signup' : 'home'); S.params = parsed.params;
+  if (S.view === 'signin' || S.view === 'signup') S.authMode = S.view === 'signup' ? 'signup' : 'login';
   if (S.view === 'trade' && parsed.params[0] && /^[A-Z0-9]+USDT$/.test(parsed.params[0])) S.trade.symbol = parsed.params[0];
   pollMarkets(); startFeed();
+  S.platform=await api('/api/platform-config').catch(()=>({forgeEnabled:false}));
   try {
     const me = await api('/api/me');
     S.user = me.user;
@@ -480,4 +532,5 @@ async function init() {
   }
 }
 
-init();
+// Deferred scripts that extend the action table (landing page) load after this file, so start once they have all run.
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

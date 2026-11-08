@@ -515,7 +515,7 @@ test('real withdrawal API requires password and operator authorization; mobile a
       await page.locator('[data-act="dismiss-earn-notice"]').first().click();
       await page.waitForFunction(()=>!S.earnNoticeActive);
     }
-    await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+    await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
     await page.locator('[data-wallet-form="withdraw"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"] [name="amount"]').getAttribute('min'), '10');
     assert.match(await page.locator('#withdrawal-minimum').textContent(), /10 USDT/);
@@ -551,8 +551,8 @@ test('real withdrawal API requires password and operator authorization; mobile a
   assert.equal(queued.filter(row => row.status === 'requested' && row.amount === 10 && row.netAmount === 9.8).length, 1);
   assert.equal((await request('/api/me', undefined, customer)).body.user.reservedBalance, 10);
   await page.reload();
-  await page.locator('.hero-card').waitFor();
-  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+  await page.locator('.hero-card, .pw-card').waitFor();
+  await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   assert.match(await page.locator('#withdrawal-minimum').textContent(), /Minimum withdrawal request: 10 USDT/);
   await page.keyboard.press('Escape');
@@ -570,15 +570,15 @@ test('real withdrawal API requires password and operator authorization; mobile a
     return addressUnavailable ? route.fulfill({ status: 503, json: { error: 'DEPOSITS_UNAVAILABLE' } }) : route.continue();
   });
   await page.reload();
-  await page.locator('.hero-card').waitFor();
+  await page.locator('.hero-card, .pw-card').waitFor();
   paymentConfig = readyConfig;
-  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+  await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   assert.equal(addressRequests, 0, 'Withdrawal checks do not depend on allocating a deposit address');
   await page.keyboard.press('Escape');
 
   metadataUnavailable = true;
-  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+  await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
   await page.locator('[data-act="retry-wallet"]').waitFor();
   assert.equal(await page.locator('.modal-wallet-form').count(), 0, 'A failed fresh status check must not expose a cached form');
   metadataUnavailable = false;
@@ -587,12 +587,12 @@ test('real withdrawal API requires password and operator authorization; mobile a
   await page.keyboard.press('Escape');
 
   await page.reload();
-  await page.locator('.hero-card').waitFor();
+  await page.locator('.hero-card, .pw-card').waitFor();
   assert.equal(addressRequests, 1);
-  await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+  await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
   await page.locator('[data-wallet-form="withdraw"]').waitFor();
   await page.keyboard.press('Escape');
-  await page.locator('.hero-card [data-act=\"wallet-deposit\"]').click();
+  await page.locator('.hero-card [data-act="wallet-deposit"], .pw-card [data-act="wallet-deposit"]').click();
   await page.locator('[data-act="retry-wallet"]').waitFor();
   assert.equal(await page.locator('.deposit-qr').count(), 0);
   addressUnavailable = false;
@@ -603,7 +603,7 @@ test('real withdrawal API requires password and operator authorization; mobile a
 
   for (const config of [{ ...readyConfig, withdrawalsAvailable: false }, { ...readyConfig, withdrawalsAvailable: undefined }]) {
     paymentConfig = config;
-    await page.locator('.hero-card [data-act=\"wallet-withdraw\"]').click();
+    await page.locator('.hero-card [data-act="wallet-withdraw"], .pw-card [data-act="wallet-withdraw"]').click();
     await page.locator('[data-act="retry-wallet"]').waitFor();
     assert.equal(await page.locator('[data-wallet-form="withdraw"]').count(), 0, 'Withdrawal admission needs an explicit ready flag');
     await page.keyboard.press('Escape');

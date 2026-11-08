@@ -13,6 +13,23 @@ function tradeAvailable(row) {
   return T.side === 'BUY' ? num(S.user.withdrawBalance) : num(holdingOf(row.base)?.quantity);
 }
 
+function orderCardInner(row) {
+  const T = S.trade, buy = T.side === 'BUY', avail = tradeAvailable(row);
+  return `
+        <div class="seg seg-trade" role="tablist"><button class="${buy ? 'is-on is-buy' : ''}" type="button" data-act="trade-side" data-side="BUY">${i18n.html("Buy")}</button><button class="${!buy ? 'is-on is-sell' : ''}" type="button" data-act="trade-side" data-side="SELL">${i18n.html("Sell")}</button></div>
+        <div class="avail"><span>${i18n.html("Available")}</span><b>${buy ? `${money(avail)} USDT` : `${S.hide ? '••••' : qty(avail)} ${esc(row.base)}`}</b><button class="mini-link" type="button" data-act="wallet-deposit">${icon('plus')}</button></div>
+        <form class="form" data-form="order" novalidate>
+          <label class="field"><span>${i18n.html(buy ? 'Total' : 'Quantity')}</span><div class="control">
+            <input id="order-input" name="value" type="text" inputmode="decimal" autocomplete="off" placeholder="${buy ? '0.00' : '0.00000000'}" value="${esc(T.input)}"><b class="suffix">${buy ? 'USDT' : esc(row.base)}</b></div></label>
+          <div class="pcts">${[25, 50, 75, 100].map(p => `<button type="button" data-act="trade-pct" data-pct="${p}">${p === 100 ? i18n.html('Max') : p + '%'}</button>`).join('')}</div>
+          <div class="est"><span>${i18n.html(buy ? 'You get ≈' : 'You receive ≈')}</span><b id="order-est">—</b></div>
+          <p class="form-msg" id="order-msg" role="alert"></p>
+          <button class="btn btn-lg btn-block ${buy ? 'btn-buy' : 'btn-sell'}" type="submit" ${T.busy ? 'disabled' : ''}>${i18n.html(buy ? 'Buy {asset}' : 'Sell {asset}', {asset:row.base})}</button>
+        </form>
+        <p class="fine">${icon('info')}${i18n.html("Prices follow live Binance quotes; positions are recorded by {value0} and settled in {value1}. No coin custody is implied.", {"value0":"Portgainy","value1":"USDT"})}</p>
+  `;
+}
+
 function tradeView() {
   const T = S.trade;
   const row = coinBySymbol(T.symbol);
@@ -32,6 +49,7 @@ function tradeView() {
       <button class="icon-btn ${hasAlert ? 'is-on' : ''}" type="button" data-act="open-alert" aria-label="${i18n.html("Price alert")}">${icon('bellPlus')}</button></span>
     </header>
     <div class="trade-grid">
+      <div class="trade-main">
       <section class="card chart-card">
         <div class="px-row"><strong class="px-big ${tone(row.change)}" data-px="${esc(row.symbol)}">${price(row.price)}</strong><span class="chg ${tone(row.change)}" data-chg="${esc(row.symbol)}">${pct(row.change)}</span></div>
         <div class="px-sub">≈ $<span data-px-usd="${esc(row.symbol)}">${price(row.price)}</span> · ${liveBadge()}</div>
@@ -40,22 +58,37 @@ function tradeView() {
         <div class="chart-wrap"><canvas id="trade-chart" role="img" aria-label="${i18n.html('{asset} price history', {asset:row.name})}"></canvas><span class="chart-status" id="chart-status">${T.history ? '' : i18n.html('Loading price history…')}</span></div>
         <div class="range-bar" aria-label="${i18n.html("{value0} hour range", {"value0":"24"})}"><span>${price(row.low)}</span><div><i style="left:${position}%"></i></div><span>${price(row.high)}</span></div>
       </section>
-      <section class="card order-card">
-        <div class="seg seg-trade" role="tablist"><button class="${buy ? 'is-on is-buy' : ''}" type="button" data-act="trade-side" data-side="BUY">${i18n.html("Buy")}</button><button class="${!buy ? 'is-on is-sell' : ''}" type="button" data-act="trade-side" data-side="SELL">${i18n.html("Sell")}</button></div>
-        <div class="avail"><span>${i18n.html("Available")}</span><b>${buy ? `${money(avail)} USDT` : `${S.hide ? '••••' : qty(avail)} ${esc(row.base)}`}</b><button class="mini-link" type="button" data-act="wallet-deposit">${icon('plus')}</button></div>
-        <form class="form" data-form="order" novalidate>
-          <label class="field"><span>${i18n.html(buy ? 'Total' : 'Quantity')}</span><div class="control">
-            <input id="order-input" name="value" type="text" inputmode="decimal" autocomplete="off" placeholder="${buy ? '0.00' : '0.00000000'}" value="${esc(T.input)}"><b class="suffix">${buy ? 'USDT' : esc(row.base)}</b></div></label>
-          <div class="pcts">${[25, 50, 75, 100].map(p => `<button type="button" data-act="trade-pct" data-pct="${p}">${p === 100 ? i18n.html('Max') : p + '%'}</button>`).join('')}</div>
-          <div class="est"><span>${i18n.html(buy ? 'You get ≈' : 'You receive ≈')}</span><b id="order-est">—</b></div>
-          <p class="form-msg" id="order-msg" role="alert"></p>
-          <button class="btn btn-lg btn-block ${buy ? 'btn-buy' : 'btn-sell'}" type="submit" ${T.busy ? 'disabled' : ''}>${i18n.html(buy ? 'Buy {asset}' : 'Sell {asset}', {asset:row.base})}</button>
-        </form>
-        <p class="fine">${icon('info')}${i18n.html("Prices follow live Binance quotes; positions are recorded by {value0} and settled in {value1}. No coin custody is implied.", {"value0":"Portgainy","value1":"USDT"})}</p>
-      </section>
+      <section class="card tabs-card">${tradeTabs(row)}</section>
+      </div>
+      <div class="trade-side">
+      ${isPhone() ? '' : `<section class="card order-card">${orderCardInner(row)}</section>`}
+      ${snapCard(row)}
+      </div>
     </div>
-    <section class="card">${tradeTabs(row)}</section>
+    ${isPhone() ? `<div class="trade-cta"><button class="btn btn-buy btn-lg" type="button" data-act="trade-open" data-side="BUY">${i18n.html('Buy {asset}', { asset: row.base })}</button><button class="btn btn-sell btn-lg" type="button" data-act="trade-open" data-side="SELL">${i18n.html('Sell {asset}', { asset: row.base })}</button></div>` : ''}
   </div>`;
+}
+
+/* Phones place the order ticket in a bottom sheet opened from the Buy / Sell bar. */
+function openOrderSheet(side) {
+  const row = coinBySymbol(S.trade.symbol);
+  if (!row) return;
+  if (side && side !== S.trade.side) { S.trade.side = side; S.trade.input = ''; }
+  S.orderSheet = true;
+  openSheet(`${sheetHead(`${row.base}/USDT`, i18n.text('Spot · {value0}', { value0: 'USDT' }))}<div class="order-card is-sheet" id="order-sheet-body">${orderCardInner(row)}</div>`, { label: 'Order', focus: false, onClose: () => { S.orderSheet = false; } });
+  updateOrderEstimate();
+}
+
+function refreshOrderSheet() {
+  const row = coinBySymbol(S.trade.symbol), box = document.querySelector('#order-sheet-body');
+  if (!row || !box) return;
+  box.innerHTML = orderCardInner(row);
+  updateOrderEstimate();
+}
+
+function snapCard(row) {
+  const others = sortedMarkets('hot').filter(r => r.symbol !== row.symbol).slice(0, 5);
+  return `<section class="card snap-card"><div class="sec-head"><h2>${i18n.html('Popular markets')}</h2>${moreLink('All', 'markets')}</div><div class="mlist">${others.map(r => marketRow(r)).join('')}</div></section>`;
 }
 
 function tradeTabs(row) {
@@ -82,7 +115,7 @@ function tradeTabBody(row) {
 
 function positionsList(compactMode = false) {
   const rows = holdings();
-  if (!rows.length) return emptyState('layers', 'No open positions', 'Buy a coin with your Spot balance and it will show up here.', compactMode ? '' : '<button class="btn btn-lime btn-sm" data-act="goto" data-view="trade">Start trading</button>');
+  if (!rows.length) return emptyState('layers', 'No open positions', S.user?.forgeEnabled?'Use your USDT wallet to open a synthetic market position.':'Buy a coin with your Spot balance and it will show up here.', compactMode ? '' : '<button class="btn btn-lime btn-sm" data-act="goto" data-view="trade">Start trading</button>');
   return `<ul class="pos">${rows.map(row => {
     const c = coin(row.base), value = num(row.quantity) * num(c?.price), pnl = value - num(row.cost), p = num(row.cost) > 0 ? pnl / num(row.cost) * 100 : 0;
     return `<li class="pos-row"><button type="button" data-act="open-trade" data-symbol="${esc(c?.symbol || row.base + 'USDT')}">${coinMark(row.base, 38)}<span class="pos-name"><b>${esc(row.base)}</b><small>${S.hide ? '••••' : qty(row.quantity)}</small></span><span class="pos-val"><b data-pos-val="${esc(row.base)}">${c ? money(value) : '—'}<small> USDT</small></b><small class="${tone(pnl)}" data-pos-pnl="${esc(row.base)}">${c ? (S.hide ? '••••' : `${pnl >= 0 ? '+' : ''}${usd(pnl)} (${pct(p)})`) : '—'}</small></span></button></li>`;
@@ -117,17 +150,18 @@ function drawTradeChart() {
   if (!canvas || !T.history?.points?.length) return;
   const points = T.history.points;
   const rising = points.at(-1).price >= points[0].price;
-  const color = rising ? '#35e08f' : '#ff4a6e';
+  const css = getComputedStyle(document.documentElement), grid = css.getPropertyValue('--line').trim() || 'rgba(0,0,0,.08)', tick = css.getPropertyValue('--ink-3').trim() || '#6e7380';
+  const color = rising ? (css.getPropertyValue('--up').trim() || '#0c9a5c') : (css.getPropertyValue('--down').trim() || '#de3453');
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight || 220);
-  gradient.addColorStop(0, rising ? 'rgba(53,224,143,.32)' : 'rgba(255,74,110,.30)');
+  gradient.addColorStop(0, rising ? 'rgba(12,154,92,.26)' : 'rgba(222,52,83,.24)');
   gradient.addColorStop(1, 'rgba(0,0,0,0)');
   T.chart = new Chart(canvas, {
     type: 'line',
     data: { labels: points.map(p => new Date(p.time).toLocaleString('en-US', T.range === '1D' || T.range === '1H' ? { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' } : { month: 'short', day: 'numeric' })), datasets: [{ data: points.map(p => p.price), borderColor: color, backgroundColor: gradient, fill: true, pointRadius: 0, pointHitRadius: 12, borderWidth: 2, tension: 0.18 }] },
     options: { animation: false, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, backgroundColor: '#111', borderColor: '#2a2a2e', borderWidth: 1, titleColor: '#9a9a96', bodyColor: '#f4f4ef', callbacks: { label: item => `${price(item.raw)} USDT` } } },
-      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: '#6c6c68', maxTicksLimit: 4, font: { size: 10 } } }, y: { position: 'right', border: { display: false }, grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#6c6c68', maxTicksLimit: 4, font: { size: 10 }, callback: v => price(v) } } } }
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, backgroundColor: '#11121a', borderColor: '#2a2c3a', borderWidth: 1, titleColor: '#a9acb8', bodyColor: '#f6f7fb', cornerRadius: 12, padding: 10, callbacks: { label: item => `${price(item.raw)} USDT` } } },
+      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: tick, maxTicksLimit: 4, font: { size: 10 } } }, y: { position: 'right', border: { display: false }, grid: { color: grid }, ticks: { color: '#6c6c68', maxTicksLimit: 4, font: { size: 10 }, callback: v => price(v) } } } }
   });
 }
 
@@ -240,6 +274,8 @@ function checkAlerts() {
 /* ---------------------------------------------------------------- assets */
 
 function assetsView() {
+  if (isPhone()) return phoneWallet();
+  if(S.user?.forgeEnabled)return PortgainyForge.walletView();
   const u = S.user, pnl = unrealized();
   const tabs = [['overview', i18n.text('Overview')], ['spot', i18n.text('Spot')], ['earn', i18n.text('Earn')], ['history', i18n.text('History')]];
   let body = '';
@@ -262,9 +298,9 @@ function assetsView() {
       <section class="card" id="withdraw-status">${sectionHead('Withdrawal requests')}${withdrawalsList()}</section>`;
   }
   return `<div class="page assets">
-    <header class="page-head"><div><h1>${i18n.html("Assets")}</h1><p>${i18n.html("Spot · Earn · Crypto")}</p></div><button class="icon-btn" type="button" data-act="toggle-hide" aria-label="${i18n.html("Toggle balances")}">${icon(S.hide ? 'eyeOff' : 'eye')}</button></header>
+    <header class="page-head"><div><h1>${i18n.html("Wallet")}</h1><p>${i18n.html("Spot · Earn · Crypto")}</p></div></header>
     <article class="hero-card is-compact">
-      <div class="hero-top"><span class="hero-label">${i18n.html("Est. total value")}</span></div>
+      <div class="hero-top"><span class="hero-label">${i18n.html("Est. total value")}<button class="eye-btn" type="button" data-act="toggle-hide" aria-label="${i18n.html(S.hide ? 'Show balances' : 'Hide balances')}">${icon(S.hide ? 'eyeOff' : 'eye')}</button></span></div>
       <div class="hero-num"><strong data-total>${S.hide ? '••••••' : usd(totalValue())}</strong><span>USDT</span></div>
       <div class="hero-sub"><span>≈ $<span data-total-usd>${S.hide ? '••••' : usd(totalValue())}</span></span>${holdings().length ? `<span class="pnl ${tone(pnl.amount)}" data-pnl>${S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)} (${pct(pnl.percent)})`}<small>${i18n.html("Unrealized PNL")}</small></span>` : ''}</div>
       <div class="quick">${[['wallet-deposit', 'deposit', i18n.text('Add Funds')], ['wallet-withdraw', 'withdraw', i18n.text('Send')], ['wallet-transfer', 'transfer', i18n.text('Transfer')], ['goto', 'earn', i18n.text('Earn'), 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${esc(label)}</span></button>`).join('')}</div>
@@ -319,6 +355,7 @@ function applyPayConfig(config = {}) {
   S.pay.automaticWithdrawals = config.automaticWithdrawals === true;
   const min = Number(config.minimumWithdrawalAmount);
   S.pay.minimum = Number.isFinite(min) && min >= 10 ? min : 10;
+  S.pay.depositMinimum = Number(config.minimumDepositAmount)||0;
   S.pay.networks = Array.isArray(config.networks) ? config.networks : [];
 }
 
@@ -330,9 +367,10 @@ async function loadDepositAddress() {
 let walletToken = 0;
 
 async function openWallet(type) {
+  if(S.user?.forgeEnabled && type==='transfer'){go('earn');return;}
   if (!S.user) return;
   const token = ++walletToken;
-  const meta = { deposit: [i18n.text('Add funds'), i18n.text('Deposit USDT to your Earn account')], withdraw: [i18n.text('Send USDT'), i18n.text('Withdraw from your Spot account')], transfer: [i18n.text('Transfer'), i18n.text('Move USDT from Spot to Earn')] }[type];
+  const meta = { deposit: [i18n.text('Add funds'), i18n.text(S.user.forgeEnabled?'Deposit USDT to your wallet':'Deposit USDT to your Earn account')], withdraw: [i18n.text('Send USDT'), i18n.text(S.user.forgeEnabled?'Withdraw from your USDT wallet':'Withdraw from your Spot account')], transfer: [i18n.text('Transfer'), i18n.text('Move USDT from Spot to Earn')] }[type];
   openSheet(`${sheetHead(meta[0], meta[1])}<div class="sheet-loading"><i class="spinner"></i><span>${i18n.html(type === 'transfer' ? 'Preparing…' : 'Checking payment availability…')}</span></div>`, { label: meta[0] });
   try {
     if (type !== 'transfer') {
@@ -352,7 +390,7 @@ function maxAmount() { return clamp(num(S.user.withdrawBalance), 0, 100000).toFi
 
 function amountField(type) {
   const min = type === 'withdraw' ? S.pay.minimum : '0.000001';
-  return `<div class="avail"><span>${i18n.html("Available Spot balance")}</span><b data-wallet-available>${money(S.user.withdrawBalance)} USDT</b></div>
+  return `<div class="avail"><span>${i18n.html(S.user.forgeEnabled?'Available USDT balance':'Available Spot balance')}</span><b data-wallet-available>${money(S.user.withdrawBalance)} USDT</b></div>
     <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input id="wallet-amount" name="amount" type="number" inputmode="decimal" min="${min}" max="100000" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b><button class="max-btn" type="button" data-act="wallet-max">${i18n.html("MAX")}</button></div></label>${type === 'withdraw' ? `<p class="hint" id="withdrawal-minimum">${i18n.html('Minimum withdrawal request: {amount} {currency}.', {amount:S.pay.minimum,currency:'USDT'})}</p>` : ''}`;
 }
 
@@ -363,6 +401,7 @@ function networkSelect() {
 
 function walletSheet(type, meta) {
   const head = sheetHead(meta[0], meta[1]);
+  const depositRule=S.user?.forgeEnabled?`<p class="note">${icon('info')}${i18n.html('Minimum credit: 10 USDT. Smaller confirmed deposits accumulate until the threshold is reached.')}${S.user.pendingDeposit?` ${i18n.html('Awaiting minimum')}: ${money(S.user.pendingDeposit)} USDT`:''}</p>`:'';
   const unavailable = text => `${head}${emptyState('info', 'Temporarily unavailable', text, `<button class="btn btn-lime btn-sm" data-act="retry-wallet" data-type="${type}">${i18n.html("Try again")}</button>`)}`;
   if (type !== 'transfer' && S.pay.mode === 'production-redirect' && S.pay.origin) {
     return `${head}<p class="note">${icon('shield')}${i18n.html('For your security, this action opens on our verified payments site.')}</p><a class="btn btn-lime btn-lg btn-block" href="${esc(S.pay.origin)}/?wallet=${type}#wallet" rel="noopener">${i18n.html('Continue securely')}${icon('external')}</a>`;
@@ -372,16 +411,16 @@ function walletSheet(type, meta) {
     if (S.pay.mode === 'tron-watch-only') {
       const w = S.pay.wallet;
       if (!w) return unavailable('Deposits are temporarily unavailable.');
-      return `${head}<div class="dep">
+      return `${head}${depositRule}<div class="dep">
         <div class="dep-net"><span class="tag tag-lime">USDT</span><span class="tag">TRON · TRC20</span></div>
         <div class="qr"><img class="deposit-qr" src="${esc(w.qr)}" width="180" height="180" alt="${i18n.html('Deposit QR code')}"></div>
         <label class="field"><span>${i18n.html("Deposit address")}</span><div class="control addr"><input id="dep-address" type="text" value="${esc(w.address)}" readonly><button class="max-btn" type="button" data-act="copy-address">${i18n.html("COPY")}</button></div></label>
-        <ul class="steps"><li>${icon('shield')}${i18n.html('Send only {currency} on the {network} network.', {currency:'USDT',network:'TRON (TRC20)'})}</li><li>${icon('clock')}${i18n.html('Your balance updates automatically after blockchain confirmation.')}</li><li>${icon('earn')}${i18n.html('Deposits credit your {account} account.', {account:'Earn'})}</li></ul>
+        <ul class="steps"><li>${icon('shield')}${i18n.html('Send only {currency} on the {network} network.', {currency:'USDT',network:'TRON (TRC20)'})}</li><li>${icon('clock')}${i18n.html(S.user.forgeEnabled?'Confirmed deposits credit your USDT wallet once the 10 USDT threshold is met.':'Your balance updates automatically after blockchain confirmation.')}</li><li>${icon('earn')}${S.user.forgeEnabled?i18n.html('One USDT wallet for purchases, trading and withdrawals.'):i18n.html('Deposits credit your {account} account.', {account:'Earn'})}</li></ul>
         <a class="link-btn" href="${esc(w.explorer)}" target="_blank" rel="noopener noreferrer">${i18n.html('View address on {explorer}', {explorer:'TRONSCAN'})} ${icon('external')}</a></div>`;
     }
     const first = S.pay.networks[0] || { address: '' };
-    return `${head}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="deposit" data-type="deposit">${networkSelect()}<label class="field"><span>${i18n.html("Deposit address")}</span><div class="control addr"><input id="dep-address" data-deposit-address type="text" value="${esc(first.address)}" readonly><button class="max-btn" type="button" data-act="copy-address">${i18n.html("COPY")}</button></div></label>
-      <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input name="amount" type="number" min="5" step="0.01" placeholder="25.00" required><b class="suffix">USDT</b></div></label><p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">${i18n.html("Add to Earn")}</button></form>`;
+    return `${head}${depositRule}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="deposit" data-type="deposit">${networkSelect()}<label class="field"><span>${i18n.html("Deposit address")}</span><div class="control addr"><input id="dep-address" data-deposit-address type="text" value="${esc(first.address)}" readonly><button class="max-btn" type="button" data-act="copy-address">${i18n.html("COPY")}</button></div></label>
+      <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input name="amount" type="number" min="${S.user.forgeEnabled?10:5}" step="0.01" placeholder="25.00" required><b class="suffix">USDT</b></div></label><p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">${i18n.html(S.user.forgeEnabled?'Add funds':'Add to Earn')}</button></form>`;
   }
   if (type === 'withdraw') {
     if (!S.pay.withdrawals) return unavailable('Withdrawals are temporarily unavailable.');
@@ -425,7 +464,7 @@ async function submitWallet(form) {
   if (S.busy) return;
   const type = form.dataset.type, data = new FormData(form), msg = form.querySelector('.form-msg'), button = form.querySelector('button[type="submit"]');
   const endpoints = { deposit: '/api/wallet/deposit', withdraw: '/api/wallet/withdraw', transfer: '/api/wallet/transfer' };
-  const done = { deposit: i18n.text('Deposit added to Earn'), withdraw: i18n.text('Withdrawal requested'), transfer: i18n.text('Transferred to Earn') };
+  const done = { deposit: i18n.text(S.user.forgeEnabled?'Deposit added to your USDT wallet':'Deposit added to Earn'), withdraw: i18n.text('Withdrawal requested'), transfer: i18n.text('Transferred to Earn') };
   const amount = data.get('amount');
   if (!(num(amount) > 0)) { msg.textContent = i18n.text('Enter a valid USDT amount.'); return; }
   S.busy = true; button.disabled = true; msg.textContent = '';
